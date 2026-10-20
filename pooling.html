@@ -1,0 +1,1085 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kongsi Pooling Simulator</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: simulator console — customer groups | container stage | money flow, with utilisation + break-even beneath */
+:root{
+  --bg:#F2F4F6; --surface:#FFFFFF; --sunk:#E6EAEE; --ink:#121A23; --muted:#5A6676; --line:#D3D9E0;
+  --accent:#F2B705; --accent-ink:#1A1400; --pos:#1F8A55; --neg:#C8402F;
+  --ga:#3F6FE0; --gb:#1F9D63; --gc:#8E55DB; --gd:#E2683A; --ge:#1597AB;
+  --scene:#E9EDF1; --scene-ground:#DCE2E8;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1218; --surface:#151C25; --sunk:#0A0E13; --ink:#E7ECF2; --muted:#93A0B0; --line:#26303C;
+  --accent:#F5C02A; --accent-ink:#1A1400; --pos:#3CC284; --neg:#F06A5D;
+  --ga:#6E92FF; --gb:#3CC284; --gc:#B585F5; --gd:#F5875C; --ge:#3CC3D6;
+  --scene:#111821; --scene-ground:#18212C; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0D1218; --surface:#151C25; --sunk:#0A0E13; --ink:#E7ECF2; --muted:#93A0B0; --line:#26303C;
+  --accent:#F5C02A; --accent-ink:#1A1400; --pos:#3CC284; --neg:#F06A5D;
+  --ga:#6E92FF; --gb:#3CC284; --gc:#B585F5; --gd:#F5875C; --ge:#3CC3D6;
+  --scene:#111821; --scene-ground:#18212C; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;line-height:1.02;text-wrap:balance;margin:0}
+h2{font-size:clamp(28px,4vw,40px);text-transform:uppercase}
+h3{font-size:19px;text-transform:uppercase;letter-spacing:.03em}
+p{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.lede{color:var(--muted);max-width:64ch;font-size:16px}
+.num{font-variant-numeric:tabular-nums}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:inherit}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;min-height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.brand-mark{width:30px;height:30px;border-radius:4px;background:var(--accent);display:grid;place-items:center}
+.brand-name{font-family:var(--f-display);font-weight:700;font-size:24px}
+.top nav{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.top nav a{text-decoration:none;font-size:14px;padding:8px 10px;border-radius:4px;color:var(--muted);white-space:nowrap}
+.top nav a:hover{color:var(--ink);background:var(--sunk)}
+.top nav a[aria-current]{color:var(--ink);font-weight:600}
+@media (max-width:560px){.top nav a.hide-sm{display:none}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:var(--r);font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap;line-height:1.2}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.dark{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.sim-tag{display:inline-block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;background:var(--sunk);color:var(--muted);vertical-align:middle}
+
+.hero{padding-block:40px 28px}
+.hero h1{font-size:clamp(40px,6vw,72px);text-transform:uppercase;margin-top:12px}
+.hero h1 em{font-style:normal;background:var(--accent);color:var(--accent-ink);padding:0 .12em}
+.hero .lede{margin-top:14px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+
+section.band{padding-block:28px 56px;border-top:1px solid var(--line)}
+.sec-head{display:grid;gap:10px;margin-bottom:22px}
+
+/* controls */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px;margin-bottom:14px}
+.toolbar .sep{width:1px;align-self:stretch;background:var(--line);margin-inline:4px}
+.toolbar label.inline{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.toolbar select{padding:6px 8px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:7px 11px;font-size:13px;font-weight:500;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+.stage{display:grid;grid-template-columns:250px minmax(0,1fr) 290px;gap:14px;align-items:start}
+@media (max-width:1100px){.stage{grid-template-columns:minmax(0,1fr) 300px}.groups{grid-column:1/-1;order:3}}
+@media (max-width:760px){.stage{grid-template-columns:1fr}.groups{order:3}.money{order:2}.viewcol{order:1}}
+
+/* groups */
+.groups{display:grid;gap:8px;min-width:0}
+@media (max-width:1100px) and (min-width:761px){.groups{grid-template-columns:repeat(5,1fr)}}
+@media (max-width:760px){.groups{grid-template-columns:1fr 1fr}}
+@media (max-width:420px){.groups{grid-template-columns:1fr}}
+.gcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:11px 12px;display:grid;gap:6px;position:relative;transition:border-color .3s,box-shadow .3s}
+.gcard.in{border-color:var(--gcol);box-shadow:inset 3px 0 0 var(--gcol)}
+.gcard .gh{display:flex;align-items:center;gap:8px}
+.gcard .chip{width:22px;height:22px;border-radius:4px;background:var(--gcol);color:#fff;font-family:var(--f-mono);font-size:12px;font-weight:600;display:grid;place-items:center;flex-shrink:0}
+.gcard .gname{font-weight:600;font-size:14px;line-height:1.2}
+.gcard dl{display:grid;grid-template-columns:auto 1fr;gap:1px 10px;margin:0;font-size:12.5px}
+.gcard dt{color:var(--muted)}
+.gcard dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.gcard .gfoot{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.gcard .gstate{font-size:11.5px;font-family:var(--f-mono);color:var(--muted)}
+.gcard.in .gstate{color:var(--gcol)}
+
+/* viewport */
+.viewcol{display:grid;gap:12px;min-width:0}
+.viewport{position:relative;background:var(--scene);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;height:470px;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.viewport.dragging{cursor:grabbing}
+.viewport canvas{position:absolute;left:0;top:0;display:block}
+@media (max-width:760px){.viewport{height:min(62vh,400px);min-height:320px}}
+.vhud{position:absolute;left:10px;top:10px;right:10px;display:flex;justify-content:space-between;gap:8px;pointer-events:none;flex-wrap:wrap}
+.pill{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:6px 10px;font-family:var(--f-mono);font-size:12px;display:inline-flex;gap:8px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.vtools{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}
+.vtools button{width:34px;height:34px;border-radius:4px;border:1px solid var(--line);background:var(--surface);font-size:18px;font-weight:600;cursor:pointer;display:grid;place-items:center}
+.vhint{position:absolute;left:10px;bottom:12px;font-size:11.5px;color:var(--muted);font-family:var(--f-mono);pointer-events:none}
+@media (max-width:560px){.vhint{display:none}}
+.inspect{position:absolute;z-index:3;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:9px 11px;font-size:12.5px;box-shadow:0 6px 18px rgba(0,0,0,.18);pointer-events:none;max-width:240px}
+.inspect b{display:block;margin-bottom:2px}
+
+/* utilisation */
+.util{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:grid;gap:12px}
+.ustats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+@media (max-width:640px){.ustats{grid-template-columns:repeat(2,1fr)}}
+.stat .k{font-size:11px;color:var(--muted);font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.05em}
+.stat .v{font-family:var(--f-display);font-size:26px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.ubar-wrap{position:relative;padding-top:22px;padding-bottom:20px}
+.ubar{height:22px;background:var(--sunk);border-radius:4px;overflow:hidden;position:relative}
+.ubar i{display:block;height:100%;width:0;background:var(--accent);border-radius:4px 0 0 4px}
+.ubar .pct{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--f-mono);font-size:12px;font-weight:600}
+.mark{position:absolute;top:0;bottom:16px;width:0;border-left:2px dashed var(--ink)}
+.mark.target{top:20px;bottom:0}
+.mark span{position:absolute;top:0;transform:translateX(-50%);font-family:var(--f-mono);font-size:10.5px;white-space:nowrap;background:var(--surface);padding:0 3px}
+.mark.target{border-left-color:var(--pos)}
+.mark.target span{color:var(--pos);top:auto;bottom:-18px;transform:translateX(-100%);padding-right:4px}
+.ustatus{display:flex;gap:10px;align-items:center;font-weight:600;flex-wrap:wrap}
+.ustatus .badge{font-family:var(--f-mono);font-size:11px;padding:3px 8px;border-radius:999px;background:var(--sunk);font-weight:500}
+.ustatus .badge.neg{color:var(--neg)}
+.ustatus .badge.pos{color:var(--pos)}
+.ustatus .badge.acc{background:var(--accent);color:var(--accent-ink)}
+
+/* money */
+.money{display:grid;gap:10px;min-width:0}
+.mcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;display:grid;gap:8px;transition:box-shadow .4s}
+.mcard.flash{box-shadow:0 0 0 3px var(--accent)}
+.mcard .mt{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.mcard .mt b{font-family:var(--f-display);text-transform:uppercase;font-size:16px;letter-spacing:.03em}
+.big{font-family:var(--f-display);font-size:36px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.vault{display:grid;grid-template-columns:78px 1fr;gap:12px;align-items:center}
+.vault svg{width:78px;height:78px;transition:transform .5s cubic-bezier(.3,1.4,.5,1);transform-origin:50% 85%}
+.small{font-size:12px;color:var(--muted)}
+.erows{display:grid;gap:3px;font-size:12px}
+.erow{display:grid;grid-template-columns:1fr 46px 62px;gap:8px;align-items:center}
+.erow .track{height:5px;background:var(--sunk);border-radius:2px;overflow:hidden}
+.erow .track i{display:block;height:100%;background:var(--muted)}
+.erow.var .track i{background:var(--neg)}
+.erow .amt{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:11.5px}
+.etotal{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:6px;font-weight:600;font-variant-numeric:tabular-nums}
+.gauge{position:relative;height:10px;background:var(--sunk);border-radius:5px;overflow:hidden}
+.gauge .zero{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink)}
+.gauge i{position:absolute;top:0;bottom:0}
+.contrib.neg .big{color:var(--neg)}
+.contrib.pos .big{color:var(--pos)}
+
+/* coins */
+.coin{position:absolute;z-index:40;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE89A,#E8AE10 60%,#B07F00);color:#5A3E00;font:700 8.5px/22px var(--f-mono);text-align:center;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.coin.out{background:radial-gradient(circle at 35% 30%,#ffd2c8,#E06A4F 60%,#9b3220);color:#fff}
+
+/* slider row */
+.scen{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:grid;gap:12px}
+.slider-row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}
+@media (max-width:560px){.slider-row{grid-template-columns:1fr}}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.scen-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.whatif{font-size:13px;color:var(--muted)}
+.whatif b{color:var(--ink)}
+
+/* chart + decision */
+.lower{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px;margin-top:14px}
+@media (max-width:900px){.lower{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.card-title{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.card-title b{font-family:var(--f-display);text-transform:uppercase;font-size:18px;letter-spacing:.03em}
+.chartwrap{overflow-x:auto}
+.chartwrap svg{display:block;width:100%;min-width:480px;height:auto}
+.decision{display:grid;gap:10px}
+.verdict{display:flex;gap:10px;align-items:flex-start}
+.verdict .vicon{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;font-weight:700;color:#fff;font-family:var(--f-mono)}
+.verdict b{display:block;font-size:16px}
+.reasons{margin:0;padding-left:18px;font-size:13.5px;color:var(--muted);display:grid;gap:3px}
+.reasons strong{color:var(--ink);font-weight:600}
+.actions{display:flex;flex-wrap:wrap;gap:6px}
+.actions span{font-size:12px;border:1px dashed var(--line);border-radius:4px;padding:3px 8px}
+
+/* settings */
+details.settings{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+details.settings summary{cursor:pointer;padding:14px 16px;font-weight:600;display:flex;justify-content:space-between;gap:10px}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px 16px;padding:4px 16px 16px}
+.sgroup{grid-column:1/-1;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+.field{display:grid;gap:4px}
+.field label{font-size:12.5px;font-weight:500}
+.field input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);font-variant-numeric:tabular-nums}
+.mixtable{grid-column:1/-1;overflow-x:auto}
+.mixtable table{border-collapse:collapse;font-size:12.5px;min-width:520px;width:100%}
+.mixtable th,.mixtable td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+.mixtable th:first-child,.mixtable td:first-child{text-align:left}
+.toggle{display:inline-flex;gap:8px;align-items:center;font-size:14px}
+
+/* merge */
+.merge-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px}
+@media (max-width:900px){.merge-grid{grid-template-columns:1fr}}
+.merge-view{position:relative;background:var(--scene);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;height:400px;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.merge-view canvas{position:absolute;left:0;top:0}
+@media (max-width:760px){.merge-view{height:340px}}
+.cmp{width:100%;border-collapse:collapse;font-size:13.5px}
+.cmp th,.cmp td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+.cmp th:first-child,.cmp td:first-child{text-align:left}
+.cmp th{font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:500}
+.cmp tr.tot td{font-weight:600}
+.compat{display:grid;gap:6px;font-size:13.5px}
+.compat label{display:flex;gap:8px;align-items:flex-start}
+.compat label span small{display:block;color:var(--muted);font-size:12px}
+.note{font-size:12.5px;color:var(--muted);border-left:3px solid var(--line);padding-left:10px}
+.improve{font-family:var(--f-display);font-size:30px;font-weight:700;color:var(--pos)}
+
+/* summary */
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;counter-reset:s}
+@media (max-width:800px){.summary{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.summary{grid-template-columns:1fr}}
+.summary div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:6px;counter-increment:s}
+.summary div::before{content:counter(s);font-family:var(--f-display);font-size:30px;font-weight:700;color:var(--accent);line-height:1}
+.summary b{font-size:15px}
+.summary span{font-size:13.5px;color:var(--muted)}
+
+/* narration */
+.narr{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#121A23;color:#F2F4F6;border-top:2px solid var(--accent);padding-block:12px calc(12px + env(safe-area-inset-bottom,0px))}
+.narr .wrap{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.narr p{font-size:15px;max-width:80ch}
+.narr .step{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#F5C02A;margin-bottom:3px}
+.narr .nb{display:flex;gap:6px;flex-wrap:wrap}
+.narr .btn{background:transparent;color:#F2F4F6;border-color:rgba(242,244,246,.35)}
+.narr .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+@media (max-width:640px){.narr .wrap{grid-template-columns:1fr}.narr p{font-size:14px}}
+.pulse{animation:pulse 1.2s ease-in-out 3}
+@keyframes pulse{50%{box-shadow:0 0 0 4px var(--accent)}}
+@media (prefers-reduced-motion: reduce){.pulse{animation:none}.vault svg{transition:none}}
+.toast{position:fixed;left:50%;top:calc(76px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:35;background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:var(--r);font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:calc(100% - 32px);text-align:center}
+.toast.pos{background:var(--pos);color:#fff}
+footer{padding-block:30px calc(30px + var(--narr-pad,0px));color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="https://zylow03.github.io/realway-express/" aria-label="RealWAY Express home">
+      <span class="brand-mark"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="9" rx="1" stroke="#1A1400" stroke-width="2"/><circle cx="5.5" cy="14.5" r="1.5" fill="#1A1400"/><circle cx="12.5" cy="14.5" r="1.5" fill="#1A1400"/><path d="M6 3v9M10 3v9" stroke="#1A1400" stroke-width="1.5"/></svg></span>
+      <span class="brand-name">RealWAY Express</span>
+    </a>
+    <nav aria-label="Pages">
+      <a class="hide-sm" href="https://zylow03.github.io/realway-express/">Website</a>
+      <a aria-current="page" href="#sim">Pooling simulator</a>
+      <a href="#merge">Pool merging</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Kongsi Pooling · how the shared container pays for itself</p>
+    <h1>Many small parcels. <em>One shared container.</em></h1>
+    <p class="lede">Five customer groups share one 40 ft container. Watch their parcels load while their payments come in, the logistics costs are paid, and the departure moves from a loss to a positive operating contribution. All figures are simulated assumptions you can edit.</p>
+    <div class="hero-actions">
+      <button class="btn primary" id="tourBtn">Start investor walkthrough</button>
+      <a class="btn" href="#sim">Open the simulator</a>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="sim">
+  <div class="wrap">
+    <div class="toolbar" role="toolbar" aria-label="Simulation controls">
+      <button class="btn primary sm" id="startBtn">Start pooling</button>
+      <button class="btn sm" id="pauseBtn" disabled>Pause</button>
+      <button class="btn sm" id="restartBtn">Restart</button>
+      <button class="btn sm" id="resetBtn">Reset</button>
+      <button class="btn sm" id="nextBtn">Add next group</button>
+      <span class="sep"></span>
+      <label class="inline" for="speed">Speed
+        <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+      </label>
+      <span class="sep"></span>
+      <div class="seg" role="group" aria-label="View"><button type="button" id="v3d" aria-pressed="true">3D view</button><button type="button" id="vtop" aria-pressed="false">Top-down</button></div>
+      <span class="sim-tag" style="margin-left:auto">Simulated figures</span>
+    </div>
+
+    <div class="stage">
+      <div class="groups" id="groups" aria-label="Customer groups"></div>
+
+      <div class="viewcol">
+        <div class="viewport" id="vp">
+          <div class="vhud"><span class="pill"><span class="dot" id="vdot"></span><span id="vstatus">Empty container · doors open</span></span><span class="pill num" id="vcount">0 / 1,000 parcels</span></div>
+          <div class="vtools"><button type="button" id="zin" aria-label="Zoom in">+</button><button type="button" id="zout" aria-label="Zoom out">−</button><button type="button" id="zreset" aria-label="Reset view" style="font-size:13px">⟲</button></div>
+          <div class="vhint" id="vhint">Drag to rotate · tap a parcel stack to inspect</div>
+          <div class="inspect" id="inspect" hidden></div>
+        </div>
+
+        <div class="util" id="utilCard">
+          <div class="ustats">
+            <div class="stat"><div class="k">Confirmed parcels</div><div class="v" id="sN">0</div></div>
+            <div class="stat"><div class="k">Customer groups</div><div class="v" id="sG">0</div></div>
+            <div class="stat"><div class="k">Occupied</div><div class="v" id="sVol">0 m³</div></div>
+            <div class="stat"><div class="k">Remaining</div><div class="v" id="sRem">50 m³</div></div>
+            <div class="stat"><div class="k">Utilisation</div><div class="v" id="sU">0%</div></div>
+          </div>
+          <div class="ubar-wrap" id="ubarWrap">
+            <div class="ubar"><i id="ubarFill"></i><span class="pct num" id="ubarPct">0.0%</span></div>
+            <div class="mark" id="beMark"><span id="beLabel">Break-even</span></div>
+            <div class="mark target" id="tgMark" style="left:90%"><span>Departure target 90%</span></div>
+          </div>
+          <div class="ustatus"><span class="badge" id="ustatusBadge">Collecting</span><span id="ustatusText">Pool is collecting customer shipments.</span><span class="small num" id="sKg" style="margin-left:auto"></span></div>
+        </div>
+
+        <div class="scen">
+          <div class="slider-row">
+            <label for="slider" style="font-weight:600;font-size:14px">Parcels in pool</label>
+            <input type="range" id="slider" min="0" max="1000" step="10" value="0">
+            <span class="num mono" id="sliderVal" style="font-family:var(--f-mono);min-width:6ch;text-align:right">0</span>
+          </div>
+          <div class="scen-btns">
+            <span class="small">Quick scenarios:</span>
+            <button class="btn sm" data-u="60">60%</button><button class="btn sm" data-u="80">80%</button><button class="btn sm" data-u="90">90%</button><button class="btn sm" data-u="100">100%</button>
+            <span class="sep" style="width:1px;height:22px;background:var(--line)"></span>
+            <button class="btn sm" id="add50">+50 parcels</button><button class="btn sm" id="add100">+100 parcels</button>
+          </div>
+          <p class="whatif" id="whatif"></p>
+        </div>
+      </div>
+
+      <div class="money" id="money">
+        <div class="mcard" id="revCard">
+          <div class="mt"><b>Customer shipping revenue</b><span class="sim-tag">Simulated</span></div>
+          <div class="vault">
+            <svg id="bag" viewBox="0 0 80 80" aria-hidden="true">
+              <path d="M28 14h24l-6 10H34z" fill="#C99A12"/>
+              <path d="M34 24h12c14 8 24 20 24 34 0 11-9 18-20 18H30C19 76 10 69 10 58c0-14 10-26 24-34z" fill="#E8B21A"/>
+              <path d="M34 24h12" stroke="#8a6400" stroke-width="3" stroke-linecap="round"/>
+              <text x="40" y="60" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-weight="700" font-size="15" fill="#5A3E00">RM</text>
+            </svg>
+            <div><div class="big" id="mRev">RM0</div><div class="small">Collected from customers when they join. This is revenue, not profit.</div></div>
+          </div>
+        </div>
+        <div class="mcard" id="expCard">
+          <div class="mt"><b>Paid to logistics partners</b><span class="big num" style="font-size:22px" id="mCost">RM0</span></div>
+          <div class="erows" id="erows"></div>
+          <div class="etotal"><span>Fixed + variable</span><span id="mCostSplit">RM22,000 + RM0</span></div>
+        </div>
+        <div class="mcard contrib" id="conCard">
+          <div class="mt"><b>Operating contribution</b><span class="sim-tag">Before overhead</span></div>
+          <div class="big" id="mCon">RM0</div>
+          <div class="gauge"><i id="gFill"></i><span class="zero" id="gZero"></span></div>
+          <div class="small" id="mConNote">Revenue minus direct operating cost. Not net profit: company overhead is excluded.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lower">
+      <div class="card">
+        <div class="card-title"><b>Break-even chart</b><span class="small" id="beText">Each parcel adds RM28 toward the RM22,000 fixed cost</span></div>
+        <div class="chartwrap" id="chart"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><b>Pooling decision engine</b><span class="sim-tag">Rule-based</span></div>
+        <div class="decision" id="decision"></div>
+      </div>
+    </div>
+
+    <details class="settings" id="settings">
+      <summary><span>Edit assumptions</span><span class="small">All prices and costs are simulated</span></summary>
+      <div class="sgrid" id="sgrid"></div>
+    </details>
+  </div>
+</section>
+
+<section class="band" id="merge">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">When a pool doesn't fill</p>
+      <h2>Pool merging</h2>
+      <p class="lede">Two compatible booking batches are each only partly full. Sending both as separate full-container departures pays the fixed cost twice. Merging them fills one container and releases the other.</p>
+    </div>
+    <div class="merge-grid">
+      <div style="display:grid;gap:12px;min-width:0">
+        <div class="merge-view" id="mvp">
+          <div class="vhud"><span class="pill"><span class="dot" id="mdot"></span><span id="mstatus">Two partial pools waiting</span></span></div>
+          <div class="vtools"><button type="button" id="mzin" aria-label="Zoom in">+</button><button type="button" id="mzout" aria-label="Zoom out">−</button></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="mergeBtn">Merge pools</button><button class="btn" id="mergeReset">Reset</button><span class="small" id="mergeWhy" style="align-self:center"></span></div>
+        <div class="card">
+          <div class="card-title"><b>Compatibility check</b><span class="small">Merging is allowed only if every check passes</span></div>
+          <div class="compat" id="compat"></div>
+        </div>
+      </div>
+      <div style="display:grid;gap:12px;align-content:start;min-width:0">
+        <div class="card">
+          <div class="card-title"><b>Two departures vs one</b><span class="sim-tag">Simulated</span></div>
+          <div style="overflow-x:auto"><table class="cmp" id="cmp"></table></div>
+          <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><span class="small">Illustrative improvement from sharing one departure</span><span class="improve num" id="improve">RM22,000</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><b>Decision engine</b><span class="small" id="mDecTitle">Container A</span></div>
+          <div class="decision" id="mdecision"></div>
+        </div>
+        <p class="note">This comparison assumes the two batches would otherwise need two separately contracted full-container departures. In real operations a smaller LCL allocation or another option might cost less than a second full container.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="summary">
+  <div class="wrap">
+    <div class="sec-head"><p class="eyebrow">The mechanism in one view</p><h2>How Kongsi Pooling works</h2></div>
+    <div class="summary">
+      <div><b>Many customers ship small</b><span>Shoppers, resellers and merchants each send a few parcels.</span></div>
+      <div><b>We consolidate compatible demand</b><span>Parcels with matching destinations, timing and cargo rules go into one pool.</span></div>
+      <div><b>Customers share freight capacity</b><span>Each pays for their parcels, not for a whole container.</span></div>
+      <div><b>We coordinate logistics partners</b><span>Warehouse, freight, border transfer, customs and last-mile partners are paid per departure.</span></div>
+      <div><b>The platform tracks viability</b><span>Utilisation and contribution are calculated live, so each departure decision is clear.</span></div>
+      <div><b>Better pooling, better economics</b><span>Less unused space spreads the fixed cost across more parcels and improves contribution.</span></div>
+    </div>
+  </div>
+</section>
+</main>
+<footer><div class="wrap"><span>RealWAY Express · Kongsi Pooling simulator</span><span>All prices, costs and volumes are simulated assumptions for demonstration.</span></div></footer>
+
+<div class="narr" id="narr" hidden>
+  <div class="wrap">
+    <div><div class="step" id="narrStep">Walkthrough</div><p id="narrText"></p></div>
+    <div class="nb"><button class="btn sm" id="narrPause">Pause</button><button class="btn sm" id="narrNext">Next</button><button class="btn sm" id="narrRestart">Restart</button><button class="btn sm primary" id="narrExit">Exit</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmtRM=v=>{const s=Math.round(Math.abs(v)).toLocaleString('en-MY');return (v<-0.5?'−RM':'RM')+s};
+const fmtRMs=v=>(v>0.5?'+':'')+fmtRM(v);
+const fmtN=v=>Math.round(v).toLocaleString('en-MY');
+const f1=v=>(Math.round(v*10)/10).toFixed(1);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+
+function showErr(where,msg){const host=where||document.body;if(host.querySelector('.err'))return;host.insertAdjacentHTML('beforeend',`<div class="err inspect" style="left:10px;right:10px;top:60px;max-width:none">Something went wrong in this view: ${msg}</div>`)}
+
+/* ================= ASSUMPTIONS ================= */
+const DEFAULTS={capacity:50,parcelVol:0.05,parcelKg:5,payload:26000,price:36,
+  fWarehouse:2500,fFreight:11000,fCross:4000,fMy:2500,fCustoms:2000,
+  vLabel:1,vHandling:2,vDelivery:5,mixed:false};
+let A={...DEFAULTS};
+const GROUPS=[
+  {id:'A',name:'Individual online shoppers',n:200,cv:'--ga'},
+  {id:'B',name:'Online resellers',n:250,cv:'--gb'},
+  {id:'C',name:'Small businesses',n:150,cv:'--gc'},
+  {id:'D',name:'E-commerce merchants',n:300,cv:'--gd'},
+  {id:'E',name:'Other buyers',n:100,cv:'--ge'}];
+const GI=Object.fromEntries(GROUPS.map((g,i)=>[g.id,i]));
+// Mixed parcel types: actual volume (m3) and weight (kg). Charge uses chargeable volume = max(actual, kg / 250).
+const TYPES=[{k:'Small',vol:.02,kg:2},{k:'Standard',vol:.05,kg:5},{k:'Large',vol:.10,kg:9},{k:'Dense',vol:.03,kg:12}];
+const MIX={A:[.5,.35,.1,.05],B:[.3,.45,.15,.1],C:[.15,.45,.25,.15],D:[.2,.5,.2,.1],E:[.25,.45,.2,.1]};
+const DENSITY=250;
+const fixedCost=()=>A.fWarehouse+A.fFreight+A.fCross+A.fMy+A.fCustoms;
+const varPer=()=>A.vLabel+A.vHandling+A.vDelivery;
+const ratePerM3=()=>A.price/A.parcelVol;
+
+function typeCounts(gid,n){const mix=MIX[gid];const raw=mix.map(s=>s*n);const fl=raw.map(Math.floor);let left=n-fl.reduce((a,b)=>a+b,0);
+  raw.map((r,i)=>[r-fl[i],i]).sort((a,b)=>b[0]-a[0]).forEach(([,i])=>{if(left>0){fl[i]++;left--}});return fl}
+function groupTotals(gid,n){
+  if(n<=0)return {n:0,vol:0,kg:0,rev:0};
+  if(!A.mixed)return {n,vol:n*A.parcelVol,kg:n*A.parcelKg,rev:n*A.price};
+  const c=typeCounts(gid,n);let vol=0,kg=0,rev=0;
+  c.forEach((k,i)=>{const t=TYPES[i];vol+=k*t.vol;kg+=k*t.kg;rev+=k*ratePerM3()*Math.max(t.vol,t.kg/DENSITY)});
+  return {n,vol,kg,rev};
+}
+function totals(members){
+  let N=0,vol=0,kg=0,rev=0;const by={};
+  members.forEach(m=>{const t=groupTotals(m.g,m.n);N+=m.n;vol+=t.vol;kg+=t.kg;rev+=t.rev;by[m.g]=t});
+  const fixed=fixedCost(),vc=N*varPer(),cost=fixed+vc;
+  return {N,vol,kg,rev,fixed,vc,cost,con:rev-cost,util:vol/A.capacity*100,groups:members.length,by,
+    vLabel:N*A.vLabel,vHandling:N*A.vHandling,vDelivery:N*A.vDelivery};
+}
+// how many parcels of group gid fit, given members already in pool
+function fitCount(members,gid,want){
+  const t=totals(members);let lo=0,hi=want;
+  const ok=n=>{const g=groupTotals(gid,n);return t.vol+g.vol<=A.capacity+1e-9&&t.kg+g.kg<=A.payload+1e-9};
+  if(ok(want))return want;
+  while(lo<hi){const mid=Math.ceil((lo+hi)/2);if(ok(mid))lo=mid;else hi=mid-1}
+  return lo;
+}
+// fill groups in a given order up to N parcels (bounded by capacity)
+function buildMembers(order,N){const out=[];let left=N;
+  for(const gid of order){if(left<=0)break;const g=GROUPS[GI[gid]];const n=fitCount(out,gid,Math.min(g.n,left));if(n<=0)break;out.push({g:gid,n});left-=n;if(n<Math.min(g.n,left+n))break}
+  return out}
+const DEFAULT_ORDER=GROUPS.map(g=>g.id);
+function maxFill(order){return totals(buildMembers(order||DEFAULT_ORDER,1e9)).N}
+// curve of (util, contribution) along the join sequence: current members, then remaining groups
+function curve(members){
+  const seq=members.map(m=>m.g);DEFAULT_ORDER.forEach(g=>{if(!seq.includes(g))seq.push(g)});
+  const pts=[{u:0,c:-fixedCost(),N:0}];const built=[];
+  for(const gid of seq){const g=GROUPS[GI[gid]];const n=fitCount(built,gid,g.n);if(n<=0)break;built.push({g:gid,n});const t=totals(built);pts.push({u:t.util,c:t.con,N:t.N,g:gid});if(n<g.n)break}
+  return pts;
+}
+function breakEven(pts){for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i];if(a.c<0&&b.c>=0){const f=-a.c/(b.c-a.c);return {u:a.u+f*(b.u-a.u),N:a.N+f*(b.N-a.N)}}}return null}
+
+/* ================= CLOCK (pausable, speed) ================= */
+const clock={t:0,paused:false,speed:1,last:performance.now()};
+let waiters=[];
+function sleep(ms){return new Promise(r=>waiters.push({at:clock.t+(reduce?Math.min(ms,150):ms),r}))}
+function tickClock(now){const dt=Math.min(64,now-clock.last);clock.last=now;if(!clock.paused){clock.t+=dt*clock.speed;
+  waiters=waiters.filter(w=>{if(clock.t>=w.at){w.r();return false}return true})}}
+function setPaused(p){clock.paused=p;coins.forEach(a=>{try{p?a.pause():a.play()}catch(_){}});$('#pauseBtn').textContent=p?'Resume':'Pause';$('#narrPause').textContent=p?'Resume':'Pause'}
+
+/* ================= VECTORS + RENDERER ================= */
+class V{constructor(x=0,y=0,z=0){this.x=x;this.y=y;this.z=z}set(x,y,z){this.x=x;this.y=y;this.z=z;return this}copy(v){return this.set(v.x,v.y,v.z)}clone(){return new V(this.x,this.y,this.z)}lerp(v,t){this.x+=(v.x-this.x)*t;this.y+=(v.y-this.y)*t;this.z+=(v.z-this.z)*t;return this}}
+const C={L:12.0,W:2.35,H:2.39};
+const SLOTS={nx:10,ny:5,nz:4};const BLOCKS=SLOTS.nx*SLOTS.ny*SLOTS.nz; // 200 visual stacks = 100% of usable capacity
+const CELL={x:C.L/SLOTS.nx,y:C.H/SLOTS.ny,z:C.W/SLOTS.nz};
+const BSIZE=[CELL.x-.07,CELL.y-.05,CELL.z-.05];
+function slotPos(i,ox,oz){const per=SLOTS.ny*SLOTS.nz;const wall=Math.floor(i/per),r=i%per,y=Math.floor(r/SLOTS.nz),z=r%SLOTS.nz;
+  return new V(ox-C.L/2+CELL.x*(wall+.5),CELL.y*(y+.5),oz-C.W/2+CELL.z*(z+.5))}
+
+let PAL={};let shadeCache={};
+function readPal(){const dark=document.documentElement.getAttribute('data-theme')==='dark'||(document.documentElement.getAttribute('data-theme')!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);
+  PAL={scene:css('--scene'),ground:css('--scene-ground'),accent:css('--accent'),pos:css('--pos'),neg:css('--neg'),ink:css('--ink'),muted:css('--muted'),
+    A:css('--ga'),B:css('--gb'),C:css('--gc'),D:css('--gd'),E:css('--ge'),
+    shell:dark?'#7FA3C8':'#4B6A8A',edge:dark?'#9CB8D6':'#2B4A6A',floor:'#7C6A55',chassis:dark?'#3A4656':'#2A3340',
+    pad:dark?'#26313E':'#CBD2DA',padEdge:dark?'#3A4757':'#B3BCC7',line:dark?'rgba(0,0,0,.5)':'rgba(0,0,0,.2)',mark:dark?'rgba(255,255,255,.07)':'rgba(30,50,70,.08)',label:dark?'#E7ECF2':'#121A23'};
+  shadeCache={}}
+function hexRgb(h){h=(h||'#888').replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return [n>>16&255,n>>8&255,n&255]}
+function shade(col,f){const k=col+f;if(shadeCache[k])return shadeCache[k];const rgb=hexRgb(col);return shadeCache[k]=`rgb(${rgb.map(v=>clamp(Math.round(v*f),0,255)).join(',')})`}
+const FACES=[[[1,0,0],[1,3,7,5],.84],[[-1,0,0],[0,2,6,4],.84],[[0,1,0],[2,3,7,6],1.0],[[0,-1,0],[0,1,5,4],.5],[[0,0,1],[4,5,7,6],.7],[[0,0,-1],[0,1,3,2],.7]];
+
+function createView(host,cfg){
+  const cv=document.createElement('canvas');host.prepend(cv);const g=cv.getContext('2d');
+  const v={host,cv,g,theta:cfg.theta,phi:cfg.phi,baseR:cfg.radius,zoom:1,target:cfg.target.clone(),fov:40,mode:'3d',W:0,H:0,dpr:1,
+    cam:{p:new V(),r:[0,0,0],u:[0,0,0],f:[0,0,0],F:1,cx:0,cy:0},hits:[],plan:null,dirty:true,visible:true,cfg};
+  const pts=new Array(8);
+  v.resize=()=>{const W=host.clientWidth,H=host.clientHeight;if(!W||!H)return;v.W=W;v.H=H;v.dpr=Math.min(window.devicePixelRatio||1,2);
+    cv.width=Math.round(W*v.dpr);cv.height=Math.round(H*v.dpr);cv.style.width=W+'px';cv.style.height=H+'px';
+    if(cfg.onResize)cfg.onResize(v);v.dirty=true};
+  if(window.ResizeObserver)new ResizeObserver(v.resize).observe(host);window.addEventListener('resize',v.resize);v.resize();
+  function updCam(){const R=v.baseR/v.zoom,c=v.cam,t=v.target;
+    c.p.set(t.x+R*Math.sin(v.phi)*Math.sin(v.theta),t.y+R*Math.cos(v.phi),t.z+R*Math.sin(v.phi)*Math.cos(v.theta));
+    let f=[t.x-c.p.x,t.y-c.p.y,t.z-c.p.z];let l=Math.hypot(...f);f=f.map(x=>x/l);
+    let r=[-f[2],0,f[0]];l=Math.hypot(...r)||1;r=r.map(x=>x/l);
+    c.f=f;c.r=r;c.u=[r[1]*f[2]-r[2]*f[1],r[2]*f[0]-r[0]*f[2],r[0]*f[1]-r[1]*f[0]];c.F=(v.H/2)/Math.tan(v.fov*Math.PI/360);c.cx=v.W/2;c.cy=v.H/2}
+  function proj(x,y,z){const c=v.cam;const dx=x-c.p.x,dy=y-c.p.y,dz=z-c.p.z;const cz=dx*c.f[0]+dy*c.f[1]+dz*c.f[2];
+    return [c.cx+c.F*(dx*c.r[0]+dy*c.r[1]+dz*c.r[2])/cz,c.cy-c.F*(dx*c.u[0]+dy*c.u[1]+dz*c.u[2])/cz,cz]}
+  v.proj=proj;
+  function corners(p,s,sc){const hx=s[0]/2*sc,hy=s[1]/2*sc,hz=s[2]/2*sc;for(let i=0;i<8;i++){const q=proj(p.x+(i&1?hx:-hx),p.y+(i&2?hy:-hy),p.z+(i&4?hz:-hz));if(q[2]<.2)return null;pts[i]=q}return [hx,hy,hz]}
+  function box(p,s,col,o){o=o||{};const sc=o.scale==null?1:o.scale;if(sc<=0.001)return;const h=corners(p,s,sc);if(!h)return;const polys=o.hit?[]:null;
+    for(const [n,idx,lf] of FACES){if(o.skipX&&n[0]===1)continue;
+      const fx=p.x+n[0]*h[0],fy=p.y+n[1]*h[1],fz=p.z+n[2]*h[2];const c=v.cam.p;
+      const facing=n[0]*(c.x-fx)+n[1]*(c.y-fy)+n[2]*(c.z-fz)>0;
+      if(o.faces==='back'?facing:!facing)continue;
+      g.beginPath();g.moveTo(pts[idx[0]][0],pts[idx[0]][1]);for(let k=1;k<4;k++)g.lineTo(pts[idx[k]][0],pts[idx[k]][1]);g.closePath();
+      g.globalAlpha=o.alpha==null?1:o.alpha;if(col){g.fillStyle=shade(col,lf);g.fill()}
+      if(o.edge){g.globalAlpha=(o.alpha==null?1:o.alpha)*(o.edgeAlpha||1);g.strokeStyle=o.edge;g.lineWidth=o.lw||1;g.stroke()}
+      if(o.seam&&n[1]===1){g.globalAlpha=(o.alpha==null?1:o.alpha)*.5;g.strokeStyle=o.edge;g.beginPath();const a=pts[idx[0]],b=pts[idx[1]],c2=pts[idx[2]],d=pts[idx[3]];g.moveTo((a[0]+b[0])/2,(a[1]+b[1])/2);g.lineTo((c2[0]+d[0])/2,(c2[1]+d[1])/2);g.stroke()}
+      if(polys)polys.push(idx.map(k=>[pts[k][0],pts[k][1]]))}
+    g.globalAlpha=1;if(polys&&polys.length)v.hits.push({polys,info:o.hit})}
+  function edges(p,s,col,lw,alpha){if(!corners(p,s,1))return;g.strokeStyle=col;g.lineWidth=lw;g.globalAlpha=alpha==null?1:alpha;g.beginPath();
+    [[0,1],[2,3],[4,5],[6,7],[0,2],[1,3],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]].forEach(([a,b])=>{g.moveTo(pts[a][0],pts[a][1]);g.lineTo(pts[b][0],pts[b][1])});g.stroke();g.globalAlpha=1}
+  const dist2=p=>{const c=v.cam.p;return (p.x-c.x)**2+(p.y-c.y)**2+(p.z-c.z)**2};
+  function text(x,y,z,s,col,size,bg){const q=proj(x,y,z);if(q[2]<.2)return;g.font=`600 ${size||12}px "IBM Plex Mono",monospace`;g.textAlign='center';g.textBaseline='middle';
+    if(bg){const w=g.measureText(s).width+12;g.fillStyle=bg;g.fillRect(q[0]-w/2,q[1]-10,w,20)}g.fillStyle=col;g.fillText(s,q[0],q[1])}
+
+  v.render=(scene)=>{
+    if(!v.W||!v.H){v.resize();if(!v.W)return}
+    g.setTransform(v.dpr,0,0,v.dpr,0,0);v.hits=[];
+    if(v.mode==='top')return renderPlan(scene);
+    updCam();
+    g.fillStyle=PAL.ground;g.fillRect(0,0,v.W,v.H);
+    const grd=g.createLinearGradient(0,0,0,v.H*.3);grd.addColorStop(0,PAL.scene);grd.addColorStop(1,PAL.ground);g.fillStyle=grd;g.fillRect(0,0,v.W,v.H*.3);
+    g.lineJoin='round';
+    // floor markings
+    g.strokeStyle=PAL.mark;g.lineWidth=1;g.beginPath();
+    for(let x=-12;x<=12;x+=2){const a=proj(x,-1.2,-8),b=proj(x,-1.2,9);if(a[2]>.2&&b[2]>.2){g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1])}}
+    for(let z=-8;z<=9;z+=2){const a=proj(-12,-1.2,z),b=proj(12,-1.2,z);if(a[2]>.2&&b[2]>.2){g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1])}}
+    g.stroke();
+    // containers far to near
+    const cons=[...scene.containers].sort((a,b)=>dist2(new V(b.ox,0,b.oz))-dist2(new V(a.ox,0,a.oz)));
+    for(const ct of cons){const al=ct.alpha==null?1:ct.alpha;const o=new V(ct.ox,0,ct.oz);
+      box(new V(ct.ox,-.62,ct.oz),[C.L+.6,.36,C.W+.1],PAL.chassis,{alpha:al});
+      [-4.5,4.5].forEach(x=>box(new V(ct.ox+x,-.98,ct.oz),[1.6,.4,1.8],PAL.chassis,{alpha:al}));
+      box(new V(ct.ox,-.06,ct.oz),[C.L,.08,C.W],PAL.floor,{alpha:al});
+      box(new V(ct.ox,C.H/2,ct.oz),[C.L,C.H,C.W],PAL.shell,{alpha:.14*al,faces:'back',skipX:true});
+      // ribs on back wall
+      g.strokeStyle=PAL.shell;g.globalAlpha=.3*al;g.beginPath();for(let i=0;i<24;i++){const x=ct.ox-C.L/2+.25+i*.5;const a=proj(x,0,ct.oz-C.W/2),b=proj(x,C.H,ct.oz-C.W/2);if(a[2]>.2&&b[2]>.2){g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1])}}g.stroke();g.globalAlpha=1;
+      const inside=scene.blocks.filter(b=>b.c===ct.id&&b.inside).sort((a,b)=>dist2(b.p)-dist2(a.p));
+      inside.forEach(b=>box(b.p,BSIZE,b.col,{edge:PAL.line,alpha:b.alpha,scale:b.scale,seam:true,hit:b.info}));
+      box(new V(ct.ox,C.H/2,ct.oz),[C.L,C.H,C.W],PAL.shell,{alpha:.07*al,faces:'front',skipX:true});
+      edges(new V(ct.ox,C.H/2,ct.oz),[C.L,C.H,C.W],PAL.edge,1.3,al);
+      [-1,1].forEach(s=>box(new V(ct.ox+C.L/2+C.W/4,C.H/2,ct.oz+s*(C.W/2+.03)),[C.W/2,C.H,.05],PAL.shell,{alpha:.4*al}));
+      if(ct.label)text(ct.ox+(ct.labelX||(-C.L/2+1.6)),C.H+.5,ct.oz,ct.label,PAL.label,12,ct.labelBg||null);
+      if(ct.over)text(ct.ox,C.H/2,ct.oz+C.W/2,ct.over,'#fff',13,ct.overBg);
+    }
+    // outside: pads, waiting stacks, flying blocks
+    const outs=[];
+    (scene.pads||[]).forEach(p=>{box(p.p,[2.5,.08,2.0],PAL.pad,{edge:PAL.padEdge});});
+    (scene.minis||[]).forEach(m=>outs.push(m));
+    scene.blocks.filter(b=>!b.inside).forEach(b=>outs.push(b));
+    outs.sort((a,b)=>dist2(b.p)-dist2(a.p)).forEach(b=>box(b.p,b.s||BSIZE,b.col,{edge:PAL.line,alpha:b.alpha,scale:b.scale,seam:!b.s,hit:b.info}));
+    (scene.pads||[]).forEach(p=>text(p.p.x,-1.1,p.p.z+1.25,p.label,'#fff',12,p.col));
+    v.dirty=false;
+  };
+  function renderPlan(scene){
+    g.fillStyle=PAL.ground;g.fillRect(0,0,v.W,v.H);
+    const ext=cfg.planExtent;const s=Math.min(v.W/ext.w,v.H/ext.h)*v.zoom*.92;const cx=v.W/2,cy=v.H/2;
+    const P=(x,z)=>[cx+(x-ext.cx)*s,cy+(z-ext.cz)*s];
+    for(const ct of scene.containers){const al=ct.alpha==null?1:ct.alpha;const a=P(ct.ox-C.L/2,ct.oz-C.W/2);
+      g.globalAlpha=al;g.fillStyle=PAL.floor;g.fillRect(a[0],a[1],C.L*s,C.W*s);
+      const blocks=scene.blocks.filter(b=>b.c===ct.id&&b.inside).sort((x,y)=>x.p.y-y.p.y);
+      blocks.forEach(b=>{const lvl=Math.round((b.p.y/CELL.y)-.5);const q=P(b.p.x-BSIZE[0]/2,b.p.z-BSIZE[2]/2);const w=BSIZE[0]*s*(b.scale==null?1:b.scale),h=BSIZE[2]*s*(b.scale==null?1:b.scale);
+        g.globalAlpha=(b.alpha==null?1:b.alpha)*al;g.fillStyle=shade(b.col,.72+lvl*.08);g.fillRect(q[0],q[1],w,h);
+        v.hits.push({polys:[[[q[0],q[1]],[q[0]+w,q[1]],[q[0]+w,q[1]+h],[q[0],q[1]+h]]],info:b.info})});
+      // layer counts per column
+      g.globalAlpha=al;g.strokeStyle=PAL.edge;g.lineWidth=2;g.strokeRect(a[0],a[1],C.L*s,C.W*s);
+      g.fillStyle=PAL.ink;g.font='600 11px "IBM Plex Mono",monospace';g.textAlign='left';g.textBaseline='bottom';
+      if(ct.label)g.fillText(ct.label,a[0],a[1]-4);
+      g.textAlign='center';g.textBaseline='middle';g.save();const d=P(ct.ox+C.L/2+.35,ct.oz);g.translate(d[0],d[1]);g.rotate(Math.PI/2);g.fillText('DOOR',0,0);g.restore();
+      if(ct.over){g.fillStyle=ct.overBg;const c2=P(ct.ox,ct.oz);g.fillRect(c2[0]-70,c2[1]-11,140,22);g.fillStyle='#fff';g.fillText(ct.over,c2[0],c2[1])}
+      g.globalAlpha=1}
+    (scene.pads||[]).forEach(p=>{const a=P(p.p.x-1.25,p.p.z-1);g.fillStyle=PAL.pad;g.fillRect(a[0],a[1],2.5*s,2*s)});
+    (scene.minis||[]).forEach(m=>{const q=P(m.p.x-m.s[0]/2,m.p.z-m.s[2]/2);g.fillStyle=shade(m.col,.9);g.fillRect(q[0],q[1],m.s[0]*s-1,m.s[2]*s-1)});
+    (scene.pads||[]).forEach(p=>{const a=P(p.p.x-1.25,p.p.z+1);g.fillStyle=p.col;g.fillRect(a[0],a[1]+2,2.5*s,14);
+      g.fillStyle='#fff';g.font='600 10px "IBM Plex Mono",monospace';g.textAlign='center';g.textBaseline='middle';g.fillText(p.label,a[0]+1.25*s,a[1]+9)});
+    scene.blocks.filter(b=>!b.inside).forEach(b=>{const sc=b.scale==null?1:b.scale;const q=P(b.p.x-BSIZE[0]*sc/2,b.p.z-BSIZE[2]*sc/2);g.globalAlpha=b.alpha==null?1:b.alpha;g.fillStyle=b.col;g.fillRect(q[0],q[1],BSIZE[0]*s*sc,BSIZE[2]*s*sc);g.globalAlpha=1});
+    v.dirty=false;
+  }
+  // input
+  let drag=null,moved=false;
+  host.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;drag={x:e.clientX,y:e.clientY,t:v.theta,p:v.phi};moved=false;host.classList.add('dragging');try{host.setPointerCapture(e.pointerId)}catch(_){}});
+  host.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>5)moved=true;if(!moved||v.mode==='top')return;
+    v.theta=clamp(drag.t-dx*.008,-1.15,1.15);v.phi=clamp(drag.p-dy*.006,.35,1.35);v.dirty=true;if(cfg.onDrag)cfg.onDrag()});
+  const end=e=>{if(drag&&!moved&&cfg.onTap){const r=host.getBoundingClientRect();cfg.onTap(e.clientX-r.left,e.clientY-r.top)}drag=null;host.classList.remove('dragging')};
+  host.addEventListener('pointerup',end);host.addEventListener('pointercancel',()=>{drag=null;host.classList.remove('dragging')});
+  host.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();v.setZoom(v.zoom*(e.deltaY<0?1.1:.9))},{passive:false});
+  v.setZoom=z=>{v.zoom=clamp(z,.6,2.6);v.dirty=true};
+  v.hitTest=(x,y)=>{for(let i=v.hits.length-1;i>=0;i--){for(const poly of v.hits[i].polys){if(pip(x,y,poly))return v.hits[i].info}}return null};
+  return v;
+}
+function pip(x,y,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const [xi,yi]=poly[i],[xj,yj]=poly[j];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c}return c}
+
+/* ================= MAIN SIMULATION STATE ================= */
+let members=[];          // target pool [{g,n}]
+let fromT=totals([]),toT=totals([]);let tw={t0:0,dur:1,p:1};
+const blocks=new Map();  // key -> block
+const PADS=GROUPS.map((g,i)=>({id:g.id,p:new V(-6+i*3,-1.16,4.3),label:g.id}));
+const MAIN={id:'main',ox:0,oz:0};
+let view,mview;
+
+function groupBlocks(mems){ // visual stacks per member, proportional to cumulative volume
+  const out=[];let cum=0,prevB=0;
+  mems.forEach(m=>{const t=groupTotals(m.g,m.n);cum+=t.vol;const b=Math.min(BLOCKS,Math.round(cum/A.capacity*BLOCKS));for(let k=0;k<b-prevB;k++)out.push({g:m.g,k,slot:prevB+k});prevB=b});
+  return out}
+function fullBlocksOf(gid){return Math.min(BLOCKS,Math.round(groupTotals(gid,GROUPS[GI[gid]].n).vol/A.capacity*BLOCKS))}
+function blockInfo(gid,count){const g=GROUPS[GI[gid]];const t=groupTotals(gid,g.n);const per=t.n?A.capacity/BLOCKS:0;
+  return {g:gid,title:`Group ${gid} · ${g.name}`,line:`Each stack is ${(per).toFixed(2)} m³ of cargo, about ${Math.round(per/(t.vol/t.n||A.parcelVol))} parcels. Group total: ${fmtN(g.n)} parcels, ${f1(t.vol)} m³, ${fmtRM(t.rev)}.`}}
+
+function applyMembers(next,opt){
+  opt=opt||{};
+  const dur=(opt.dur!=null?opt.dur:2200);
+  const oldMembers=members;fromT=currentDisplay();members=next;toT=totals(members);tw={t0:clock.t,dur:Math.max(1,dur),p:0};
+  // reconcile blocks
+  const target=groupBlocks(members);const want=new Map(target.map(b=>[b.g+':'+b.k,b]));
+  // leaving
+  let li=0;const leaving=[...blocks.values()].filter(b=>!want.has(b.key)&&b.state!=='out');
+  leaving.sort((a,b)=>b.slot-a.slot).forEach(b=>{const pad=PADS[GI[b.g]];const delay=(li++/Math.max(1,leaving.length))*dur*.6;
+    b.state='out';b.inside=false;b.from=b.p.clone();b.via=new V(C.L/2+1.4,1.8,1.6);b.to=new V(pad.p.x,-.7,pad.p.z);b.t0=clock.t+delay;b.dur=Math.min(900,dur*.5);b.fromScale=1;b.toScale=.35});
+  // entering / moving
+  const entering=target.filter(t=>!blocks.has(t.g+':'+t.k)||blocks.get(t.g+':'+t.k).state==='out');
+  const moving=target.filter(t=>blocks.has(t.g+':'+t.k)&&blocks.get(t.g+':'+t.k).state!=='out');
+  moving.forEach(t=>{const b=blocks.get(t.g+':'+t.k);if(b.slot!==t.slot){b.slot=t.slot;b.from=b.p.clone();b.to=slotPos(t.slot,0,0);b.via=null;b.t0=clock.t+(leaving.length?dur*.3:0);b.dur=Math.min(900,dur*.45);b.state='move';b.fromScale=b.scale;b.toScale=1}});
+  entering.sort((a,b)=>a.slot-b.slot).forEach((t,i)=>{const key=t.g+':'+t.k;const pad=PADS[GI[t.g]];
+    const b={key,g:t.g,k:t.k,slot:t.slot,c:'main',col:PAL[t.g],p:new V(pad.p.x,-.8,pad.p.z),scale:.35,inside:false,info:blockInfo(t.g)};
+    b.state='in';b.from=b.p.clone();b.via=new V(C.L/2+1.4,1.9,1.4);b.to=slotPos(t.slot,0,0);b.t0=clock.t+(entering.length>1?(i/(entering.length-1))*dur*.72:0);b.dur=Math.min(950,dur*.4+250);b.fromScale=.35;b.toScale=1;
+    blocks.set(key,b)});
+  if(!opt.silent)spawnCoins(oldMembers,members,dur);
+  syncCards();renderDecision();renderChart();updateWhatIf();
+  $('#slider').value=toT.N;$('#sliderVal').textContent=fmtN(toT.N);
+}
+function stepBlocks(){
+  let anyMoving=false;
+  for(const b of blocks.values()){
+    if(b.state==='in'||b.state==='out'||b.state==='move'){
+      const t=clamp((clock.t-b.t0)/b.dur,0,1);if(t<=0){anyMoving=true;if(b.state==='in'){b.p.copy(b.from);b.scale=b.fromScale}continue}
+      const e=ease(t);
+      if(b.via){const a=b.from.clone().lerp(b.via,e),c=b.via.clone().lerp(b.to,e);b.p.copy(a.lerp(c,e))}else{b.p.copy(b.from.clone().lerp(b.to,e))}
+      b.scale=b.fromScale+(b.toScale-b.fromScale)*e;
+      if(b.state==='in')b.inside=t>.92;
+      if(t>=1){if(b.state==='out'){blocks.delete(b.key);continue}b.state='rest';b.inside=true;b.scale=1}
+      anyMoving=true}
+  }
+  return anyMoving;
+}
+function currentDisplay(){const p=ease(clamp(tw.p,0,1));const o={};for(const k of ['N','vol','kg','rev','fixed','vc','cost','con','util','vLabel','vHandling','vDelivery'])o[k]=fromT[k]+(toT[k]-fromT[k])*p;o.groups=p>.5?toT.groups:fromT.groups;return o}
+
+/* waiting stacks on pads */
+function minis(){const out=[];
+  GROUPS.forEach((g,gi)=>{const full=fullBlocksOf(g.id);let present=0;for(const b of blocks.values())if(b.g===g.id)present++;
+    const n=Math.max(0,full-present);const pad=PADS[gi];
+    for(let i=0;i<n;i++){const layer=Math.floor(i/16),r=i%16,cx=r%4,cz=Math.floor(r/4);
+      out.push({p:new V(pad.p.x-.84+cx*.56,-1.12+.17+layer*.34,pad.p.z-.66+cz*.44),s:[.5,.32,.4],col:PAL[g.id],info:{g:g.id,title:`Group ${g.id} · ${g.name}`,line:'Waiting at the hub, not yet in the pool'}})}});
+  return out}
+
+/* ================= COINS ================= */
+let coins=[];
+function centerOf(el){const r=el.getBoundingClientRect();return [r.left+r.width/2+scrollX,r.top+r.height/2+scrollY]}
+function spawnCoins(oldM,newM,dur){
+  if(reduce)return;
+  const bag=$('#bag');const bagC=centerOf(bag);
+  const prevBy={},nextBy={};
+  oldM.forEach(m=>prevBy[m.g]=groupTotals(m.g,m.n).rev);newM.forEach(m=>nextBy[m.g]=groupTotals(m.g,m.n).rev);
+  let delay=0;
+  GROUPS.forEach(g=>{const d=(nextBy[g.id]||0)-(prevBy[g.id]||0);if(Math.abs(d)<1)return;
+    const card=document.querySelector(`.gcard[data-g="${g.id}"] .chip`);if(!card)return;const cc=centerOf(card);
+    const n=clamp(Math.round(Math.abs(d)/700),2,14);
+    for(let i=0;i<n;i++){const from=d>0?cc:bagC,to=d>0?bagC:cc;
+      const el=document.createElement('div');el.className='coin'+(d<0?' out':'');el.textContent='RM';el.style.left=(from[0]-11)+'px';el.style.top=(from[1]-11)+'px';document.body.appendChild(el);
+      const dx=to[0]-from[0],dy=to[1]-from[1];const lift=-60-Math.random()*50;
+      const an=el.animate([{transform:'translate(0,0) scale(.6)',opacity:0},{transform:`translate(${dx*.5}px,${dy*.5+lift}px) scale(1)`,opacity:1,offset:.5},{transform:`translate(${dx}px,${dy}px) scale(.7)`,opacity:.9}],
+        {duration:Math.max(500,dur*.45)/clock.speed,delay:(delay+i*(dur*.5/n))/clock.speed,easing:'cubic-bezier(.4,0,.2,1)',fill:'both'});
+      coins.push(an);an.onfinish=()=>{el.remove();coins=coins.filter(x=>x!==an);bumpBag()};if(clock.paused)an.pause()}
+    delay+=dur*.08});
+}
+function bumpBag(){const bag=$('#bag');bag.style.transform=`scale(${bagScale()*1.06})`;setTimeout(()=>bag.style.transform=`scale(${bagScale()})`,140)}
+function bagScale(){const d=currentDisplay();const max=Math.max(1,totals(buildMembers(DEFAULT_ORDER,1e9)).rev);return .82+.3*clamp(d.rev/max,0,1)}
+
+/* ================= UI: GROUP CARDS ================= */
+function renderCards(){
+  $('#groups').innerHTML=GROUPS.map(g=>`<div class="gcard" data-g="${g.id}" style="--gcol:var(${g.cv})">
+    <div class="gh"><span class="chip">${g.id}</span><span class="gname">${g.name}</span></div>
+    <dl><dt>Parcels</dt><dd data-f="n"></dd><dt>Cargo volume</dt><dd data-f="vol"></dd><dt>Shipping charges</dt><dd data-f="rev"></dd></dl>
+    <div class="gfoot"><span class="gstate" data-f="state">Waiting</span><button class="btn sm" data-act="${g.id}">Join pool</button></div></div>`).join('');
+  $('#groups').addEventListener('click',e=>{const b=e.target.closest('button[data-act]');if(!b)return;stopAuto();toggleGroup(b.dataset.act)});
+  syncCards();
+}
+function syncCards(){
+  GROUPS.forEach(g=>{const el=document.querySelector(`.gcard[data-g="${g.id}"]`);if(!el)return;const m=members.find(x=>x.g===g.id);
+    const t=groupTotals(g.id,g.n);
+    el.querySelector('[data-f=n]').textContent=fmtN(g.n);
+    el.querySelector('[data-f=vol]').textContent=f1(t.vol)+' m³';
+    el.querySelector('[data-f=rev]').textContent=fmtRM(t.rev);
+    el.classList.toggle('in',!!m);
+    const st=el.querySelector('[data-f=state]');
+    if(!m)st.textContent='Waiting';else if(m.n<g.n)st.textContent=`In pool: ${fmtN(m.n)} of ${fmtN(g.n)}`;else st.textContent='In pool';
+    const btn=el.querySelector('button');btn.textContent=m?'Remove':'Join pool';
+    btn.disabled=!m&&fitCount(members,g.id,1)<1});
+}
+function toggleGroup(gid){const m=members.find(x=>x.g===gid);
+  if(m){applyMembers(members.filter(x=>x.g!==gid));return}
+  const g=GROUPS[GI[gid]];const n=fitCount(members,gid,g.n);if(n<1){toast('The container is full. This group would wait for the next departure.');return}
+  if(n<g.n)toast(`${fmtN(n)} of ${fmtN(g.n)} parcels fit. ${fmtN(g.n-n)} wait for the next departure.`);
+  applyMembers([...members,{g:gid,n}]);
+}
+function addNext(){const nx=DEFAULT_ORDER.find(id=>!members.find(m=>m.g===id)&&fitCount(members,id,1)>0);if(!nx)return false;toggleGroup(nx);return true}
+
+/* ================= UI: DASHBOARD ================= */
+let lastUtil=0,lastCon=-1;
+function updateDash(){
+  const d=currentDisplay();const be=breakEven(curve(members));
+  $('#sN').textContent=fmtN(d.N);$('#sG').textContent=d.groups+' of 5';$('#sVol').textContent=f1(d.vol)+' m³';$('#sRem').textContent=f1(Math.max(0,A.capacity-d.vol))+' m³';$('#sU').textContent=f1(d.util)+'%';
+  $('#sKg').textContent=`Weight ${fmtN(d.kg)} / ${fmtN(A.payload)} kg`;
+  $('#ubarFill').style.width=clamp(d.util,0,100)+'%';$('#ubarPct').textContent=f1(d.util)+'%';
+  $('#ubarFill').style.background=d.con>=0?'var(--pos)':'var(--accent)';
+  if(be){$('#beMark').hidden=false;$('#beMark').style.left=be.u+'%';$('#beLabel').textContent=`Break-even ${f1(be.u)}%`}else $('#beMark').hidden=true;
+  $('#vcount').textContent=`${fmtN(d.N)} parcels · ${f1(d.util)}%`;
+  // status
+  const u=d.util,beU=be?be.u:101;let badge,txt,cls,dot;
+  if(d.N<1){badge='Empty';txt='Container empty, doors open. Waiting for customers to join.';cls='';dot=PAL.muted}
+  else if(u>=99.95){badge='Fully loaded';txt='The usable volume is fully allocated. Bookings close for this departure.';cls='acc';dot=PAL.pos}
+  else if(u>=90){badge='Target reached';txt='The proposed commercial departure target of 90% has been reached.';cls='pos';dot=PAL.pos}
+  else if(u>=beU){badge='Past break-even';txt='Direct costs are covered, with a limited buffer.';cls='pos';dot=PAL.pos}
+  else if(u>=beU-12){badge='Approaching viability';txt='Getting close to break-even. A few more customers make this departure viable.';cls='neg';dot=PAL.accent}
+  else{badge='Collecting';txt='The pool is still collecting customer shipments. Dispatching now would make a loss.';cls='neg';dot=PAL.accent}
+  const B=$('#ustatusBadge');B.textContent=badge;B.className='badge '+cls;$('#ustatusText').textContent=txt;
+  $('#vstatus').textContent=badge+(d.N<1?'':' · '+(d.con>=0?'contribution '+fmtRMs(d.con):'loss '+fmtRM(d.con)));$('#vdot').style.background=dot;
+  // money
+  $('#mRev').textContent=fmtRM(d.rev);$('#bag').style.transform=`scale(${bagScale()})`;
+  $('#mCost').textContent=fmtRM(d.cost);$('#mCostSplit').textContent=`${fmtRM(d.fixed)} + ${fmtRM(d.vc)}`;
+  const rows=[['China warehouse consolidation',A.fWarehouse,0],['International freight capacity',A.fFreight,0],['Cross-border transfers',A.fCross,0],['Malaysia receiving & handling',A.fMy,0],['Customs documentation',A.fCustoms,0],
+    ['Labels & scanning',d.vLabel,1,A.vLabel],['Parcel handling',d.vHandling,1,A.vHandling],['Domestic delivery',d.vDelivery,1,A.vDelivery]];
+  const mx=Math.max(A.fFreight,...rows.map(r=>r[1]),1);
+  $('#erows').innerHTML=rows.map(r=>`<div class="erow ${r[2]?'var':''}"><span>${r[0]}${r[2]?` <span class="small">(RM${r[3]}/parcel)</span>`:''}</span><span class="track"><i style="width:${r[1]/mx*100}%"></i></span><span class="amt">${fmtRM(r[1])}</span></div>`).join('');
+  $('#mCon').textContent=fmtRMs(d.con);const cc=$('#conCard');cc.classList.toggle('neg',d.con<-0.5);cc.classList.toggle('pos',d.con>0.5);
+  const maxC=Math.max(1000,...curve(members).map(p=>p.c));const minC=-fixedCost();const span=maxC-minC;const z=(0-minC)/span*100;
+  $('#gZero').style.left=z+'%';const x=(d.con-minC)/span*100;const gf=$('#gFill');
+  if(d.con<0){gf.style.left=x+'%';gf.style.width=(z-x)+'%';gf.style.background='var(--neg)'}else{gf.style.left=z+'%';gf.style.width=(x-z)+'%';gf.style.background='var(--pos)'}
+  // milestones
+  if(be&&lastUtil<be.u-0.01&&d.util>=be.u-0.01){milestone('be',be)}
+  if(lastUtil<90-0.01&&d.util>=90-0.01){milestone('t90')}
+  lastUtil=d.util;lastCon=d.con;
+  updateChartPoint(d);
+}
+function milestone(kind,be){
+  if(kind==='be'){toast(`Break-even crossed at ${f1(be.u)}% utilisation (about ${fmtN(Math.ceil(be.N))} parcels)`,true);flash('#conCard');const z=document.getElementById('zeroLine');if(z){z.classList.remove('pulse-line');void z.getBBox();z.classList.add('pulse-line')}}
+  else{toast('Commercial departure target reached: 90% full',true);flash('#utilCard')}
+}
+function flash(sel){const el=$(sel);el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse')}
+let toastT;function toast(m,pos){const t=$('#toast');t.textContent=m;t.className='toast'+(pos?' pos':'');t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2800)}
+
+/* ================= CHART ================= */
+const CH={W:620,H:270,l:62,r:16,t:18,b:40};
+let chartScale=null;
+function renderChart(){
+  const pts=curve(members);const be=breakEven(pts);
+  const minC=-fixedCost();const maxC=Math.max(1000,...pts.map(p=>p.c));const pad=(maxC-minC)*.08;
+  const y0=minC-pad,y1=maxC+pad;
+  const X=u=>CH.l+u/100*(CH.W-CH.l-CH.r),Y=c=>CH.t+(y1-c)/(y1-y0)*(CH.H-CH.t-CH.b);
+  chartScale={X,Y};
+  const step=niceStep((y1-y0)/5);let ticks='';for(let v=Math.ceil(y0/step)*step;v<=y1;v+=step){ticks+=`<line x1="${CH.l}" x2="${CH.W-CH.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width="${v===0?0:1}"/><text x="${CH.l-8}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${v===0?'0':(v>0?'+':'−')+Math.abs(v/1000)+'k'}</text>`}
+  let xt='';for(let u=0;u<=100;u+=20)xt+=`<text x="${X(u)}" y="${CH.H-CH.b+18}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono,monospace">${u}%</text>`;
+  const line=pts.map(p=>`${X(p.u).toFixed(1)},${Y(p.c).toFixed(1)}`).join(' ');
+  const area=`${X(0)},${Y(0)} ${line} ${X(pts[pts.length-1].u)},${Y(0)}`;
+  const groupDots=pts.slice(1).map(p=>`<circle cx="${X(p.u)}" cy="${Y(p.c)}" r="3.5" fill="var(${GROUPS[GI[p.g]].cv})"/><text x="${X(p.u)}" y="${Y(p.c)-9}" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono,monospace" fill="var(--muted)">${p.g}</text>`).join('');
+  const beSvg=be?`<line x1="${X(be.u)}" x2="${X(be.u)}" y1="${CH.t}" y2="${CH.H-CH.b}" stroke="var(--ink)" stroke-dasharray="4 3"/><text x="${X(be.u)-5}" y="${CH.t+12}" text-anchor="end" font-size="11" font-family="IBM Plex Mono,monospace" fill="var(--ink)">break-even ${f1(be.u)}%</text>`:'';
+  $('#chart').innerHTML=`<svg viewBox="0 0 ${CH.W} ${CH.H}" role="img" aria-label="Operating contribution against container utilisation">
+    <defs><clipPath id="cAbove"><rect x="0" y="0" width="${CH.W}" height="${Y(0)}"/></clipPath><clipPath id="cBelow"><rect x="0" y="${Y(0)}" width="${CH.W}" height="${CH.H}"/></clipPath>
+    <style>.pulse-line{animation:pl 1.4s ease-in-out 2}@keyframes pl{50%{stroke:var(--pos);stroke-width:4}}</style></defs>
+    ${ticks}${xt}
+    <polygon points="${area}" fill="var(--neg)" opacity=".12" clip-path="url(#cBelow)"/>
+    <polygon points="${area}" fill="var(--pos)" opacity=".16" clip-path="url(#cAbove)"/>
+    <line id="zeroLine" x1="${CH.l}" x2="${CH.W-CH.r}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--ink)" stroke-width="1.5"/>
+    <line x1="${X(90)}" x2="${X(90)}" y1="${CH.t}" y2="${CH.H-CH.b}" stroke="var(--pos)" stroke-dasharray="2 3"/>
+    <text x="${X(90)+4}" y="${CH.H-CH.b-6}" font-size="10.5" font-family="IBM Plex Mono,monospace" fill="var(--pos)">90% target</text>
+    ${beSvg}
+    <polyline points="${line}" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>
+    ${groupDots}
+    <line id="cpV" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 3"/>
+    <circle id="cpDot" r="7" fill="var(--accent)" stroke="var(--surface)" stroke-width="2.5"/>
+    <text id="cpTxt" font-size="12" font-weight="600" font-family="IBM Plex Mono,monospace" fill="var(--ink)"></text>
+    <text x="${(CH.l+CH.W-CH.r)/2}" y="${CH.H-4}" text-anchor="middle" font-size="11" fill="var(--muted)">Container utilisation (by physical volume)</text>
+    <text transform="translate(13 ${(CH.t+CH.H-CH.b)/2}) rotate(-90)" text-anchor="middle" font-size="11" fill="var(--muted)">Operating contribution (RM)</text>
+  </svg>`;
+  const per=A.mixed?null:A.price-varPer();
+  $('#beText').textContent=per!=null?`Each parcel adds RM${per} (RM${A.price} − RM${varPer()}) toward the ${fmtRM(fixedCost())} fixed cost${be?` · break-even ≈ ${fmtN(Math.ceil(be.N))} parcels`:' · break-even not reachable'}`:`Mixed parcels: revenue per parcel varies by size${be?` · break-even ≈ ${fmtN(Math.ceil(be.N))} parcels`:''}`;
+  updateChartPoint(currentDisplay());
+}
+function niceStep(x){const p=Math.pow(10,Math.floor(Math.log10(x)));const m=x/p;return (m<1.5?1:m<3.5?2:m<7.5?5:10)*p}
+function updateChartPoint(d){if(!chartScale)return;const dot=document.getElementById('cpDot');if(!dot)return;const {X,Y}=chartScale;const x=X(clamp(d.util,0,100)),y=Y(d.con);
+  dot.setAttribute('cx',x);dot.setAttribute('cy',y);dot.setAttribute('fill',d.con>=0?'var(--pos)':'var(--accent)');
+  const l=document.getElementById('cpV');l.setAttribute('x1',x);l.setAttribute('x2',x);l.setAttribute('y1',y);l.setAttribute('y2',Y(0));
+  const t=document.getElementById('cpTxt');t.textContent=fmtRMs(d.con);t.setAttribute('x',x>CH.W-120?x-12:x+12);t.setAttribute('y',y+(d.con<0?18:-12));t.setAttribute('text-anchor',x>CH.W-120?'end':'start')}
+
+/* ================= DECISION ENGINE ================= */
+function decide(t,ctx){
+  const be=ctx.be;const u=t.util;const out={reasons:[],actions:[]};
+  out.reasons.push(`Pool holds <strong>${fmtN(t.N)} parcels</strong> (${f1(t.vol)} of ${f1(A.capacity)} m³, <strong>${f1(u)}%</strong> utilised).`);
+  out.reasons.push(`Customer revenue <strong>${fmtRM(t.rev)}</strong>; direct operating cost <strong>${fmtRM(t.cost)}</strong> (fixed ${fmtRM(t.fixed)} + variable ${fmtRM(t.vc)}).`);
+  if(t.N<1){out.verdict='Open for bookings';out.tone='muted';out.icon='·';out.reasons=['No parcels in the pool yet.'];out.actions=['Promote the departure','Collect bookings until cut-off'];return out}
+  if(u>=99.95){out.verdict='Close bookings: capacity fully allocated';out.tone='pos';out.icon='✓';out.reasons.push(`Projected operating contribution <strong>${fmtRMs(t.con)}</strong>.`);out.actions=['Dispatch on schedule','Move new bookings to the next departure'];return out}
+  if(u>=90){out.verdict='Dispatch: departure target reached';out.tone='pos';out.icon='✓';out.reasons.push(`Projected operating contribution <strong>${fmtRMs(t.con)}</strong>, above break-even (${be?f1(be.u):'—'}%).`);out.actions=['Confirm freight booking','Top up remaining space until cut-off'];return out}
+  if(be&&u>=be.u){out.verdict='Past break-even, limited buffer';out.tone='acc';out.icon='!';out.reasons.push(`Contribution <strong>${fmtRMs(t.con)}</strong>. One cancelled booking could push it back below zero.`);out.actions=['Keep collecting until cut-off','Dispatch at cut-off if delivery dates require'];return out}
+  out.verdict='Hold: below break-even';out.tone='neg';out.icon='✕';
+  out.reasons.push(`Dispatching now with the assumed full-container cost would lose <strong>${fmtRM(t.con)}</strong>.`);
+  if(be)out.reasons.push(`Break-even needs about <strong>${fmtN(Math.ceil(be.N))} parcels</strong> (${f1(be.u)}%).`);
+  if(ctx.mergeHint)out.reasons.push(ctx.mergeHint);
+  out.actions=['Check compatible pools to merge','Get an LCL quotation','Use a later departure if delivery dates allow'];
+  return out;
+}
+function decisionHTML(o){const col=o.tone==='pos'?'var(--pos)':o.tone==='neg'?'var(--neg)':o.tone==='acc'?'var(--accent)':'var(--muted)';
+  return `<div class="verdict"><span class="vicon" style="background:${col}${o.tone==='acc'?';color:var(--accent-ink)':''}">${o.icon}</span><div><b>${o.verdict}</b><span class="small">Recommendation from transparent rules on the numbers below</span></div></div>
+  <ul class="reasons">${o.reasons.map(r=>`<li>${r}</li>`).join('')}</ul><div class="actions">${o.actions.map(a=>`<span>${a}</span>`).join('')}</div>`}
+function renderDecision(){const t=toT;const be=breakEven(curve(members));
+  const hint=t.util<(be?be.u:101)&&t.N>0?`A compatible batch of 300 parcels is waiting in another pool. Merging would bring this pool to ${fmtN(Math.min(t.N+300,maxFill()))} parcels. See <a href="#merge">Pool merging</a>.`:null;
+  $('#decision').innerHTML=decisionHTML(decide(t,{be,mergeHint:hint}))}
+
+/* ================= WHAT-IF ================= */
+function extendMembers(k){const out=members.map(m=>({...m}));let left=k;
+  for(const m of out){const g=GROUPS[GI[m.g]];if(m.n<g.n&&left>0){const rest=out.filter(x=>x!==m);const can=fitCount(rest,m.g,Math.min(g.n,m.n+left));left-=Math.max(0,can-m.n);m.n=Math.max(m.n,can)}}
+  for(const id of DEFAULT_ORDER){if(left<=0)break;if(out.find(m=>m.g===id))continue;const g=GROUPS[GI[id]];const n=fitCount(out,id,Math.min(g.n,left));if(n<1)break;out.push({g:id,n});left-=n}
+  return out}
+function updateWhatIf(){const t=toT;const t100=totals(extendMembers(100));const added=t100.N-t.N;
+  if(added<1){$('#whatif').innerHTML='The container is full. Extra demand would go to the next departure.';return}
+  $('#whatif').innerHTML=`Adding <b>${fmtN(added)} more parcels</b> would add <b>${fmtRMs(t100.rev-t.rev)}</b> revenue and <b>${fmtRM(t100.vc-t.vc)}</b> variable cost, moving contribution from <b>${fmtRMs(t.con)}</b> to <b>${fmtRMs(t100.con)}</b> and utilisation to <b>${f1(t100.util)}%</b>. The fixed cost stays at ${fmtRM(t.fixed)}.`}
+
+/* ================= SCENARIOS / SLIDER ================= */
+function membersForN(N){return buildMembers(DEFAULT_ORDER,N)}
+function nForUtil(pct){const target=pct/100*A.capacity;let lo=0,hi=maxFill();while(lo<hi){const mid=Math.ceil((lo+hi)/2);if(totals(membersForN(mid)).vol<=target+1e-9)lo=mid;else hi=mid-1}return lo}
+let sliderTimer=null;
+function onSlider(){stopAuto();const N=+$('#slider').value;$('#sliderVal').textContent=fmtN(N);applyMembers(membersForN(N),{dur:380,silent:true})}
+
+/* ================= AUTO PLAY ================= */
+let autoRun=0;
+function stopAuto(){autoRun++;$('#pauseBtn').disabled=true;if(clock.paused&&!tour.active)setPaused(false)}
+async function startPooling(){const my=++autoRun;$('#pauseBtn').disabled=false;
+  while(my===autoRun){if(!addNext())break;await sleep(2200+900);}
+  if(my===autoRun)$('#pauseBtn').disabled=true}
+
+/* ================= SETTINGS ================= */
+const FIELDS=[['Container',[['capacity','Usable cargo capacity (m³)',.5],['payload','Max payload (kg)',100]]],
+  ['Standard parcel',[['parcelVol','Average parcel size (m³)',.005],['parcelKg','Average parcel weight (kg)',.5],['price','Customer price per parcel (RM)',1]]],
+  ['Fixed cost per departure (RM)',[['fWarehouse','China warehouse consolidation',100],['fFreight','International freight capacity',100],['fCross','Cross-border transfers',100],['fMy','Malaysia receiving & handling',100],['fCustoms','Customs documentation',100]]],
+  ['Variable cost per parcel (RM)',[['vLabel','Labels & scanning',.5],['vHandling','Parcel handling',.5],['vDelivery','Domestic delivery allowance',.5]]]];
+function renderSettings(){
+  let h='';FIELDS.forEach(([grp,fs])=>{h+=`<div class="sgroup">${grp}</div>`;fs.forEach(([k,l,st])=>{h+=`<div class="field"><label for="s_${k}">${l}</label><input id="s_${k}" type="number" min="0" step="${st}" value="${A[k]}" data-k="${k}"></div>`})});
+  h+=`<div class="sgroup">Parcel mix</div><label class="toggle" style="grid-column:1/-1"><input type="checkbox" id="s_mixed" ${A.mixed?'checked':''}> Use mixed parcel sizes and weights (charges calculated per parcel from chargeable volume)</label>`;
+  h+=`<div class="mixtable" id="mixtable" ${A.mixed?'':'hidden'}></div>`;
+  h+=`<div style="grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn sm" id="s_reset" type="button">Reset to default assumptions</button><span class="small" id="s_info"></span></div>`;
+  $('#sgrid').innerHTML=h;renderMixTable();
+  $('#sgrid').addEventListener('input',e=>{const k=e.target.dataset.k;if(!k)return;const v=parseFloat(e.target.value);if(!(v>=0))return;if((k==='capacity'||k==='parcelVol'||k==='payload'||k==='parcelKg')&&v<=0)return;A[k]=v;assumptionsChanged()});
+  $('#sgrid').addEventListener('change',e=>{if(e.target.id==='s_mixed'){A.mixed=e.target.checked;$('#mixtable').hidden=!A.mixed;assumptionsChanged()}});
+  $('#sgrid').addEventListener('click',e=>{if(e.target.id==='s_reset'){A={...DEFAULTS};renderSettings();assumptionsChanged();toast('Default assumptions restored')}});
+}
+function renderMixTable(){const el=$('#mixtable');if(!el)return;const r=ratePerM3();
+  el.innerHTML=`<table><thead><tr><th>Parcel type</th><th>Volume m³</th><th>Weight kg</th><th>Chargeable m³</th><th>Charge</th>${GROUPS.map(g=>`<th>Mix ${g.id}</th>`).join('')}</tr></thead><tbody>${TYPES.map((t,i)=>{const ch=Math.max(t.vol,t.kg/DENSITY);return `<tr><td>${t.k}</td><td>${t.vol.toFixed(3)}</td><td>${t.kg}</td><td>${ch.toFixed(3)}</td><td>${fmtRM(ch*r)}</td>${GROUPS.map(g=>`<td>${Math.round(MIX[g.id][i]*100)}%</td>`).join('')}</tr>`}).join('')}</tbody></table>
+  <p class="small" style="margin-top:6px">Chargeable volume is the larger of actual volume and weight ÷ ${DENSITY} kg/m³. Rate ${fmtRM(r)} per chargeable m³ (customer price ÷ standard parcel size). The container fill uses actual volume.</p>`}
+function assumptionsChanged(){
+  renderMixTable();
+  // keep current membership, trimmed to capacity
+  const kept=[];members.forEach(m=>{const n=fitCount(kept,m.g,Math.min(m.n,GROUPS[GI[m.g]].n));if(n>0)kept.push({g:m.g,n})});
+  // in mixed or changed units block keys may change: rebuild
+  for(const b of [...blocks.values()])b.info=blockInfo(b.g);
+  $('#slider').max=maxFill();
+  applyMembers(kept,{dur:500,silent:true});
+  const be=breakEven(curve(kept));$('#s_info').textContent=`Capacity ≈ ${fmtN(maxFill())} parcels from the five groups${be?` · break-even ${f1(be.u)}% (${fmtN(Math.ceil(be.N))} parcels)`:' · break-even not reachable with these assumptions'}`;
+  renderMerge(true);
+}
+
+/* ================= MERGE SCENARIO ================= */
+const MA={id:'A',ox:0,oz:-2.1,label:'Container A',labelX:-C.L/2+2},MB={id:'B',ox:0,oz:2.1,label:'Container B',labelX:C.L/2-2};
+let mblocks=[],merged=false,mergeBusy=false;
+const COMPAT=[['dest','Same destination','Both batches go to Selangor, Malaysia'],['window','Delivery windows overlap','A: 10–14 days · B: 9–14 days'],['cargo','Cargo restrictions match','General goods only, no batteries or liquids'],['weight','Weight within payload','3,000 kg + 1,500 kg ≤ 26,000 kg'],['cutoff','Same hub cut-off','Both at Kunming hub by Thursday 18:00']];
+let compatState=Object.fromEntries(COMPAT.map(c=>[c[0],true]));
+function stdUnit(){return {vol:A.parcelVol,kg:A.parcelKg,price:A.price}}
+function mergeNumbers(){const u=stdUnit();const nA=600,nB=300;const fix=fixedCost(),vp=varPer();
+  const rev=(nA+nB)*u.price,varC=(nA+nB)*vp;
+  return {nA,nB,rev,varC,sepFixed:2*fix,sepCost:2*fix+varC,sepCon:rev-2*fix-varC,mFixed:fix,mCost:fix+varC,mCon:rev-fix-varC,improve:fix,
+    uA:nA*u.vol/A.capacity*100,uB:nB*u.vol/A.capacity*100,uM:(nA+nB)*u.vol/A.capacity*100,fits:(nA+nB)*u.vol<=A.capacity+1e-9}}
+function renderMerge(rebuild){
+  const m=mergeNumbers();
+  $('#compat').innerHTML=COMPAT.map(([k,l,s])=>`<label><input type="checkbox" data-c="${k}" ${compatState[k]?'checked':''}><span>${l}<small>${s}</small></span></label>`).join('')+
+    `<label><input type="checkbox" disabled ${m.fits?'checked':''}><span>Combined volume fits<small>${f1((m.nA+m.nB)*A.parcelVol)} m³ of ${f1(A.capacity)} m³ usable</small></span></label>`;
+  const ok=COMPAT.every(c=>compatState[c[0]])&&m.fits;
+  $('#mergeBtn').disabled=!ok||merged||mergeBusy;
+  $('#mergeWhy').textContent=!ok?'Merging is blocked: '+(m.fits?COMPAT.filter(c=>!compatState[c[0]]).map(c=>c[1].toLowerCase()).join(', ')+' failed.':'the combined cargo does not fit.'):merged?'Pools merged. Container B released.':'';
+  $('#cmp').innerHTML=`<thead><tr><th></th><th>Two departures</th><th>One merged</th></tr></thead><tbody>
+    <tr><td>Parcels</td><td>${fmtN(m.nA)} + ${fmtN(m.nB)}</td><td>${fmtN(m.nA+m.nB)}</td></tr>
+    <tr><td>Utilisation</td><td>${f1(m.uA)}% + ${f1(m.uB)}%</td><td>${f1(m.uM)}%</td></tr>
+    <tr><td>Customer revenue</td><td>${fmtRM(m.rev)}</td><td>${fmtRM(m.rev)}</td></tr>
+    <tr><td>Fixed cost</td><td>${fmtRM(m.sepFixed)}</td><td>${fmtRM(m.mFixed)}</td></tr>
+    <tr><td>Variable cost</td><td>${fmtRM(m.varC)}</td><td>${fmtRM(m.varC)}</td></tr>
+    <tr><td>Total operating cost</td><td>${fmtRM(m.sepCost)}</td><td>${fmtRM(m.mCost)}</td></tr>
+    <tr class="tot"><td>Operating contribution</td><td style="color:var(--neg)">${fmtRMs(m.sepCon)}</td><td style="color:${m.mCon>=0?'var(--pos)':'var(--neg)'}">${fmtRMs(m.mCon)}</td></tr></tbody>`;
+  $('#improve').textContent=fmtRMs(m.mCon-m.sepCon);
+  // decision for container A
+  const tA=merged?totalsStd(m.nA+m.nB):totalsStd(m.nA);
+  const beN=fixedCost()/(A.price-varPer());const be={u:beN*A.parcelVol/A.capacity*100,N:beN};
+  $('#mDecTitle').textContent=merged?'Container A after merge':'Container A on its own';
+  $('#mdecision').innerHTML=decisionHTML(decide(tA,{be,mergeHint:merged?null:`Container B holds <strong>${fmtN(m.nB)} compatible parcels</strong>. Merging gives ${fmtN(m.nA+m.nB)} parcels and a contribution of <strong>${fmtRMs(m.mCon)}</strong>.`}));
+  if(rebuild&&!mergeBusy)buildMergeBlocks();
+}
+function totalsStd(N){const rev=N*A.price,fixed=fixedCost(),vc=N*varPer();return {N,vol:N*A.parcelVol,kg:N*A.parcelKg,rev,fixed,vc,cost:fixed+vc,con:rev-fixed-vc,util:N*A.parcelVol/A.capacity*100}}
+function buildMergeBlocks(){const m=mergeNumbers();mblocks=[];
+  const bA=Math.min(BLOCKS,Math.round(m.nA*A.parcelVol/A.capacity*BLOCKS)),bB=Math.min(BLOCKS,Math.round(m.nB*A.parcelVol/A.capacity*BLOCKS));
+  for(let i=0;i<bA;i++)mblocks.push({c:'A',slot:i,p:slotPos(i,MA.ox,MA.oz),col:PAL[i<bA*.45?'A':i<bA*.8?'B':'C'],inside:true,scale:1,info:{title:'Container A',line:'Booking batch A (600 parcels)'}});
+  const startB=merged?bA:0;
+  for(let i=0;i<bB;i++){const onA=merged;mblocks.push({c:onA?'A':'B',slot:startB+i,p:onA?slotPos(bA+i,MA.ox,MA.oz):slotPos(i,MB.ox,MB.oz),col:PAL[i<bB*.6?'D':'E'],inside:true,scale:1,info:{title:merged?'Container A (merged from B)':'Container B',line:'Compatible booking batch B (300 parcels)'}})}
+  MB.alpha=merged?.25:1;MB.over=merged?'Released capacity':null;MB.overBg=PAL.pos;
+  MA.label=`Container A · ${f1(merged?m.uM:m.uA)}%`;MA.labelBg=PAL.scene;MB.labelBg=PAL.scene;MB.label=merged?'Container B · released':`Container B · ${f1(m.uB)}%`;
+  if(mview)mview.dirty=true;
+  $('#mstatus').textContent=merged?`Merged: one container at ${f1(m.uM)}%`:'Two partial pools waiting';$('#mdot').style.background=merged?PAL.pos:PAL.accent;
+}
+async function doMerge(){
+  if(merged||mergeBusy)return;mergeBusy=true;renderMerge(false);const m=mergeNumbers();
+  const bA=mblocks.filter(b=>b.c==='A').length;const movers=mblocks.filter(b=>b.c==='B');
+  $('#mstatus').textContent='Transferring compatible parcels from B to A…';$('#mdot').style.background=PAL.accent;
+  const dur=2600;const t0=clock.t;
+  movers.forEach((b,i)=>{b.from=b.p.clone();b.to=slotPos(bA+i,MA.ox,MA.oz);b.via=new V(C.L/2+1.6,3.2,0);b.t0=t0+i/movers.length*dur*.75;b.dur=900;b.inside=false;b.moving=true});
+  await new Promise(res=>{const chk=()=>{if(movers.every(b=>!b.moving))res();else setTimeout(chk,60)};chk()});
+  movers.forEach(b=>{b.c='A';b.inside=true;b.info={title:'Container A (merged from B)',line:'Compatible booking batch B (300 parcels)'}});
+  const a0=clock.t;await new Promise(res=>{const f=()=>{const t=clamp((clock.t-a0)/700,0,1);MB.alpha=1-.75*t;mview.dirty=true;if(t>=1)res();else requestAnimationFrame(f)};f()});
+  merged=true;mergeBusy=false;buildMergeBlocks();renderMerge(false);toast(`Merged: 900 parcels in one container · contribution ${fmtRMs(m.mCon)}`,true);
+}
+function stepMerge(){let any=false;for(const b of mblocks){if(!b.moving)continue;const t=clamp((clock.t-b.t0)/b.dur,0,1);if(t<=0){any=true;continue}const e=ease(t);
+  const a=b.from.clone().lerp(b.via,e),c=b.via.clone().lerp(b.to,e);b.p.copy(a.lerp(c,e));if(t>=1){b.moving=false;b.inside=true;b.c='A'}any=true}return any}
+function resetMerge(){merged=false;mergeBusy=false;MB.alpha=1;MB.over=null;renderMerge(true)}
+
+/* ================= INVESTOR WALKTHROUGH ================= */
+const tour={active:false,run:0,skip:null};
+function narr(step,text){$('#narrStep').textContent=step;$('#narrText').textContent=text}
+async function wait(ms){const my=tour.run;await Promise.race([sleep(ms),new Promise(r=>tour.skip=r)]);if(my!==tour.run)throw new Error('stop')}
+function scrollTo(sel){const el=$(sel);const y=el.getBoundingClientRect().top+scrollY-70;window.scrollTo({top:y,behavior:reduce?'auto':'smooth'})}
+async function runTour(){
+  const my=++tour.run;tour.active=true;$('#narr').hidden=false;document.documentElement.style.setProperty('--narr-pad','110px');stopAuto();setPaused(false);
+  try{
+    applyMembers([],{dur:400,silent:true});resetMerge();scrollTo('#sim');
+    narr('1 · The problem','Small sellers in China each send a few parcels. None of them can fill a 40 ft container alone, but the departure still costs RM22,000 in fixed freight and handling.');await wait(5200);
+    const gs=['A','B','C'];const lines={A:'Group A joins: 200 parcels from individual online shoppers. The container is 20% full and RM7,200 enters the revenue bag. We are still far below the fixed cost.',
+      B:'Group B, online resellers, adds 250 parcels. Utilisation rises to 45% and revenue to RM16,200.',C:'Group C, small businesses, adds 150 parcels. The container is now 60% full.'};
+    for(const g of gs){narr('2 · Customers join the pool',lines[g]);toggleGroup(g);await wait(3600)}
+    narr('3 · An underfilled container loses money','At 60%, revenue is RM21,600 but direct costs are RM26,800. Dispatching now would lose RM5,200. This is why we don\'t send half-empty containers.');flash('#conCard');await wait(6000);
+    narr('4 · Crossing break-even','Group D, e-commerce merchants, adds 300 parcels. Watch the contribution cross zero at about 78.6% utilisation (786 parcels).');toggleGroup('D');await wait(4200);
+    narr('4 · Departure target reached','At 90% the commercial departure target is reached: RM32,400 revenue, RM29,200 cost, +RM3,200 operating contribution.');await wait(4600);
+    narr('5 · Full container','Group E, other buyers, fills the last 10%. Full container: RM36,000 revenue, RM30,000 cost, +RM6,000 simulated operating contribution.');toggleGroup('E');await wait(5200);
+    scrollTo('#merge');resetMerge();
+    narr('6 · When a pool doesn\'t fill','Here two compatible batches are only 60% and 30% full. Sent separately as two full-container departures, they would lose RM18,800 together.');await wait(5600);
+    narr('6 · Merging pools','We merge them. Batch B moves into Container A, which becomes 90% full, and Container B\'s capacity is released.');await doMerge();await wait(2500);
+    narr('6 · The result','One departure instead of two: +RM3,200 instead of −RM18,800, an illustrative improvement of RM22,000 (one fixed cost saved).');await wait(5600);
+    scrollTo('#summary');
+    narr('7 · The mechanism','Many customers contribute shipments. We consolidate compatible demand, coordinate logistics partners, and track utilisation and viability on every departure.');await wait(7000);
+    narr('Walkthrough complete','Replay any time, or use the simulator controls to explore other scenarios.');
+  }catch(e){if(e.message!=='stop')console.error(e)}
+}
+function exitTour(){tour.run++;tour.active=false;$('#narr').hidden=true;document.documentElement.style.setProperty('--narr-pad','0px');setPaused(false)}
+
+/* ================= INSPECT ================= */
+function showInspect(host,box,x,y,info){if(!info){box.hidden=true;return}
+  box.innerHTML=`<b>${info.title}</b>${info.line}`;box.hidden=false;const w=host.clientWidth;box.style.left=Math.min(w-250,Math.max(8,x+12))+'px';box.style.top=Math.max(50,y-10)+'px';
+  clearTimeout(box._t);box._t=setTimeout(()=>box.hidden=true,3500)}
+
+/* ================= BOOT ================= */
+function boot(){
+  readPal();renderCards();renderSettings();
+  view=createView($('#vp'),{theta:.5,phi:.98,radius:21,target:new V(0,0,1.6),planExtent:{w:20,h:9.5,cx:0,cz:1.9},
+    onResize:v=>{if(v.W<600){v.baseR=29;v.target.set(0,-.2,2.0)}else{v.baseR=21;v.target.set(0,-.1,1.7)}},
+    onTap:(x,y)=>showInspect($('#vp'),$('#inspect'),x,y,view.hitTest(x,y))});
+  mview=createView($('#mvp'),{theta:.45,phi:.92,radius:23,target:new V(0,.3,0),planExtent:{w:16,h:9,cx:.5,cz:0},
+    onResize:v=>{v.baseR=v.W<600?31:23}});
+  $('#zin').onclick=()=>view.setZoom(view.zoom*1.2);$('#zout').onclick=()=>view.setZoom(view.zoom/1.2);$('#zreset').onclick=()=>{view.zoom=1;view.theta=.5;view.phi=.98;view.dirty=true};
+  $('#mzin').onclick=()=>mview.setZoom(mview.zoom*1.2);$('#mzout').onclick=()=>mview.setZoom(mview.zoom/1.2);
+  $('#v3d').onclick=()=>{view.mode='3d';$('#v3d').setAttribute('aria-pressed','true');$('#vtop').setAttribute('aria-pressed','false');$('#vhint').textContent='Drag to rotate · tap a parcel stack to inspect'};
+  $('#vtop').onclick=()=>{view.mode='top';$('#vtop').setAttribute('aria-pressed','true');$('#v3d').setAttribute('aria-pressed','false');$('#vhint').textContent='Top-down loading view · darker = lower layers'};
+  $('#startBtn').onclick=()=>{stopAuto();setPaused(false);startPooling()};
+  $('#pauseBtn').onclick=()=>setPaused(!clock.paused);
+  $('#restartBtn').onclick=()=>{stopAuto();setPaused(false);applyMembers([],{dur:700});setTimeout(startPooling,800)};
+  $('#resetBtn').onclick=()=>{stopAuto();setPaused(false);applyMembers([],{dur:700})};
+  $('#nextBtn').onclick=()=>{stopAuto();if(!addNext())toast('All groups have joined, or the container is full.')};
+  $('#speed').onchange=e=>{clock.speed=+e.target.value};
+  $('#slider').max=maxFill();$('#slider').addEventListener('input',onSlider);
+  document.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{stopAuto();const N=nForUtil(+b.dataset.u);applyMembers(membersForN(N),{dur:2400})});
+  $('#add50').onclick=()=>{stopAuto();const nx=extendMembers(50);if(totals(nx).N===toT.N)return toast('The container is full.');applyMembers(nx,{dur:1200})};
+  $('#add100').onclick=()=>{stopAuto();const nx=extendMembers(100);if(totals(nx).N===toT.N)return toast('The container is full.');applyMembers(nx,{dur:1400})};
+  $('#mergeBtn').onclick=()=>doMerge();$('#mergeReset').onclick=()=>resetMerge();
+  $('#compat').addEventListener('change',e=>{const k=e.target.dataset.c;if(!k)return;compatState[k]=e.target.checked;if(!e.target.checked&&merged)resetMerge();renderMerge(false)});
+  $('#tourBtn').onclick=()=>runTour();$('#narrExit').onclick=exitTour;$('#narrRestart').onclick=()=>runTour();
+  $('#narrPause').onclick=()=>setPaused(!clock.paused);$('#narrNext').onclick=()=>{if(clock.paused)setPaused(false);tour.skip&&tour.skip()};
+  const mo=()=>{readPal();for(const b of blocks.values())b.col=PAL[b.g];buildMergeBlocks();renderChart()};
+  try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',mo)}catch(_){}
+  new MutationObserver(mo).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  applyMembers([],{dur:1,silent:true});renderMerge(true);
+  // visibility
+  if(window.IntersectionObserver){const io=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target===$('#vp')?view:mview;v.visible=e.isIntersecting}));io.observe($('#vp'));io.observe($('#mvp'))}
+  requestAnimationFrame(frame);
+}
+let errored=false;
+let frames=0;
+function frame(now){
+  frames++;tickClock(now);
+  try{
+    if(tw.p<1){tw.p=clamp((clock.t-tw.t0)/tw.dur,0,1)}
+    const moving=stepBlocks();
+    updateDash();
+    if(view.visible||frames<3)view.render({containers:[MAIN],blocks:[...blocks.values()],pads:GROUPS.map((g,i)=>({p:PADS[i].p,label:'Group '+g.id,col:PAL[g.id]})),minis:minis()});
+    const mm=stepMerge();
+    if(mview.visible||frames<3)mview.render({containers:[MA,MB],blocks:mblocks});
+  }catch(err){if(!errored){errored=true;console.error(err);showErr($('#vp'),err.message)}}
+  requestAnimationFrame(frame);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+window.__sim={totals,buildMembers,members:()=>members,applyMembers,nForUtil,membersForN,mergeNumbers,breakEven,curve,A:()=>A};
+})();
+</script>
+
+</body>
+</html>
