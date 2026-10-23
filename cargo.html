@@ -1,0 +1,1386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RealWAY Cargo Space</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: two-screen freight console — A: light booking workflow (schedule → seat map → summary); B: dark industrial 3D terminal */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --sunk:#E8ECF2; --ink:#0F1B2D; --muted:#5B6879; --line:#D5DCE5;
+  --navy:#0F2340; --cobalt:#1F5BD8; --cobalt-ink:#FFFFFF; --green:#18905A; --warn:#C2410C; --amber:#B7791F; --brand:#F2B705;
+  --mA:#2B7BD8; --mB:#1F9D63; --mC:#7C4DDB; --mD:#E07A2F; --mE:#0E9AA7;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:6px;
+  /* Screen B: fixed industrial dark look */
+  --b-bg:#0B111A; --b-surface:#121B27; --b-line:#243244; --b-ink:#E6ECF3; --b-muted:#93A2B5;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D131B; --surface:#141C27; --sunk:#0A0F15; --ink:#E6ECF3; --muted:#95A3B5; --line:#253244;
+  --navy:#C9D6EA; --cobalt:#5B8CFF; --cobalt-ink:#0A1222; --green:#3CC284; --warn:#F2834F; --amber:#E0B45A;
+  --mA:#5B9BF0; --mB:#3CC284; --mC:#A27BF2; --mD:#F2994F; --mE:#3CC3CE; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0D131B; --surface:#141C27; --sunk:#0A0F15; --ink:#E6ECF3; --muted:#95A3B5; --line:#253244;
+  --navy:#C9D6EA; --cobalt:#5B8CFF; --cobalt-ink:#0A1222; --green:#3CC284; --warn:#F2834F; --amber:#E0B45A;
+  --mA:#5B9BF0; --mB:#3CC284; --mC:#A27BF2; --mD:#F2994F; --mE:#3CC3CE; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;line-height:1.04;text-wrap:balance;margin:0}
+h2{font-size:clamp(28px,4vw,42px);text-transform:uppercase}
+h3{font-size:18px;text-transform:uppercase;letter-spacing:.03em}
+p{margin:0}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.lede{color:var(--muted);max-width:68ch}
+.small{font-size:12.5px;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--f-mono)}
+.sim{display:inline-block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;background:var(--sunk);color:var(--muted);vertical-align:middle;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:var(--r);font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap;line-height:1.2;text-decoration:none}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--cobalt);color:var(--cobalt-ink);border-color:var(--cobalt)}
+.btn.navy{background:var(--navy);color:var(--bg);border-color:var(--navy)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.btn.ghost{background:transparent}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:25;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;min-height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex-shrink:0}
+.brand-mark{width:30px;height:30px;border-radius:4px;background:var(--brand);display:grid;place-items:center}
+.brand-name{font-family:var(--f-display);font-weight:700;font-size:24px}
+.top nav{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none;min-width:0}
+.top nav a{text-decoration:none;color:var(--muted);font-size:14px;padding:8px 10px;border-radius:4px;white-space:nowrap}
+.top nav a:hover{color:var(--ink);background:var(--sunk)}
+@media (max-width:640px){.top nav a.hide-sm{display:none}}
+
+/* screen switch + guided demo */
+.screenbar .sim{white-space:normal}
+.screenbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding-block:18px 14px}
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.tabs button{border:0;background:transparent;padding:10px 16px;font-weight:600;font-size:14px;cursor:pointer;display:flex;gap:8px;align-items:center}
+.tabs button .k{font-family:var(--f-mono);font-size:11px;background:var(--sunk);padding:1px 6px;border-radius:3px;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--navy);color:var(--bg)}
+.tabs button[aria-selected="true"] .k{background:rgba(255,255,255,.18);color:inherit}
+
+/* ===== SCREEN A ===== */
+#screenA{padding-bottom:60px}
+.a-head{display:grid;gap:8px;margin-bottom:16px}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.steps span{font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:999px;background:var(--sunk);color:var(--muted)}
+.steps span.on{background:var(--cobalt);color:var(--cobalt-ink)}
+.steps span.done{background:color-mix(in srgb,var(--green) 18%,var(--surface));color:var(--green)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0}
+.routebar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:12px;align-items:end}
+@media (max-width:900px){.routebar{grid-template-columns:1fr 1fr}}
+.field{display:grid;gap:5px;min-width:0}
+.field label{font-size:12.5px;font-weight:600}
+.field input,.field select{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--muted);align-items:center}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px}
+.svc{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:3px;border:1px solid currentColor;white-space:nowrap}
+.svc.sim{color:var(--muted);background:transparent}
+.svc.plan{color:var(--cobalt)}
+.svc.conf{color:var(--green)}
+.schedule{overflow-x:auto;padding-bottom:6px;margin-top:12px}
+.days{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(190px,1fr);gap:10px;min-width:min-content}
+.day{display:grid;gap:8px;align-content:start}
+.day h4{margin:0;font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:6px 2px;border-bottom:2px solid var(--line)}
+.day h4 b{color:var(--ink);font-size:15px;font-family:var(--f-display);letter-spacing:.02em;margin-left:4px}
+.day .none{font-size:12px;color:var(--muted);padding:8px 2px}
+.dep{border:1px solid var(--line);border-radius:8px;padding:11px 12px;background:var(--surface);display:grid;gap:6px;cursor:pointer;text-align:left;transition:border-color .2s,transform .2s,box-shadow .2s}
+.dep:hover{border-color:var(--cobalt);transform:translateY(-1px)}
+.dep[aria-pressed="true"]{border-color:var(--cobalt);box-shadow:0 0 0 2px var(--cobalt)}
+.dep.full{opacity:.72}
+.dep .t{display:flex;justify-content:space-between;gap:6px;align-items:center}
+.dep .time{font-family:var(--f-display);font-size:24px;font-weight:700;line-height:1}
+.dep .code{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.dep dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:1px 8px;font-size:12px}
+.dep dt{color:var(--muted)}
+.dep dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.cap{height:6px;background:var(--sunk);border-radius:3px;overflow:hidden}
+.cap i{display:block;height:100%}
+.avail{font-size:12px;font-weight:600}
+.avail.ok{color:var(--green)}
+.avail.lim{color:var(--amber)}
+.avail.full{color:var(--warn)}
+
+.bookgrid{display:grid;grid-template-columns:270px minmax(0,1fr) 320px;gap:14px;margin-top:14px;align-items:start}
+@media (max-width:1180px){.bookgrid{grid-template-columns:minmax(0,1fr) 320px}.cargo{grid-column:1/-1}}
+@media (max-width:820px){.bookgrid{grid-template-columns:1fr}}
+.selbar{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;background:var(--navy);color:var(--bg);border-radius:8px;padding:12px 16px;margin-top:16px}
+.selbar b{font-family:var(--f-display);font-size:20px;letter-spacing:.02em}
+.selbar span{font-size:13px;opacity:.85}
+.selbar .btn{margin-left:auto;background:transparent;color:inherit;border-color:rgba(255,255,255,.35)}
+.calc{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:13px;background:var(--sunk);border-radius:var(--r);padding:10px 12px}
+.calc dt{color:var(--muted)}
+.calc dd{margin:0;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.dims{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.warnbox{font-size:12.5px;border-left:3px solid var(--warn);padding:6px 10px;background:color-mix(in srgb,var(--warn) 8%,transparent);border-radius:0 4px 4px 0}
+.infobox{font-size:12.5px;border-left:3px solid var(--cobalt);padding:6px 10px;background:color-mix(in srgb,var(--cobalt) 7%,transparent);border-radius:0 4px 4px 0}
+
+/* seat map */
+.wagonmap{display:grid;gap:12px}
+.track{position:relative;border-radius:10px;background:repeating-linear-gradient(90deg,var(--sunk) 0 10px,transparent 10px 22px),var(--surface);border:1px solid var(--line);padding:14px 12px;overflow-x:auto}
+.train{display:flex;gap:10px;min-width:720px;align-items:stretch}
+.loco{width:46px;border-radius:6px 16px 16px 6px;background:var(--navy);color:var(--bg);display:grid;place-items:center;font-family:var(--f-mono);font-size:10px;writing-mode:vertical-rl;letter-spacing:.1em;flex-shrink:0}
+.mod{flex:1;border-radius:6px;border:2px solid var(--mc);background:color-mix(in srgb,var(--mc) 9%,var(--surface));padding:8px;display:grid;gap:6px;min-width:0;transition:opacity .3s,box-shadow .3s;cursor:pointer}
+.mod.dim{opacity:.45}
+.mod.target{box-shadow:0 0 0 3px color-mix(in srgb,var(--mc) 45%,transparent)}
+.mod .mh{display:flex;justify-content:space-between;gap:6px;align-items:baseline}
+.mod .mh b{font-family:var(--f-display);font-size:17px;letter-spacing:.02em}
+.mod .mh span{font-family:var(--f-mono);font-size:10.5px;color:var(--muted)}
+.mod .dest{font-size:11.5px;font-weight:600;color:var(--mc)}
+.seats{display:grid;grid-template-columns:repeat(8,1fr);gap:3px}
+.seat{aspect-ratio:1/1.35;border-radius:3px;border:1px solid color-mix(in srgb,var(--mc) 45%,var(--line));background:var(--surface);padding:0;cursor:pointer;position:relative;font-size:9px;line-height:1;color:#fff;display:grid;place-items:center;transition:background .25s,transform .15s}
+.seat:hover:not(:disabled){transform:scale(1.08)}
+.seat:disabled{cursor:not-allowed}
+.seat.booked{background:color-mix(in srgb,var(--mc) 70%,#555);border-color:transparent}
+.seat.heldO{background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--amber) 55%,var(--surface)) 0 3px,var(--surface) 3px 6px);border-color:var(--amber)}
+.seat.recvO{background:color-mix(in srgb,var(--mc) 85%,#000)}
+.seat.blocked{background:repeating-linear-gradient(-45deg,var(--sunk) 0 3px,color-mix(in srgb,var(--muted) 40%,var(--surface)) 3px 5px);border-color:var(--muted)}
+.seat.weight{background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--warn) 30%,var(--surface)) 0 2px,var(--surface) 2px 5px);border-color:var(--warn)}
+.seat.sel{background:var(--cobalt);border-color:var(--cobalt)}
+.seat.sel::after{content:"✓";font-size:10px;font-weight:700}
+.seat.mine{background:var(--cobalt);border-color:var(--navy);box-shadow:inset 0 0 0 2px rgba(255,255,255,.5)}
+.seat.mineHeld{background:repeating-linear-gradient(45deg,var(--cobalt) 0 3px,color-mix(in srgb,var(--cobalt) 40%,var(--surface)) 3px 6px)}
+.seat.pop{animation:pop .35s ease-out}
+@keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+.bars{display:grid;gap:5px}
+.bar{display:grid;grid-template-columns:52px 1fr 70px;gap:6px;align-items:center;font-size:11px}
+.bar .tr{height:6px;background:var(--sunk);border-radius:3px;overflow:hidden;position:relative}
+.bar .tr i{position:absolute;inset:0 auto 0 0;background:var(--mc)}
+.bar .tr i.mine{background:var(--cobalt)}
+.bar .v{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:10.5px}
+.joinrow{display:flex;gap:10px;align-items:stretch;min-width:720px}
+.joinrow .note{width:46px;flex-shrink:0;font-family:var(--f-mono);font-size:9.5px;color:var(--muted);display:grid;place-items:center;text-align:center}
+.joinrow .mod,.joinrow .gap{flex:1;min-width:0}
+.seatlegend{display:flex;flex-wrap:wrap;gap:10px 16px;font-size:12px;color:var(--muted)}
+.seatlegend span{display:inline-flex;gap:6px;align-items:center}
+.seatlegend .seat{width:14px;cursor:default;pointer-events:none}
+
+.summary{position:sticky;top:76px;display:grid;gap:12px}
+.sum dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:13px}
+.sum dt{color:var(--muted)}
+.sum dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;font-weight:500}
+.price{font-family:var(--f-display);font-size:38px;font-weight:700;line-height:1}
+.lifecycle{display:grid;gap:4px;margin:4px 0}
+.lc{display:grid;grid-template-columns:20px 1fr;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.lc i{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);display:block}
+.lc.done{color:var(--ink)}
+.lc.done i{background:var(--green);border-color:var(--green)}
+.lc.now{color:var(--ink);font-weight:600}
+.lc.now i{background:var(--cobalt);border-color:var(--cobalt);box-shadow:0 0 0 3px color-mix(in srgb,var(--cobalt) 30%,transparent)}
+.actions{display:flex;flex-wrap:wrap;gap:6px}
+.timer{font-family:var(--f-mono);font-size:12px;color:var(--amber);font-weight:600}
+details.rules{border:1px solid var(--line);border-radius:var(--r);padding:8px 12px}
+details.rules summary{cursor:pointer;font-size:13px;font-weight:600}
+.rulesgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.rulesgrid input{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.rulesgrid label{font-size:12px;display:grid;gap:3px}
+.loglist{font-size:12px;color:var(--muted);display:grid;gap:3px;max-height:150px;overflow:auto;font-family:var(--f-mono)}
+
+/* ===== SCREEN B ===== */
+#screenB{background:var(--b-bg);color:var(--b-ink);padding-block:28px 60px;--line:var(--b-line);--surface:var(--b-surface);--sunk:#0A0F16;--muted:var(--b-muted);--ink:var(--b-ink)}
+#screenB .btn{background:var(--b-surface);border-color:var(--b-line);color:var(--b-ink)}
+#screenB .btn.primary{background:#2F6BF0;border-color:#2F6BF0;color:#fff}
+#screenB .btn.on{background:#E6ECF3;color:#0B111A;border-color:#E6ECF3}
+#screenB .sim{background:#1B2635;color:#9FB0C4}
+.b-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:end;margin-bottom:16px}
+@media (max-width:820px){.b-head{grid-template-columns:1fr}}
+.b-head h2{font-size:clamp(30px,4.6vw,50px)}
+.concept{display:inline-flex;gap:8px;align-items:center;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:#F5C02A;border:1px solid #6b5514;background:#241d08;padding:6px 10px;border-radius:4px}
+.route{display:flex;align-items:center;gap:0;overflow-x:auto;padding:4px 2px 10px}
+.rstop{display:grid;justify-items:center;gap:4px;min-width:118px;position:relative;background:none;border:0;cursor:pointer;color:inherit;padding:0 4px}
+.rstop .pin{width:30px;height:30px;border-radius:50%;border:2px solid #4b5d75;background:#0B111A;display:grid;place-items:center;font-family:var(--f-mono);font-size:11px;font-weight:600;z-index:1;transition:all .3s}
+.rstop.done .pin{background:#4b5d75;color:#0B111A}
+.rstop.now .pin{border-color:#F5C02A;color:#F5C02A;box-shadow:0 0 0 4px rgba(245,192,42,.18)}
+.rstop b{font-size:12.5px}
+.rstop small{font-size:11px;color:var(--b-muted);text-align:center;line-height:1.25}
+.rline{flex:1;min-width:30px;height:3px;background:repeating-linear-gradient(90deg,#4b5d75 0 8px,transparent 8px 13px);margin-top:-30px;position:relative}
+.rline i{position:absolute;inset:0 auto 0 0;width:0;background:#F5C02A}
+.rline.road{background:repeating-linear-gradient(90deg,#8a6b2a 0 3px,transparent 3px 7px)}
+.btool{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.btool .grp{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.btool .sep{width:1px;height:26px;background:var(--b-line)}
+.btool select{background:var(--b-surface);border:1px solid var(--b-line);color:var(--b-ink);border-radius:var(--r);padding:6px 8px}
+.bstage{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px}
+@media (max-width:1000px){.bstage{grid-template-columns:1fr}}
+.bview{position:relative;height:560px;background:#0E1621;border:1px solid var(--b-line);border-radius:8px;overflow:hidden;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.bview.dragging{cursor:grabbing}
+.bview canvas{position:absolute;left:0;top:0;display:block}
+@media (max-width:760px){.bview{height:min(64vh,440px);min-height:330px}}
+.bhud{position:absolute;left:12px;top:12px;right:12px;display:flex;justify-content:space-between;gap:8px;pointer-events:none;flex-wrap:wrap}
+.bpill{background:rgba(11,17,26,.86);border:1px solid var(--b-line);border-radius:4px;padding:6px 10px;font-family:var(--f-mono);font-size:12px;display:inline-flex;gap:8px;align-items:center;max-width:100%}
+.bdot{width:8px;height:8px;border-radius:50%;background:#93A2B5;flex-shrink:0}
+.bmsg{position:absolute;left:50%;bottom:58px;transform:translateX(-50%);background:rgba(11,17,26,.92);border:1px solid #2f8f5f;color:#E6ECF3;padding:9px 14px;border-radius:6px;font-size:13.5px;font-weight:600;text-align:center;max-width:calc(100% - 24px);pointer-events:none;transition:opacity .3s}
+.bmsg.info{border-color:#3a5b8f}
+.bmsg.warn{border-color:#a8742a}
+.camtools{position:absolute;left:12px;bottom:12px;display:flex;gap:4px;flex-wrap:wrap}
+.camtools button{background:rgba(18,27,39,.92);border:1px solid var(--b-line);color:var(--b-ink);border-radius:4px;padding:5px 9px;font-size:12px;font-weight:600;cursor:pointer}
+.camtools button[aria-pressed="true"]{background:#E6ECF3;color:#0B111A}
+.zoomtools{position:absolute;right:12px;bottom:12px;display:flex;gap:4px}
+.zoomtools button{width:32px;height:30px;background:rgba(18,27,39,.92);border:1px solid var(--b-line);color:var(--b-ink);border-radius:4px;font-size:17px;font-weight:600;cursor:pointer}
+.pip{position:absolute;right:12px;top:56px;width:min(300px,46%);aspect-ratio:4/3;background:#0A1018;border:1px solid #3a5b8f;border-radius:6px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.pip canvas{position:absolute;left:0;top:0}
+.pip .pl{position:absolute;left:8px;top:6px;right:8px;font-family:var(--f-mono);font-size:10.5px;color:#9FB0C4;display:flex;justify-content:space-between;pointer-events:none}
+.inspect{position:absolute;inset:0;background:#0A1018;z-index:5;display:grid;grid-template-rows:auto 1fr auto}
+.inspect .ih{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--b-line);flex-wrap:wrap}
+.inspect .ic{position:relative;min-height:0}
+.inspect .ic canvas{position:absolute;left:0;top:0}
+.inspect .if{padding:8px 12px;border-top:1px solid var(--b-line);font-size:12px;color:var(--b-muted)}
+.bside{display:grid;gap:10px;align-content:start;min-width:0}
+.bcard{background:var(--b-surface);border:1px solid var(--b-line);border-radius:8px;padding:13px 14px;min-width:0}
+.bcard h3{font-size:15px;margin-bottom:8px}
+.mlist{display:grid;gap:6px}
+.mrow{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;padding:7px 8px;border-radius:6px;border:1px solid transparent;cursor:pointer;background:none;color:inherit;text-align:left;width:100%}
+.mrow:hover{border-color:var(--b-line)}
+.mrow.sel{border-color:#6c86ad;background:#162234}
+.mrow .chip{width:26px;height:26px;border-radius:4px;display:grid;place-items:center;font-family:var(--f-mono);font-weight:700;font-size:12px;color:#fff}
+.mrow b{font-size:13px;display:block}
+.mrow small{font-size:11px;color:var(--b-muted)}
+.st{font-family:var(--f-mono);font-size:10.5px;padding:2px 6px;border-radius:3px;background:#1B2635;color:#9FB0C4;white-space:nowrap}
+.st.ok{background:#123524;color:#55D597}
+.st.go{background:#2a2410;color:#F5C02A}
+.st.off{background:#1B2635;color:#6f7f93}
+.minfo dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:12.5px}
+.minfo dt{color:var(--b-muted)}
+.minfo dd{margin:0;text-align:right}
+.minv{display:grid;gap:3px;font-size:12px;margin-top:8px}
+.minv div{display:flex;justify-content:space-between;gap:8px}
+.minv .you{color:#8fb2ff;font-weight:600}
+.checks{display:grid;gap:4px;font-size:12.5px}
+.checks span::before{content:"✓ ";color:#55D597;font-weight:700}
+.checks span.no::before{content:"• ";color:#6f7f93}
+.flow{display:grid;gap:8px}
+.flow svg{width:100%;height:auto;display:block}
+details.eng{background:#1a1408;border:1px solid #6b5514;border-radius:8px;padding:12px 14px}
+details.eng summary{cursor:pointer;font-weight:700;color:#F5C02A}
+details.eng ul{margin:8px 0 0;padding-left:18px;font-size:13px;color:#D8CBA6;display:grid;gap:3px}
+details.eng p{font-size:13px;color:#D8CBA6;margin-top:8px}
+.compare{margin-top:18px}
+.cmpgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:860px){.cmpgrid{grid-template-columns:1fr}}
+.cview{position:relative;height:300px;background:#0E1621;border:1px solid var(--b-line);border-radius:8px;overflow:hidden}
+.cview canvas{position:absolute;left:0;top:0}
+.ccount{position:absolute;left:10px;top:10px;right:10px;display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;pointer-events:none}
+.costs{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+.costs th,.costs td{padding:7px 8px;border-bottom:1px solid var(--b-line);text-align:left}
+.costs th{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--b-muted);font-weight:500}
+.costs input{width:100%;min-width:90px;background:#0A0F16;border:1px solid var(--b-line);color:var(--b-ink);border-radius:4px;padding:5px 7px}
+.costs td small{color:var(--b-muted);display:block;font-size:11px}
+.final{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+@media (max-width:760px){.final{grid-template-columns:1fr}}
+.final div{border:1px solid var(--b-line);border-radius:8px;padding:16px;background:var(--b-surface)}
+.final b{font-family:var(--f-display);font-size:22px;text-transform:uppercase;display:block;margin-bottom:4px}
+.final .tag{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase}
+
+/* guided demo */
+.guide{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#0B111A;color:#E6ECF3;border-top:2px solid #2F6BF0;padding-block:10px calc(10px + env(safe-area-inset-bottom,0px))}
+.guide .wrap{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}
+@media (max-width:760px){.guide .wrap{grid-template-columns:1fr}}
+.gsteps{display:flex;gap:4px}
+.gsteps span{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-size:11px;background:#1B2635;color:#93A2B5}
+.gsteps span.on{background:#2F6BF0;color:#fff}
+.gsteps span.done{background:#123524;color:#55D597}
+.guide b{display:block;font-family:var(--f-display);font-size:18px;text-transform:uppercase;letter-spacing:.03em}
+.guide p{font-size:13.5px;color:#C2CDDB}
+.guide .gb{display:flex;gap:6px;flex-wrap:wrap}
+.guide .btn{background:transparent;color:#E6ECF3;border-color:#3a4a60}
+.guide .btn.primary{background:#2F6BF0;border-color:#2F6BF0;color:#fff}
+.toast{position:fixed;left:50%;top:calc(74px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:40;background:var(--navy);color:var(--bg);padding:9px 16px;border-radius:var(--r);font-size:14px;font-weight:600;max-width:calc(100% - 32px);text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast.warn{background:var(--warn);color:#fff}
+footer{padding-block:28px calc(28px + var(--gpad,0px));color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.fadein{animation:fi .45s ease-out}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.fadein,.seat.pop{animation:none}}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="https://zylow03.github.io/realway-express/" aria-label="RealWAY Express home">
+      <span class="brand-mark"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="9" rx="1" stroke="#1A1400" stroke-width="2"/><circle cx="5.5" cy="14.5" r="1.5" fill="#1A1400"/><circle cx="12.5" cy="14.5" r="1.5" fill="#1A1400"/><path d="M6 3v9M10 3v9" stroke="#1A1400" stroke-width="1.5"/></svg></span>
+      <span class="brand-name">RealWAY Express</span>
+    </a>
+    <nav aria-label="Pages">
+      <a class="hide-sm" href="https://zylow03.github.io/realway-express/">Website</a>
+      <a class="hide-sm" href="https://zylow03.github.io/realway-express/pooling.html">Pooling simulator</a>
+      <a href="#screenA" data-go="A">Book cargo space</a>
+      <a href="#screenB" data-go="B">Modular dispatch</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap screenbar">
+    <div class="tabs" role="tablist" aria-label="Screens">
+      <button role="tab" id="tabA" aria-selected="true" data-go="A"><span class="k">A</span>Book cargo space</button>
+      <button role="tab" id="tabB" aria-selected="false" data-go="B"><span class="k">B</span>Modular connection &amp; dispatch</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span class="sim">All schedules, prices and capacities are simulated</span>
+      <button class="btn navy" id="guideBtn">Start investor demo (7 clicks)</button>
+    </div>
+  </div>
+
+  <!-- ================= SCREEN A ================= -->
+  <section id="screenA" class="wrap">
+    <div class="a-head">
+      <p class="eyebrow">Screen A · Scheduled cargo space booking</p>
+      <h2>Pick a departure. Choose your space.</h2>
+      <p class="lede">Book space on a scheduled shared rail movement the way you would pick seats for a film. You reserve capacity inside a destination module, not a whole train or container.</p>
+      <div class="steps" id="aSteps"><span class="on">1 · Route &amp; departure</span><span>2 · Cargo space</span><span>3 · Deposit &amp; confirmation</span></div>
+    </div>
+
+    <div class="panel">
+      <div class="routebar">
+        <div class="field"><label for="origin">Origin</label>
+          <select id="origin"><option value="CN">China · Kunming hub</option><option value="LA">Laos · Vientiane</option><option value="TH">Thailand · Bangkok area</option></select></div>
+        <div class="field"><label for="dest">Final destination</label>
+          <select id="dest"><option value="LA">Laos</option><option value="TH">Thailand</option><option value="MY" selected>Malaysia</option><option value="SG">Singapore (onward by road from Malaysia)</option></select></div>
+        <div class="field"><label for="ready">Cargo ready date</label><input type="date" id="ready"></div>
+        <div class="field"><label>Showing</label><div class="small" id="showing" style="padding:9px 0">Departures after your cargo is ready</div></div>
+        <div class="legend" style="flex-direction:column;align-items:flex-start;gap:4px">
+          <span><span class="svc sim">Simulated</span> demo data only</span>
+          <span><span class="svc plan">Planned</span> intended, not confirmed</span>
+          <span><span class="svc conf">Operator-confirmed</span> none yet</span>
+        </div>
+      </div>
+      <div class="schedule" id="schedule"></div>
+      <p class="small" style="margin-top:6px">Sample departures demonstrate the interface. They are not real scheduled international rail services. No departure has been confirmed by a rail operator.</p>
+    </div>
+
+    <div id="bookView" hidden>
+      <div class="selbar fadein" id="selbar"></div>
+      <div class="bookgrid">
+        <div class="panel cargo" style="display:grid;gap:12px">
+          <h3>Your cargo</h3>
+          <div class="field"><label for="ctype">Cargo type</label>
+            <select id="ctype"><option value="gen">General cargo (palletised)</option><option value="frag">Fragile, top-load only</option><option value="dg">Contains lithium batteries</option></select></div>
+          <div class="field"><label for="pcs">Number of pieces</label><input id="pcs" type="number" min="1" value="4"></div>
+          <div class="field"><label>Size of each piece (cm)</label><div class="dims"><input id="cl" type="number" min="1" value="120" aria-label="Length cm"><input id="cw" type="number" min="1" value="80" aria-label="Width cm"><input id="ch" type="number" min="1" value="110" aria-label="Height cm"></div></div>
+          <div class="field"><label for="kg">Total weight (kg)</label><input id="kg" type="number" min="1" value="1600"></div>
+          <dl class="calc" id="calc"></dl>
+          <div id="cargoNote"></div>
+          <button class="btn primary" id="autoSel">Select the space I need</button>
+          <p class="small">One reservation unit = <b id="unitDef">0.45 m³</b> of planning volume inside a module. Units are for booking only; they are not fixed compartments.</p>
+        </div>
+
+        <div class="panel wagonmap">
+          <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline">
+            <h3>Top-down loading arrangement <span class="sim">Proposed modular concept</span></h3>
+            <span class="small" id="compatNote"></span>
+          </div>
+          <div class="track"><div class="train" id="train"></div></div>
+          <div class="track" style="padding-block:10px"><div class="joinrow" id="joinrow"></div></div>
+          <div class="seatlegend">
+            <span><button class="seat" tabindex="-1" aria-hidden="true"></button>Available</span>
+            <span><button class="seat sel" tabindex="-1" aria-hidden="true" style="--mc:var(--cobalt)"></button>Your selection</span>
+            <span><button class="seat heldO" tabindex="-1" aria-hidden="true"></button>Temporarily held</span>
+            <span><button class="seat booked" tabindex="-1" aria-hidden="true" style="--mc:#666"></button>Deposit-confirmed</span>
+            <span><button class="seat recvO" tabindex="-1" aria-hidden="true" style="--mc:#666"></button>Cargo received / allocated</span>
+            <span><button class="seat blocked" tabindex="-1" aria-hidden="true"></button>Unavailable: loading constraint</span>
+            <span><button class="seat weight" tabindex="-1" aria-hidden="true"></button>Unavailable: weight limit</span>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button class="btn sm" id="simSme">Simulate other SME bookings</button>
+            <button class="btn sm" id="simHeavy">Add a heavy booking (weight limit demo)</button>
+            <button class="btn sm ghost" id="clearSel">Clear my selection</button>
+          </div>
+          <div class="infobox" id="weightExplain" hidden></div>
+        </div>
+
+        <aside class="summary">
+          <div class="panel sum">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><h3>Booking summary</h3><span class="sim">Estimate</span></div>
+            <div class="price num" id="sPrice" style="margin:8px 0 2px">RM0</div>
+            <p class="small" id="sPriceNote">Estimated quotation. Not a confirmed transport price.</p>
+            <dl style="margin-top:10px" id="sumdl"></dl>
+          </div>
+          <div class="panel sum">
+            <h3>Reservation status</h3>
+            <div class="lifecycle" id="lifecycle"></div>
+            <div class="timer" id="holdTimer"></div>
+            <div class="actions" id="lcActions" style="margin-top:6px"></div>
+            <div class="actions" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)">
+              <span class="small" style="width:100%">Rule demonstrations</span>
+              <button class="btn sm" id="dExpire">Let hold expire</button>
+              <button class="btn sm" id="dCancel">Cancel booking</button>
+              <button class="btn sm" id="dMiss">Miss the cut-off</button>
+            </div>
+            <details class="rules" style="margin-top:10px">
+              <summary>Deposit and refund rules (editable, no policy agreed)</summary>
+              <div class="rulesgrid">
+                <label>Deposit % of estimate<input id="rDep" type="number" min="0" max="100" value="20"></label>
+                <label>Hold time (minutes)<input id="rHold" type="number" min="1" value="30"></label>
+                <label>Refund if cancelled before cut-off (%)<input id="rRefBefore" type="number" min="0" max="100" value="80"></label>
+                <label>Refund if cargo misses cut-off (%)<input id="rRefMiss" type="number" min="0" max="100" value="0"></label>
+              </div>
+            </details>
+            <div class="loglist" id="lcLog" style="margin-top:10px"></div>
+          </div>
+          <button class="btn navy" id="viewCargo">View my cargo in the transport arrangement →</button>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SCREEN B ================= -->
+  <section id="screenB" hidden>
+    <div class="wrap">
+      <div class="b-head">
+        <div style="display:grid;gap:10px">
+          <p class="eyebrow" style="color:#93A2B5">Screen B · Modular cargo connection &amp; dispatch</p>
+          <h2>Four independent cargo modules. One coordinated freight movement.</h2>
+          <p class="lede" style="color:#B7C3D3">Each module carries a separate shipment group and could be lifted off at a suitable terminal without unpacking individual parcels. This four-module layout is a proposed engineering concept, not an existing certified system.</p>
+        </div>
+        <span class="concept">⚠ Proposed concept · engineering validation required</span>
+      </div>
+
+      <div class="route" id="route"></div>
+
+      <div class="btool">
+        <div class="grp">
+          <button class="btn primary sm" id="bAssemble">Assemble cargo train</button>
+          <button class="btn sm" id="bDispatch">Run modular dispatch</button>
+          <button class="btn sm" id="bReplace">Demonstrate replacement</button>
+          <button class="btn sm" id="bInspect">Inspect connection</button>
+          <button class="btn sm" id="bCompare">Compare handling</button>
+        </div>
+        <span class="sep"></span>
+        <div class="grp">
+          <button class="btn sm" id="pStart">Start</button>
+          <button class="btn sm" id="pPause">Pause</button>
+          <button class="btn sm" id="pReplay">Replay</button>
+          <button class="btn sm" id="pNext">Next step</button>
+          <button class="btn sm" id="pReset">Reset</button>
+          <label class="small" style="display:inline-flex;gap:6px;align-items:center;color:#93A2B5">Speed <select id="bSpeed"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option></select></label>
+        </div>
+      </div>
+
+      <div class="bstage">
+        <div style="display:grid;gap:10px;min-width:0">
+          <div class="bview" id="bview">
+            <div class="bhud"><span class="bpill"><span class="bdot" id="bdot"></span><span id="bstatus">Loading terminal · Kunming (simulated)</span></span><span class="bpill num" id="bprog">Modules secured 0 / 4</span></div>
+            <div class="pip" id="pip" hidden><div class="pl"><span>Connection close-up</span><span id="pipState">UNLOCKED</span></div></div>
+            <div class="bmsg info" id="bmsg" hidden></div>
+            <div class="camtools" role="group" aria-label="Camera">
+              <button data-cam="3d" aria-pressed="true">3D</button><button data-cam="side" aria-pressed="false">Side</button><button data-cam="top" aria-pressed="false">Top-down</button><button data-cam="close" aria-pressed="false">Close-up</button>
+            </div>
+            <div class="zoomtools"><button id="bzin" aria-label="Zoom in">+</button><button id="bzout" aria-label="Zoom out">−</button></div>
+            <div class="inspect" id="inspect" hidden>
+              <div class="ih"><b style="font-family:var(--f-display);font-size:18px;text-transform:uppercase">Inspect connection · proposed interface</b>
+                <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" id="iLock">Lock</button><button class="btn sm" id="iUnlock">Unlock</button><button class="btn sm" id="iExplode">Exploded view</button><button class="btn sm" id="iClose">Close</button></div></div>
+              <div class="ic" id="ic"></div>
+              <div class="if">Drag to rotate. Concept based on container corner castings and twistlock-style securing hardware. Not a certified or final design: container type, wagon design, lifting equipment, structural loads and railway certification must be confirmed.</div>
+            </div>
+          </div>
+          <p class="small" style="color:#93A2B5">Tap a module for its details, a mounting point to inspect the connection, or the crane to see it move. Wagon length, module spacing and fitting positions are provisional placeholders.</p>
+        </div>
+
+        <aside class="bside">
+          <div class="bcard"><h3>Modules</h3><div class="mlist" id="mlist"></div></div>
+          <div class="bcard minfo" id="minfo"><h3>Module details</h3><p class="small">Select a module to see its cargo inventory, utilisation and connection status.</p></div>
+          <div class="bcard" id="checkCard" hidden><h3>Connection checks</h3><div class="checks" id="checks"></div></div>
+          <div class="bcard flow"><h3>Module replacement &amp; return flow</h3>
+            <div class="tabs" role="group" style="background:#0A0F16;border-color:var(--b-line)"><button id="fOne" aria-selected="true">One-way flow</button><button id="fRet" aria-selected="false">Return direction</button></div>
+            <div id="flowSvg"></div>
+            <p class="small" id="flowText"></p>
+          </div>
+        </aside>
+      </div>
+
+      <div class="compare" id="compareSec">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin:22px 0 10px">
+          <h2 style="font-size:clamp(24px,3.4vw,34px)">Conventional handling vs proposed modular handling</h2>
+          <button class="btn sm" id="cRun">Run comparison</button>
+        </div>
+        <div class="cmpgrid">
+          <div style="display:grid;gap:6px"><div class="cview" id="cLeft"><div class="ccount"><span class="bpill">Conventional: one 40 ft container, mixed destinations</span><span class="bpill num" id="cLeftN">Parcel moves 0</span></div></div>
+            <p class="small" style="color:#93A2B5">At the Laos stop, workers open the container, find the Laos parcels, and move other parcels out of the way and back again.</p></div>
+          <div style="display:grid;gap:6px"><div class="cview" id="cRight"><div class="ccount"><span class="bpill">Proposed: destination modules</span><span class="bpill num" id="cRightN">Module lifts 0 · parcels touched 0</span></div></div>
+            <p class="small" style="color:#93A2B5">The Laos module is lifted off as one handling unit. The other modules stay secured and unopened.</p></div>
+        </div>
+        <div class="bcard" style="margin-top:12px;overflow-x:auto">
+          <h3>Cost categories for a fair comparison</h3>
+          <p class="small" style="color:#93A2B5">Values are blank until verified. Enter assumptions to compare. The modular method may cut parcel handling but add lifting, equipment and repositioning costs. We do not claim it is automatically faster, cheaper or safer.</p>
+          <table class="costs"><thead><tr><th>Category (RM per stop, assumption)</th><th>Conventional</th><th>Modular</th></tr></thead><tbody id="costBody"></tbody></table>
+        </div>
+      </div>
+
+      <details class="eng" style="margin-top:18px" id="engPanel">
+        <summary>Engineering validation required</summary>
+        <p>The modular container system is an engineering concept. It must be assessed with railway operators, terminal operators and container-equipment specialists before it could operate. Four nominal 10 ft modules do not prove the arrangement fits an existing 40 ft wagon or a certified handling system.</p>
+        <ul>
+          <li>Wagon compatibility and available deck length</li>
+          <li>Loading-gauge restrictions on each railway</li>
+          <li>Individual module dimensions and corner-fitting positions</li>
+          <li>Combined weight and axle loads</li>
+          <li>Securing method between module and wagon</li>
+          <li>Lifting equipment and spreader compatibility</li>
+          <li>Terminal handling capability and dwell time at each stop</li>
+          <li>Cross-border customs and regulatory approvals</li>
+        </ul>
+        <p>No certification status, equipment supplier, load rating or handling time is claimed in this prototype.</p>
+      </details>
+
+      <div class="final" id="finalSum">
+        <div><span class="tag" style="color:#8fb2ff">Software · can be prototyped now</span><b>Digital service innovation</b><span class="small" style="color:#B7C3D3">SMEs view scheduled departures, compare remaining capacity and reserve cargo space through self-service booking inspired by cinema ticketing.</span></div>
+        <div><span class="tag" style="color:#F5C02A">Engineering concept · needs validation</span><b>Proposed physical innovation</b><span class="small" style="color:#B7C3D3">Independent cargo modules travel as one coordinated arrangement, so a destination module can be handled at selected terminals without unpacking every shipment in a shared container.</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer><div class="wrap"><span>RealWAY Express · Cargo space booking and modular dispatch prototype</span><span>Simulated data. Not a live booking system. Modular arrangement requires engineering validation.</span></div></footer>
+
+<div class="guide" id="guide" hidden>
+  <div class="wrap">
+    <div class="gsteps" id="gsteps"></div>
+    <div><b id="gTitle"></b><p id="gText"></p></div>
+    <div class="gb"><button class="btn sm primary" id="gNext">Next click</button><button class="btn sm" id="gPause">Pause</button><button class="btn sm" id="gExit">Exit demo</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmtRM=v=>'RM'+Math.round(v).toLocaleString('en-MY');
+const f2=v=>(Math.round(v*100)/100).toFixed(2);
+const f1=v=>(Math.round(v*10)/10).toFixed(1);
+const fmtKg=v=>Math.round(v).toLocaleString('en-MY')+' kg';
+const DAY=864e5;
+const fmtD=d=>d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+const fmtDs=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+let toastT;function toast(m,warn){const t=$('#toast');t.textContent=m;t.className='toast'+(warn?' warn':'');t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,3200)}
+
+/* ================= SHARED DATA ================= */
+const UNIT_VOL=0.45, COLS=8, ROWS=4, SECTIONS=COLS*ROWS, MOD_VOL=UNIT_VOL*SECTIONS, MOD_KG=8000;
+const RATE=720, VOLFACTOR=333, HANDLING=25, MIN_UNIT_KG=150;
+const PLACES={CN:'China · Kunming hub',LA:'Laos · Vientiane',TH:'Thailand · Bangkok area',MY:'Malaysia',SG:'Singapore-bound'};
+const ORDER=['CN','LA','TH','MY','SG'];
+const MODS={
+  A:{id:'A',code:'RWMU 100011',origin:'CN',dest:'LA',name:'Laos',term:'Vientiane rail terminal',pos:1,cv:'--mA'},
+  B:{id:'B',code:'RWMU 100027',origin:'CN',dest:'TH',name:'Thailand',term:'Bangkok-area rail terminal',pos:2,cv:'--mB'},
+  C:{id:'C',code:'RWMU 100032',origin:'CN',dest:'MY',name:'Malaysia',term:'Malaysian rail freight terminal',pos:3,cv:'--mC'},
+  D:{id:'D',code:'RWMU 100048',origin:'CN',dest:'SG',name:'Singapore-bound',term:'Malaysian terminal, then road',pos:4,cv:'--mD',note:'Singapore-bound cargo leaves the rail at Malaysia. Onward road transport and cross-border clearance are a separate arrangement.'},
+  E:{id:'E',code:'RWMU 100053',origin:'TH',dest:'MY',name:'Malaysia (joins at Bangkok)',term:'Malaysian rail freight terminal',pos:2,cv:'--mE',joins:true,note:'Joins at the Bangkok-area terminal and takes Position 2 after Module B is lifted off.'}};
+const LEG_DAYS={CN:0,LA:2,TH:4};
+const ARR={LA:[2,3],TH:[4,5],MY:[7,9],SG:[9,12]};
+const BLOCKED=[COLS*1+7,COLS*2+7];
+const SME_NAMES=['Lumi Home Goods','Guangxi Tea Trading','Kunming Auto Parts','Yunnan Florals','Shenzhen Smart Lighting','Nanning Textiles','Pearl River Kitchenware','Hanoi-Kunming Sports','Delta Packaging','Orchid Furniture'];
+
+function seeded(n){let s=n*9301+49297;return()=>{s=(s*9301+49297)%233280;return s/233280}}
+function makeDepartures(){
+  const out=[];let d=new Date();d.setHours(9,0,0,0);d=new Date(d.getTime()+DAY);let i=0;
+  while(out.length<7){if(d.getDay()===2||d.getDay()===5){
+    const id='RW-SIM-'+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+    const r=seeded(i+3);const mods={};
+    Object.keys(MODS).forEach((k,mi)=>{const secs=[];let kg=0;
+      let frac=[.55,.62,.48,.4,.3][mi]*(0.55+r()*0.8);if(i===0&&k==='C')frac=1;if(i===0&&k==='E')frac=.95;if(i===1&&k==='C')frac=.82;
+      for(let s=0;s<SECTIONS;s++)secs.push({s:BLOCKED.includes(s)?'blocked':'free'});
+      const avail=secs.map((x,j)=>x.s==='free'?j:-1).filter(j=>j>=0).sort((a,b)=>(a%COLS)-(b%COLS)||a-b);
+      const n=Math.round(frac*avail.length);let owner=0,left=0,stage='conf';
+      for(let j=0;j<n;j++){if(left<=0){owner=Math.floor(r()*SME_NAMES.length);left=2+Math.floor(r()*4);const q=r();stage=q<.15?'held':q<.35&&i<2?'recv':'conf'}
+        const w=170+Math.floor(r()*90);secs[avail[j]]={s:stage,owner:SME_NAMES[owner],kg:w};kg+=w;left--}
+      mods[k]={secs,kg}});
+    out.push({id,i,date:new Date(d),svc:i<3?'sim':'plan',mods});i++}
+    d=new Date(d.getTime()+DAY)}
+  return out}
+const DEPS=makeDepartures();
+const modVolUsed=(dm)=>dm.secs.filter(x=>!['free','blocked','weight'].includes(x.s)).length*UNIT_VOL;
+const modKgUsed=(dm)=>dm.secs.reduce((a,x)=>a+(['free','blocked'].includes(x.s)?0:(x.kg||0)),0);
+const weightLimited=(dm)=>MOD_KG-modKgUsed(dm)<MIN_UNIT_KG;
+const freeCount=(dm)=>weightLimited(dm)?0:dm.secs.filter(x=>x.s==='free').length;
+
+/* ================= SCREEN A STATE ================= */
+const BK={dep:null,mod:null,sel:[],stage:'select',holdEnds:0,deposit:0,log:[]};
+function compatMod(o,d){return Object.values(MODS).find(m=>m.origin===o&&m.dest===d)||null}
+function cargoCalc(){
+  const pcs=Math.max(1,+$('#pcs').value||1),l=+$('#cl').value||0,w=+$('#cw').value||0,h=+$('#ch').value||0,kg=Math.max(0,+$('#kg').value||0);
+  const vol=pcs*l*w*h/1e6,wv=kg/VOLFACTOR,chg=Math.max(vol,wv);const units=Math.ceil(vol/UNIT_VOL-1e-9);
+  const type=$('#ctype').value;
+  return {pcs,vol,kg,wv,chg,units,type,charge:chg*RATE+pcs*HANDLING,freight:chg*RATE,handlingFee:pcs*HANDLING}}
+function depDate(dep,origin){return new Date(dep.date.getTime()+LEG_DAYS[origin]*DAY)}
+function cutoff(dep,origin){const c=new Date(depDate(dep,origin).getTime()-2*DAY);c.setHours(18,0,0,0);return c}
+
+function renderSchedule(){
+  const o=$('#origin').value,d=$('#dest').value;const m=compatMod(o,d);
+  const ready=new Date($('#ready').value+'T00:00:00');
+  const el=$('#schedule');
+  if(ORDER.indexOf(d)<=ORDER.indexOf(o)){el.innerHTML=`<div class="warnbox" style="margin-top:8px">The destination must be further along the line than the origin. This line runs China → Laos → Thailand → Malaysia. Return-direction cargo needs a separately scheduled northbound service.</div>`;return}
+  if(!m){el.innerHTML=`<div class="warnbox" style="margin-top:8px">No module on these sample departures carries ${PLACES[o]} → ${PLACES[d]} cargo. Try China → any destination, or Thailand → Malaysia (Module E joins at Bangkok).</div>`;return}
+  // group by day
+  const days=[];const start=new Date();start.setHours(0,0,0,0);
+  for(let k=0;k<24;k++){const day=new Date(start.getTime()+(k+1)*DAY+LEG_DAYS[o]*DAY);days.push({day,deps:[]})}
+  DEPS.forEach(dep=>{const dd=depDate(dep,o);const slot=days.find(x=>x.day.toDateString()===dd.toDateString());if(slot)slot.deps.push(dep)});
+  const shown=days.filter(x=>x.deps.length||x.day.getDay()===1).slice(0,14);
+  el.innerHTML=`<div class="days">${shown.map(x=>`<div class="day"><h4>${x.day.toLocaleDateString('en-GB',{weekday:'short'})}<b>${fmtDs(x.day)}</b></h4>${x.deps.length?x.deps.map(dep=>depCard(dep,o,d,m,ready)).join(''):'<div class="none">No departure</div>'}</div>`).join('')}</div>`;
+  $('#showing').textContent=`${PLACES[o]} → ${PLACES[d]} · Module ${m.id}`;
+}
+function depCard(dep,o,d,m,ready){
+  const dm=dep.mods[m.id];const free=freeCount(dm);const cut=cutoff(dep,o);const tooEarly=cut<ready;
+  const st=free===0?'full':free<12?'lim':'ok';const stTxt=free===0?'Full':free<12?'Limited space':'Space available';
+  const used=modVolUsed(dm)/MOD_VOL*100;const a=ARR[d];const arrA=new Date(dep.date.getTime()+a[0]*DAY),arrB=new Date(dep.date.getTime()+a[1]*DAY);
+  const pressed=BK.dep&&BK.dep.id===dep.id;
+  return `<button class="dep ${free===0?'full':''}" data-dep="${dep.id}" aria-pressed="${pressed}" ${tooEarly?'disabled title="Cut-off is before your cargo is ready"':''} style="${tooEarly?'opacity:.4;cursor:not-allowed':''}">
+    <div class="t"><span class="time">09:00</span><span class="svc ${dep.svc}">${dep.svc==='sim'?'Simulated':'Planned'}</span></div>
+    <span class="code">${dep.id}${m.joins?' · joins at Bangkok':''}</span>
+    <dl><dt>Cut-off</dt><dd>${fmtDs(cut)} 18:00</dd><dt>Arrives</dt><dd>${fmtDs(arrA)}–${fmtDs(arrB)}</dd><dt>Free space</dt><dd>${f1(free*UNIT_VOL)} m³</dd></dl>
+    <div class="cap"><i style="width:${used}%;background:${st==='full'?'var(--warn)':st==='lim'?'var(--amber)':'var(--green)'}"></i></div>
+    <span class="avail ${st}">${tooEarly?'Cut-off before cargo ready':stTxt}</span></button>`}
+
+function selectDeparture(id,quiet){
+  const dep=DEPS.find(x=>x.id===id);const o=$('#origin').value,d=$('#dest').value;const m=compatMod(o,d);if(!dep||!m)return;
+  if(freeCount(dep.mods[m.id])===0){
+    const ready=new Date($('#ready').value+'T00:00:00');
+    const next=DEPS.find(x=>x.date>dep.date&&freeCount(x.mods[m.id])>0&&cutoff(x,o)>=ready);
+    toast(`This departure has no space left in Module ${m.id}.${next?' Next available: '+fmtD(depDate(next,o))+' ('+next.id+').':''}`,true);
+    if(next){const c=document.querySelector(`[data-dep="${next.id}"]`);if(c){c.scrollIntoView({block:'nearest',inline:'center',behavior:reduce?'auto':'smooth'});c.classList.remove('fadein');void c.offsetWidth;c.classList.add('fadein')}}
+    return false}
+  if(BK.stage!=='select'&&BK.stage!=='released'&&BK.dep&&BK.dep.id!==id){toast('You have an active reservation on '+BK.dep.id+'. Cancel it first to switch departure.',true);return false}
+  BK.dep=dep;BK.mod=m;BK.sel=[];BK.stage='select';
+  renderSchedule();
+  const a=ARR[d];const arrA=new Date(dep.date.getTime()+a[0]*DAY),arrB=new Date(dep.date.getTime()+a[1]*DAY);
+  $('#selbar').innerHTML=`<b>${dep.id}</b><span>${PLACES[o]} → ${PLACES[d]}</span><span>Departs ${fmtD(depDate(dep,o))} 09:00</span><span>Cut-off ${fmtDs(cutoff(dep,o))} 18:00</span><span>Arrives ${fmtDs(arrA)}–${fmtDs(arrB)}</span><span class="svc ${dep.svc}" style="color:inherit">${dep.svc==='sim'?'Simulated departure':'Planned · not confirmed'}</span><button class="btn sm" id="changeDep">Change departure</button>`;
+  $('#changeDep').onclick=()=>{$('#schedule').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'})};
+  const bv=$('#bookView');const wasHidden=bv.hidden;bv.hidden=false;if(wasHidden){bv.classList.remove('fadein');void bv.offsetWidth;bv.classList.add('fadein')}
+  renderWagon();renderCargo();renderSummary();setSteps(2);
+  if(!quiet)setTimeout(()=>$('#selbar').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'}),60);
+  return true}
+function setSteps(n){$$('#aSteps span').forEach((s,i)=>{s.className=i+1<n?'done':i+1===n?'on':''})}
+
+/* seat map */
+function seatClass(x,dm){
+  if(x.s==='free')return weightLimited(dm)?'weight':'';
+  if(x.s==='blocked')return 'blocked';
+  if(x.s==='mineHeld')return 'mineHeld';
+  if(x.s==='mine')return 'mine';
+  if(x.s==='held')return 'heldO';
+  if(x.s==='recv'||x.s==='alloc')return 'recvO';
+  return 'booked'}
+function modCard(m,dm,isJoin){
+  const isT=BK.mod&&BK.mod.id===m.id;const vol=modVolUsed(dm),kg=modKgUsed(dm);
+  const mineV=dm.secs.filter(x=>x.s==='mine'||x.s==='mineHeld').length*UNIT_VOL+(isT?BK.sel.length*UNIT_VOL:0);
+  return `<div class="mod ${isT?'target':'dim'}" data-mod="${m.id}" style="--mc:var(${m.cv})">
+    <div class="mh"><b>Module ${m.id}</b><span>${m.code}</span></div>
+    <div class="dest">${m.joins?'Bangkok → Malaysia':'→ '+m.name}${m.id==='D'?' · road from Malaysia':''}</div>
+    <div class="seats">${dm.secs.map((x,i)=>{const sel=isT&&BK.sel.includes(i);const cl=sel?'sel':seatClass(x,dm);
+      return `<button class="seat ${cl}" data-m="${m.id}" data-i="${i}" aria-label="Module ${m.id} unit ${i+1}: ${cl||'available'}"></button>`}).join('')}</div>
+    <div class="bars">
+      <div class="bar"><span>Volume</span><span class="tr"><i style="width:${vol/MOD_VOL*100}%"></i><i class="mine" style="left:${vol/MOD_VOL*100}%;width:${isT?BK.sel.length*UNIT_VOL/MOD_VOL*100:0}%"></i></span><span class="v">${f1(vol+(isT?BK.sel.length*UNIT_VOL:0))}/${f1(MOD_VOL)} m³</span></div>
+      <div class="bar"><span>Weight</span><span class="tr"><i style="width:${kg/MOD_KG*100}%"></i><i class="mine" style="left:${kg/MOD_KG*100}%;width:${isT&&BK.sel.length?Math.min(100-kg/MOD_KG*100,cargoCalc().kg/MOD_KG*100):0}%"></i></span><span class="v">${fmtKg(kg+(isT&&BK.sel.length?cargoCalc().kg:0))}</span></div>
+    </div>
+    ${m.joins?`<span class="small" style="font-size:11px">${m.note}</span>`:''}
+  </div>`}
+function renderWagon(){
+  const dep=BK.dep;if(!dep)return;
+  $('#train').innerHTML=`<div class="loco">LOCO</div>`+['A','B','C','D'].map(k=>modCard(MODS[k],dep.mods[k])).join('');
+  $('#joinrow').innerHTML=`<div class="note">Joins at Bangkok</div><div class="gap"></div>${modCard(MODS.E,dep.mods.E)}<div class="gap"></div><div class="gap"></div>`;
+  const m=BK.mod;const dm=dep.mods[m.id];
+  $('#compatNote').textContent=`Your route uses Module ${m.id}. Other modules are shown for context.`;
+  const we=$('#weightExplain');
+  if(weightLimited(dm)&&dm.secs.some(x=>x.s==='free')){const left=MOD_KG-modKgUsed(dm);const vleft=dm.secs.filter(x=>x.s==='free').length*UNIT_VOL;
+    we.hidden=false;we.innerHTML=`<b>Why no more space can be sold in Module ${m.id}:</b> ${f1(vleft)} m³ of volume is still empty, but the module can only carry ${fmtKg(left)} more before reaching its ${fmtKg(MOD_KG)} planning weight limit (assumed). Weight runs out before volume, so the remaining units are marked unavailable.`}
+  else we.hidden=true;
+}
+$('#train').addEventListener('click',onSeat);$('#joinrow').addEventListener('click',onSeat);
+function onSeat(e){
+  const b=e.target.closest('.seat');if(!b){const mc=e.target.closest('.mod');if(mc&&BK.mod&&mc.dataset.mod!==BK.mod.id)incompatible(mc.dataset.mod);return}
+  const mid=b.dataset.m,i=+b.dataset.i;if(!BK.dep)return;
+  if(mid!==BK.mod.id){incompatible(mid);return}
+  const dm=BK.dep.mods[mid];const x=dm.secs[i];
+  if(BK.stage!=='select'&&BK.stage!=='released'){toast('Your space is already reserved. Cancel it to change the selection.',true);return}
+  if(BK.sel.includes(i)){BK.sel=BK.sel.filter(j=>j!==i);renderWagon();renderSummary();return}
+  if(x.s==='blocked'){toast('Kept clear for door access and securing equipment (loading constraint). This is not sold-out space.',true);return}
+  if(x.s!=='free'){toast(`Already reserved by another SME${x.owner?' ('+x.owner+')':''}.`,true);return}
+  if(weightLimited(dm)){toast('Unavailable: this module has reached its planning weight limit.',true);return}
+  BK.sel.push(i);renderWagon();renderSummary();popSeat(mid,i)}
+function popSeat(mid,i){const s=document.querySelector(`.seat[data-m="${mid}"][data-i="${i}"]`);if(s){s.classList.remove('pop');void s.offsetWidth;s.classList.add('pop')}}
+function incompatible(mid){const m=MODS[mid];const me=BK.mod;
+  toast(`Module ${mid} ${m.joins?'joins at Bangkok for Malaysia':'unloads at '+m.term}. Your cargo goes ${PLACES[$('#origin').value]} → ${PLACES[$('#dest').value]}, so use Module ${me.id}.`,true)}
+
+async function autoSelect(){
+  const c=cargoCalc();if(!BK.dep)return;
+  if(c.type==='dg'){toast('Cargo with lithium batteries needs dangerous-goods approval. Not bookable in this demo.',true);return}
+  if(BK.stage!=='select'&&BK.stage!=='released'){toast('Space already reserved.',true);return}
+  const dm=BK.dep.mods[BK.mod.id];
+  if(modKgUsed(dm)+c.kg>MOD_KG){toast(`Too heavy for the space left: Module ${BK.mod.id} can take ${fmtKg(MOD_KG-modKgUsed(dm))} more.`,true);return}
+  const free=dm.secs.map((x,i)=>x.s==='free'?i:-1).filter(i=>i>=0&&!BK.sel.includes(i)).sort((a,b)=>(a%COLS)-(b%COLS)||a-b);
+  const need=c.units-BK.sel.length;
+  if(need<=0){toast('Your selection already covers your cargo volume.');return}
+  if(free.length<need){toast(`Only ${f1(free.length*UNIT_VOL)} m³ left in Module ${BK.mod.id}. Try another departure.`,true);return}
+  for(let k=0;k<need;k++){BK.sel.push(free[k]);renderWagon();renderSummary();popSeat(BK.mod.id,free[k]);await new Promise(r=>setTimeout(r,reduce?0:110))}
+}
+
+/* cargo + summary */
+function renderCargo(){
+  const c=cargoCalc();
+  $('#calc').innerHTML=`<dt>Physical volume</dt><dd>${f2(c.vol)} m³</dd><dt>Volume weight (÷${VOLFACTOR} kg/m³)</dt><dd>${f2(c.wv)} m³</dd><dt>Chargeable volume</dt><dd>${f2(c.chg)} m³</dd><dt>Space units needed</dt><dd>${c.units} × ${UNIT_VOL} m³</dd>`;
+  const n=$('#cargoNote');
+  if(c.type==='dg')n.innerHTML='<div class="warnbox">Lithium batteries are restricted cargo. They need dangerous-goods documents and approval before space can be booked.</div>';
+  else if(c.wv>c.vol)n.innerHTML='<div class="infobox">Your cargo is dense, so the charge is based on weight (volume weight), not physical size. Space reserved still follows physical volume.</div>';
+  else n.innerHTML='';
+  $('#autoSel').disabled=c.type==='dg';
+  $('#autoSel').textContent=`Select the ${c.units} units I need`;
+}
+function renderSummary(){
+  if(!BK.dep)return;const c=cargoCalc();const o=$('#origin').value,d=$('#dest').value;
+  const mineCount=BK.sel.length||BK.dep.mods[BK.mod.id].secs.filter(x=>x.s==='mine'||x.s==='mineHeld').length;
+  const resV=mineCount*UNIT_VOL;const dep=BK.dep;
+  const handling=c.type==='frag'?'Top-load only, not stackable':c.type==='dg'?'Dangerous goods: approval required':'Forklift pallets, stackable 2 high';
+  $('#sPrice').textContent=fmtRM(c.charge);
+  $('#sumdl').innerHTML=`<dt>Departure</dt><dd>${dep.id}</dd><dt>Route</dt><dd>${PLACES[o].split(' ·')[0]} → ${PLACES[d].split(' ·')[0]}</dd><dt>Module</dt><dd>${BK.mod.id} · ${BK.mod.code}</dd>
+   <dt>Space reserved</dt><dd>${mineCount} units · ${f2(resV)} m³</dd><dt>Cargo volume</dt><dd>${f2(c.vol)} m³</dd><dt>Chargeable</dt><dd>${f2(c.chg)} m³</dd><dt>Weight</dt><dd>${fmtKg(c.kg)}</dd>
+   <dt>Freight estimate</dt><dd>${fmtRM(c.freight)} <span class="small">(RM${RATE}/m³)</span></dd><dt>Handling</dt><dd>${fmtRM(c.handlingFee)}</dd>
+   <dt>Booking cut-off</dt><dd>${fmtDs(cutoff(dep,o))} 18:00</dd><dt>Handling needs</dt><dd>${handling}</dd>
+   <dt>Deposit (${+$('#rDep').value||0}%)</dt><dd>${fmtRM(c.charge*(+$('#rDep').value||0)/100)}</dd>`;
+  if(resV&&resV+1e-9<c.vol)$('#sPriceNote').textContent=`Selected space (${f2(resV)} m³) is smaller than your cargo (${f2(c.vol)} m³). Add units before holding.`;
+  else $('#sPriceNote').textContent='Estimated quotation. A confirmed transport price is issued after cargo declaration and approval.';
+  renderLifecycle();
+}
+const STAGES=[['select','Space selected'],['held','Temporarily held'],['conf','Deposit-confirmed reservation'],['recv','Cargo physically received at hub'],['alloc','Approved and allocated for loading']];
+function renderLifecycle(){
+  const idx=STAGES.findIndex(s=>s[0]===BK.stage);const rel=BK.stage==='released';
+  $('#lifecycle').innerHTML=STAGES.map((s,i)=>`<div class="lc ${!rel&&i<idx?'done':!rel&&i===idx?'now':''}"><i></i><span>${s[1]}</span></div>`).join('')+(rel?`<div class="lc now" style="color:var(--warn)"><i style="background:var(--warn);border-color:var(--warn)"></i><span>Released: space returned to available</span></div>`:'');
+  const c=cargoCalc();const act=$('#lcActions');const resV=BK.sel.length*UNIT_VOL;
+  if(BK.stage==='select'||rel)act.innerHTML=`<button class="btn primary sm" id="aHold" ${!BK.sel.length||resV+1e-9<c.vol||c.type==='dg'?'disabled':''}>Hold selected space</button>`;
+  else if(BK.stage==='held')act.innerHTML=`<button class="btn primary sm" id="aPay">Pay deposit ${fmtRM(BK.deposit)} (simulated)</button>`;
+  else if(BK.stage==='conf')act.innerHTML=`<button class="btn primary sm" id="aRecv">Mark cargo received at hub</button>`;
+  else if(BK.stage==='recv')act.innerHTML=`<button class="btn primary sm" id="aAlloc">Approve and allocate for loading</button>`;
+  else act.innerHTML=`<span class="small" style="color:var(--green);font-weight:600">Allocated to Module ${BK.mod.id} for loading.</span>`;
+  $('#aHold')&&($('#aHold').onclick=hold);$('#aPay')&&($('#aPay').onclick=pay);$('#aRecv')&&($('#aRecv').onclick=recv);$('#aAlloc')&&($('#aAlloc').onclick=alloc);
+  $('#lcLog').innerHTML=BK.log.slice().reverse().map(l=>`<span>${l}</span>`).join('');
+  updateTimer();
+}
+function logA(s){const t=new Date();BK.log.push(`${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')} ${s}`)}
+function mySecs(){return BK.dep.mods[BK.mod.id].secs}
+function hold(){const c=cargoCalc();const dm=BK.dep.mods[BK.mod.id];
+  if(modKgUsed(dm)+c.kg>MOD_KG){toast(`Weight limit: Module ${BK.mod.id} can carry ${fmtKg(MOD_KG-modKgUsed(dm))} more, your cargo is ${fmtKg(c.kg)}.`,true);return}
+  const perKg=c.kg/BK.sel.length;BK.sel.forEach(i=>dm.secs[i]={s:'mineHeld',owner:'You',kg:perKg});BK.held=[...BK.sel];BK.sel=[];
+  BK.stage='held';BK.holdEnds=Date.now()+(+$('#rHold').value||30)*1000;BK.deposit=c.charge*(+$('#rDep').value||0)/100;
+  logA(`Holding ${BK.held.length} units in Module ${BK.mod.id}. Not yet guaranteed.`);setSteps(3);renderWagon();renderSummary();renderSchedule()}
+function pay(){mySecs().forEach((x,i)=>{if(x.s==='mineHeld')x.s='mine'});BK.stage='conf';logA(`Deposit ${fmtRM(BK.deposit)} paid (simulated). Reservation confirmed, subject to cargo delivery by cut-off.`);renderWagon();renderSummary()}
+function recv(){BK.stage='recv';logA('Cargo received at Kunming hub, measured and screened (simulated).');renderSummary()}
+function alloc(){BK.stage='alloc';logA(`Cargo approved and allocated for loading in Module ${BK.mod.id}.`);renderSummary();toast(`Allocated to Module ${BK.mod.id}. You can now follow it in Screen B.`)}
+function release(reason){mySecs().forEach((x,i)=>{if(x.s==='mine'||x.s==='mineHeld')mySecs()[i]={s:'free'}});BK.stage='released';BK.sel=[];logA(reason);renderWagon();renderSummary();renderSchedule()}
+function updateTimer(){const t=$('#holdTimer');if(BK.stage!=='held'){t.textContent='';return}
+  const left=Math.max(0,Math.ceil((BK.holdEnds-Date.now())/1000));t.textContent=`Hold expires in ${left} min (simulated clock: 1 min = 1 s). Pay the deposit to secure the space.`;
+  if(left<=0)release('Hold expired before deposit. Space returned to available capacity.')}
+setInterval(()=>{if(BK.stage==='held')updateTimer()},1000);
+$('#dExpire').onclick=()=>{if(BK.stage==='select'&&BK.sel.length){hold()}if(BK.stage!=='held'){toast('Select and hold some space first.',true);return}BK.holdEnds=Date.now();updateTimer()};
+$('#dCancel').onclick=()=>{if(!['held','conf','recv','alloc'].includes(BK.stage)){toast('There is no reservation to cancel yet.',true);return}
+  const ref=BK.stage==='held'?0:BK.deposit*(+$('#rRefBefore').value||0)/100;release(`Booking cancelled before cut-off. ${BK.stage==='held'?'No deposit was paid.':'Refund '+fmtRM(ref)+' of '+fmtRM(BK.deposit)+' deposit.'} Space returned.`)};
+$('#dMiss').onclick=()=>{if(BK.stage==='held'){release('Cut-off passed while space was only held. Hold released.');return}
+  if(BK.stage!=='conf'){toast(BK.stage==='recv'||BK.stage==='alloc'?'Cargo was already received, so the cut-off was met.':'Confirm a reservation first to see this rule.',true);return}
+  const ref=BK.deposit*(+$('#rRefMiss').value||0)/100;release(`Cargo not received by cut-off. Reservation released, refund ${fmtRM(ref)} of ${fmtRM(BK.deposit)} deposit under current rules.`)};
+
+/* other SME bookings */
+let simBusy=false;
+async function simSME(heavy){
+  if(!BK.dep||simBusy)return;simBusy=true;const dm=BK.dep.mods[BK.mod.id];
+  const pick=()=>dm.secs.map((x,i)=>x.s==='free'&&!BK.sel.includes(i)?i:-1).filter(i=>i>=0).sort((a,b)=>(a%COLS)-(b%COLS)||a-b);
+  const batches=heavy?[{n:3,kg:Math.max(300,MOD_KG-modKgUsed(dm)-cargoReserveKg()-90),name:'Kunming Machinery Parts (heavy)'}]:[{n:3},{n:4},{n:2},{n:3}];
+  for(const b of batches){const free=pick();if(free.length<1||weightLimited(dm)||(!heavy&&free.length<=7))break;const n=Math.min(b.n,free.length);
+    const name=b.name||SME_NAMES[Math.floor(Math.random()*SME_NAMES.length)];const per=b.kg?b.kg/n:190+Math.random()*70;
+    if(!heavy&&modKgUsed(dm)+per*n>MOD_KG-MIN_UNIT_KG)break;
+    for(let k=0;k<n;k++){dm.secs[free[k]]={s:'conf',owner:name,kg:per};renderWagon();popSeat(BK.mod.id,free[k]);await new Promise(r=>setTimeout(r,reduce?0:140))}
+    logA(`${name} reserved ${n} units (${fmtKg(per*n)}) in Module ${BK.mod.id}.`);renderSummary();await new Promise(r=>setTimeout(r,reduce?0:350))}
+  renderSchedule();renderSummary();simBusy=false;
+  if(weightLimited(dm))toast(`Module ${BK.mod.id} reached its weight limit before its volume was full.`,true)}
+function cargoReserveKg(){return BK.sel.length?cargoCalc().kg:0}
+$('#simSme').onclick=()=>simSME(false);$('#simHeavy').onclick=()=>simSME(true);
+$('#clearSel').onclick=()=>{BK.sel=[];renderWagon();renderSummary()};
+$('#autoSel').onclick=autoSelect;
+['pcs','cl','cw','ch','kg','ctype'].forEach(id=>$('#'+id).addEventListener('input',()=>{renderCargo();renderSummary();if(BK.dep)renderWagon()}));
+['rDep','rHold','rRefBefore','rRefMiss'].forEach(id=>$('#'+id).addEventListener('input',renderSummary));
+$('#schedule').addEventListener('click',e=>{const b=e.target.closest('.dep');if(b&&!b.disabled)selectDeparture(b.dataset.dep)});
+['origin','dest','ready'].forEach(id=>$('#'+id).addEventListener('change',()=>{if(BK.stage!=='select'&&BK.stage!=='released'){toast('Cancel your current reservation before changing route.',true)}BK.dep=null;BK.sel=[];BK.stage='select';$('#bookView').hidden=true;setSteps(1);renderSchedule()}));
+(function initA(){const r=new Date(Date.now()+DAY);$('#ready').value=r.toISOString().slice(0,10);$('#unitDef').textContent=UNIT_VOL+' m³';renderSchedule();renderCargo()})();
+
+/* ================= SCREEN B: RENDERER ================= */
+class V{constructor(x=0,y=0,z=0){this.x=x;this.y=y;this.z=z}set(x,y,z){this.x=x;this.y=y;this.z=z;return this}copy(v){return this.set(v.x,v.y,v.z)}clone(){return new V(this.x,this.y,this.z)}}
+const lerp=(a,b,t)=>a+(b-a)*t;
+const easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const easeOut=t=>1-Math.pow(1-t,3);
+const easeIn=t=>t*t*t;
+const FACES=[[[1,0,0],[1,3,7,5],.82],[[-1,0,0],[0,2,6,4],.74],[[0,1,0],[2,3,7,6],1.0],[[0,-1,0],[0,1,5,4],.45],[[0,0,1],[4,5,7,6],.66],[[0,0,-1],[0,1,3,2],.58]];
+const shadeCache={};
+function hexRgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return [n>>16&255,n>>8&255,n&255]}
+function shade(col,f){const k=col+'|'+f;if(shadeCache[k])return shadeCache[k];const c=hexRgb(col);return shadeCache[k]=`rgb(${c.map(v=>clamp(Math.round(v*f),0,255)).join(',')})`}
+
+function makeView(host,o){
+  const cv=document.createElement('canvas');host.prepend(cv);const g=cv.getContext('2d');
+  const v={host,cv,g,theta:o.theta,phi:o.phi,R:o.R,zoom:1,target:o.target.clone(),fov:o.fov||40,W:0,H:0,dpr:1,hits:[],
+    cam:{p:new V(),r:[0,0,0],u:[0,0,0],f:[0,0,0],F:1},goal:null,limits:o.limits||{t:[-1.25,1.25],p:[.25,1.52]},dragging:false};
+  const pts=new Array(8);
+  v.resize=()=>{const W=host.clientWidth,H=host.clientHeight;if(!W||!H)return;v.W=W;v.H=H;v.dpr=Math.min(window.devicePixelRatio||1,2);
+    cv.width=Math.round(W*v.dpr);cv.height=Math.round(H*v.dpr);cv.style.width=W+'px';cv.style.height=H+'px';o.onResize&&o.onResize(v)};
+  if(window.ResizeObserver)new ResizeObserver(v.resize).observe(host);window.addEventListener('resize',v.resize);v.resize();
+  v.updCam=()=>{const R=v.R/v.zoom,c=v.cam,t=v.target;
+    c.p.set(t.x+R*Math.sin(v.phi)*Math.sin(v.theta),t.y+R*Math.cos(v.phi),t.z+R*Math.sin(v.phi)*Math.cos(v.theta));
+    let f=[t.x-c.p.x,t.y-c.p.y,t.z-c.p.z];let l=Math.hypot(...f);f=f.map(x=>x/l);let r=[-f[2],0,f[0]];l=Math.hypot(...r)||1;r=r.map(x=>x/l);
+    c.f=f;c.r=r;c.u=[r[1]*f[2]-r[2]*f[1],r[2]*f[0]-r[0]*f[2],r[0]*f[1]-r[1]*f[0]];c.F=(v.H/2)/Math.tan(v.fov*Math.PI/360)};
+  v.proj=(x,y,z)=>{const c=v.cam;const dx=x-c.p.x,dy=y-c.p.y,dz=z-c.p.z;const cz=dx*c.f[0]+dy*c.f[1]+dz*c.f[2];
+    return [v.W/2+c.F*(dx*c.r[0]+dy*c.r[1]+dz*c.r[2])/cz,v.H/2-c.F*(dx*c.u[0]+dy*c.u[1]+dz*c.u[2])/cz,cz]};
+  v.d2=(p)=>{const c=v.cam.p;return (p.x-c.x)**2+(p.y-c.y)**2+(p.z-c.z)**2};
+  v.begin=(top,bot)=>{if(!v.W){v.resize();if(!v.W)return false}v.updCam();g.setTransform(v.dpr,0,0,v.dpr,0,0);v.hits=[];
+    const gr=g.createLinearGradient(0,0,0,v.H);gr.addColorStop(0,top);gr.addColorStop(1,bot);g.fillStyle=gr;g.fillRect(0,0,v.W,v.H);g.lineJoin='round';return true};
+  v.faceVis=(p,n,h)=>{const c=v.cam.p;return n[0]*(c.x-(p.x+n[0]*h[0]))+n[1]*(c.y-(p.y+n[1]*h[1]))+n[2]*(c.z-(p.z+n[2]*h[2]))>0};
+  v.corners=(p,s)=>{const hx=s[0]/2,hy=s[1]/2,hz=s[2]/2;for(let i=0;i<8;i++){const q=v.proj(p.x+(i&1?hx:-hx),p.y+(i&2?hy:-hy),p.z+(i&4?hz:-hz));if(q[2]<.15)return null;pts[i]=q}return [hx,hy,hz]};
+  v.box=(p,s,col,op)=>{op=op||{};const h=v.corners(p,s);if(!h)return null;const polys=[];
+    for(const [n,idx,lf] of FACES){if(op.skip&&op.skip.includes(n.join('')))continue;const fv=v.faceVis(p,n,h);if(op.back?fv:!fv)continue;
+      g.beginPath();g.moveTo(pts[idx[0]][0],pts[idx[0]][1]);for(let k=1;k<4;k++)g.lineTo(pts[idx[k]][0],pts[idx[k]][1]);g.closePath();
+      g.globalAlpha=op.alpha==null?1:op.alpha;g.fillStyle=shade(col,lf*(op.light||1));g.fill();
+      if(op.edge){g.strokeStyle=op.edge;g.lineWidth=op.lw||1;g.stroke()}
+      polys.push(idx.map(k=>[pts[k][0],pts[k][1]]))}
+    g.globalAlpha=1;if(op.hit&&polys.length)v.hits.push({polys,info:op.hit});return h};
+  v.line=(a,b,col,w,al)=>{const p=v.proj(a.x,a.y,a.z),q=v.proj(b.x,b.y,b.z);if(p[2]<.15||q[2]<.15)return;g.globalAlpha=al==null?1:al;g.strokeStyle=col;g.lineWidth=w||1;g.beginPath();g.moveTo(p[0],p[1]);g.lineTo(q[0],q[1]);g.stroke();g.globalAlpha=1};
+  v.poly=(P,col,al,stroke,lw)=>{const q=P.map(p=>v.proj(p.x,p.y,p.z));if(q.some(x=>x[2]<.15))return;g.beginPath();g.moveTo(q[0][0],q[0][1]);q.slice(1).forEach(x=>g.lineTo(x[0],x[1]));g.closePath();g.globalAlpha=al==null?1:al;if(col){g.fillStyle=col;g.fill()}if(stroke){g.strokeStyle=stroke;g.lineWidth=lw||1;g.stroke()}g.globalAlpha=1;return q};
+  v.disc=(cx,cy,cz,r,col,edge)=>{const P=[];for(let i=0;i<14;i++){const a=i/14*Math.PI*2;P.push(new V(cx+Math.cos(a)*r,cy+Math.sin(a)*r,cz))}v.poly(P,col,1,edge,1)};
+  v.text=(x,y,z,s,op)=>{op=op||{};const q=v.proj(x,y,z);if(q[2]<.15)return null;const size=op.size||12;g.font=`${op.weight||600} ${size}px "IBM Plex Mono",ui-monospace,monospace`;g.textAlign=op.align||'center';g.textBaseline='middle';
+    const w=g.measureText(s).width;const px=op.align==='left'?q[0]:q[0]-w/2;
+    if(op.bg){g.fillStyle=op.bg;g.fillRect(px-6,q[1]-size*.75,w+12,size*1.5)}g.fillStyle=op.col||'#fff';g.fillText(s,q[0],q[1]);return q};
+  v.hitTest=(x,y)=>{for(let i=v.hits.length-1;i>=0;i--)for(const poly of v.hits[i].polys)if(pip(x,y,poly))return v.hits[i].info;return null};
+  // input
+  let drag=null,moved=false;
+  host.addEventListener('pointerdown',e=>{if(e.target.closest(o.ignore||'button'))return;drag={x:e.clientX,y:e.clientY,t:v.theta,p:v.phi};moved=false;try{host.setPointerCapture(e.pointerId)}catch(_){}});
+  host.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>5){moved=true;host.classList.add('dragging')}if(!moved||o.noRotate&&o.noRotate())return;
+    v.theta=clamp(drag.t-dx*.008,v.limits.t[0],v.limits.t[1]);v.phi=clamp(drag.p-dy*.006,v.limits.p[0],v.limits.p[1]);v.dragging=true;if(v.goal){v.goal.theta=v.theta;v.goal.phi=v.phi}});
+  const end=e=>{if(drag&&!moved&&o.onTap){const r=host.getBoundingClientRect();o.onTap(e.clientX-r.left,e.clientY-r.top)}drag=null;v.dragging=false;host.classList.remove('dragging')};
+  host.addEventListener('pointerup',end);host.addEventListener('pointercancel',()=>{drag=null;v.dragging=false;host.classList.remove('dragging')});
+  host.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();v.zoom=clamp(v.zoom*(e.deltaY<0?1.1:.9),.6,2.4)},{passive:false});
+  v.smooth=()=>{if(!v.goal||v.dragging)return;const k=.07;v.theta=lerp(v.theta,v.goal.theta,k);v.phi=lerp(v.phi,v.goal.phi,k);v.R=lerp(v.R,v.goal.R,k);
+    v.target.set(lerp(v.target.x,v.goal.target.x,k),lerp(v.target.y,v.goal.target.y,k),lerp(v.target.z,v.goal.target.z,k))};
+  return v}
+function pip(x,y,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const [xi,yi]=poly[i],[xj,yj]=poly[j];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c}return c}
+
+/* ================= SCREEN B: SCENE MODEL ================= */
+const MD={L:2.991,H:2.591,W:2.438};
+const DECK=1.30,SLOT_X=[4.85,1.62,-1.62,-4.85],STORE_Z=6.3,TRUCK_Z=9.6,CZ1=-4.2,CZ2=12.6,GIRDER_Y=11.7,TROLLEY_Y=12.35,CARRY_B=4.9,IDLE_SY=9.2,TRUCK_DECK=1.36;
+const BCOL={A:'#3A7BD5',B:'#23A36B',C:'#7E57D9',D:'#E07A2F',E:'#11A0AD',ground:'#141C26',pad:'#2B333D',padLine:'#3a4552',ballast:'#2c3036',sleeper:'#5b4c3e',rail:'#A9B4C0',frame:'#2C3440',deck:'#4A5562',bogie:'#1D232B',wheel:'#101419',crane:'#D9A22B',craneD:'#8f6a17',spreader:'#E8B23A',loco:'#1F3B66',locoStripe:'#F2B705',tractor:'#B3BCC7',chassis:'#2C3440',shed:'#1E2733',pinOff:'#7a8594',pinOn:'#2FD27E',fitting:'#2a2f36',edge:'rgba(0,0,0,.45)'};
+const STOPS=[
+  {key:'CN',name:'Kunming loading terminal',short:'Kunming',sub:'China · loading',unload:[]},
+  {key:'LA',name:'Vientiane rail terminal (Laos)',short:'Vientiane',sub:'Laos · Module A off',unload:['A'],msg:'Laos module removed as one handling unit. Remaining cargo modules stay secured.'},
+  {key:'TH',name:'Bangkok-area rail terminal (Thailand)',short:'Bangkok area',sub:'Thailand · Module B off',unload:['B'],msg:'Thailand module removed as one handling unit. Malaysia and Singapore-bound modules stay secured.'},
+  {key:'MY',name:'Malaysian rail freight terminal',short:'Malaysia',sub:'Malaysia · C off, D to road',unload:['C'],truck:'D',msg:'Malaysia module removed as one handling unit.'}];
+function newState(){return {term:'CN',TX:0,wagonX:0,speed:0,shift:0,route:0,
+  mods:Object.fromEntries(['A','B','C','D','E'].map((k,i)=>[k,{id:k,where:i<4?'storage':'gone',slot:i<4?i:1,sx:i<4?SLOT_X[i]:SLOT_X[1],sz:STORE_Z,locked:false,lock:0,hi:false,dim:false}])),
+  crane:{x:SLOT_X[0]+3.4,tz:STORE_Z,sy:IDLE_SY,carry:null,locked:false},truck:{on:false,x:40,z:TRUCK_Z,mod:null},progress:0}}
+let S=newState();
+function posOf(st,m){
+  if(m.where==='wagon')return new V(st.wagonX+SLOT_X[m.slot],DECK+MD.H/2,0);
+  if(m.where==='storage')return new V(st.TX+m.sx,MD.H/2+.03,m.sz);
+  if(m.where==='truck')return new V(st.TX+st.truck.x,TRUCK_DECK+MD.H/2,st.truck.z);
+  if(m.where==='carry')return new V(st.TX+st.crane.x,st.crane.sy-.14-MD.H/2,st.crane.tz);
+  return null}
+
+/* ================= SCREEN B: DRAWING ================= */
+function drawModule(v,st,m,p){
+  const col=BCOL[m.id];const s=[MD.L,MD.H,MD.W];const h=v.box(p,s,col,{edge:BCOL.edge,lw:1,light:m.dim?.45:1,hit:{type:'mod',id:m.id}});if(!h)return;
+  const g=v.g;const dimA=m.dim?.35:1;
+  // corrugation on long sides and blind end
+  [[0,0,1],[0,0,-1]].forEach(n=>{if(!v.faceVis(p,n,h))return;const z=p.z+n[2]*h[2];g.globalAlpha=.28*dimA;g.strokeStyle='#000';g.lineWidth=1;g.beginPath();
+    for(let x=-MD.L/2+.12;x<MD.L/2-.1;x+=.16){const a=v.proj(p.x+x,p.y-MD.H/2+.12,z),b=v.proj(p.x+x,p.y+MD.H/2-.12,z);g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1])}g.stroke();g.globalAlpha=1;
+    // top & bottom rails
+    v.line(new V(p.x-MD.L/2,p.y+MD.H/2-.08,z),new V(p.x+MD.L/2,p.y+MD.H/2-.08,z),'rgba(0,0,0,.45)',2,dimA);v.line(new V(p.x-MD.L/2,p.y-MD.H/2+.08,z),new V(p.x+MD.L/2,p.y-MD.H/2+.08,z),'rgba(0,0,0,.5)',2.5,dimA)});
+  if(v.faceVis(p,[-1,0,0],h)){const x=p.x-MD.L/2;g.globalAlpha=.25*dimA;g.strokeStyle='#000';g.beginPath();for(let z=-MD.W/2+.12;z<MD.W/2-.1;z+=.16){const a=v.proj(x,p.y-MD.H/2+.12,p.z+z),b=v.proj(x,p.y+MD.H/2-.12,p.z+z);g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1])}g.stroke();g.globalAlpha=1}
+  if(v.faceVis(p,[1,0,0],h)){const x=p.x+MD.L/2+.002;// doors + locking bars
+    v.line(new V(x,p.y-MD.H/2+.1,p.z),new V(x,p.y+MD.H/2-.1,p.z),'rgba(0,0,0,.6)',1.5,dimA);
+    [-.75,-.35,.35,.75].forEach(z=>v.line(new V(x,p.y-MD.H/2+.18,p.z+z*MD.W/2),new V(x,p.y+MD.H/2-.18,p.z+z*MD.W/2),'#c9d1da',1.3,.75*dimA));
+    [-.75,.75].forEach(z=>v.line(new V(x,p.y-.05,p.z+z*MD.W/2-.12),new V(x,p.y-.05,p.z+z*MD.W/2+.12),'#c9d1da',2,.8*dimA))}
+  // corner fittings (only visible corners)
+  for(const sx of [-1,1])for(const sy of [-1,1])for(const sz of [-1,1]){
+    const vis=v.faceVis(p,[sx,0,0],h)||v.faceVis(p,[0,sy,0],h)||v.faceVis(p,[0,0,sz],h);if(!vis)continue;
+    v.box(new V(p.x+sx*(MD.L/2-.089),p.y+sy*(MD.H/2-.059),p.z+sz*(MD.W/2-.081)),[.18,.12,.165],BCOL.fitting,{light:m.dim?.6:1})}
+  // label on visible long side
+  const n=v.faceVis(p,[0,0,1],h)?1:v.faceVis(p,[0,0,-1],h)?-1:0;
+  if(n){const z=p.z+n*(MD.W/2+.01);const top=v.proj(p.x,p.y+MD.H/2,z),bot=v.proj(p.x,p.y-MD.H/2,z);const hp=Math.abs(bot[1]-top[1]);const size=clamp(hp*.13,8,13);
+    if(hp>18){g.globalAlpha=m.dim?.5:1;
+      v.text(p.x,p.y+.55,z,`MODULE ${m.id}`,{size,col:'#0B111A',bg:'rgba(240,244,248,.92)',weight:700});
+      v.text(p.x,p.y+.05,z,MODS[m.id].code,{size:size*.82,col:'#fff',weight:500});
+      v.text(p.x,p.y-.45,z,('→ '+MODS[m.id].name).toUpperCase(),{size:size*.82,col:'#fff',weight:600});
+      if(st.myCargo&&st.myCargo.mod===m.id&&m.where!=='gone')v.text(p.x,p.y-.95,z,`YOUR CARGO · ${f1(st.myCargo.vol)} m³`,{size:size*.78,col:'#fff',bg:'#2F6BF0'});
+      g.globalAlpha=1}}
+  if(m.hi){const q=v.proj(p.x,p.y+MD.H/2+.55,p.z);if(q[2]>.15){g.fillStyle='#F5C02A';g.beginPath();g.moveTo(q[0],q[1]+8);g.lineTo(q[0]-7,q[1]-4);g.lineTo(q[0]+7,q[1]-4);g.closePath();g.fill()}}
+}
+function drawTrack(v,st){
+  const g=v.g;
+  for(let x=-30;x<30;x+=6)v.box(new V(x+3,-.06,0),[6,.12,3.3],BCOL.ballast,{});
+  const sl=[];const off=((st.shift%0.7)+0.7)%0.7;for(let x=-28;x<28;x+=.7)sl.push(new V(x-off,.06,0));
+  sl.sort((a,b)=>v.d2(b)-v.d2(a)).forEach(p=>v.box(p,[.26,.12,2.6],BCOL.sleeper,{}));
+  for(const z of [-.7175,.7175])for(let x=-28;x<28;x+=4)v.box(new V(x+2,.2,z),[4,.15,.075],BCOL.rail,{});
+}
+function drawTerminalGround(v,st){
+  if(Math.abs(st.TX)>48)return;const T=st.TX;
+  for(let x=-15;x<15;x+=7.5)v.box(new V(T+x+3.75,.01,8.2),[7.5,.02,10.5],BCOL.pad,{});
+  // storage bay markings
+  SLOT_X.forEach(x=>{const P=[new V(T+x-1.65,.03,STORE_Z-1.35),new V(T+x+1.65,.03,STORE_Z-1.35),new V(T+x+1.65,.03,STORE_Z+1.35),new V(T+x-1.65,.03,STORE_Z+1.35)];v.poly(P,null,1,'#F5C02A',1)});
+  for(const z of [CZ1,CZ2])for(let x=-15;x<15;x+=5)v.box(new V(T+x+2.5,.08,z),[5,.12,.12],'#5c6672',{});
+  const term=STOPS.find(s=>s.key===st.term);
+  v.text(T-12,.05,10.6,(term?term.short:'Terminal').toUpperCase()+' · SIMULATED TERMINAL',{size:11,col:'#9FB0C4',align:'left'});
+}
+function drawShed(v,st){if(Math.abs(st.TX)>48)return;v.box(new V(st.TX+1,3.2,-13.5),[22,6.4,7],BCOL.shed,{edge:'rgba(255,255,255,.05)'});v.text(st.TX+1,5.5,-10,'TERMINAL STORAGE',{size:10,col:'#6f7f93'})}
+function drawCraneFar(v,st){if(Math.abs(st.TX)>48)return;const x=st.TX+st.crane.x;
+  [-2.4,2.4].forEach(dx=>v.box(new V(x+dx,5.6,CZ1),[.5,11.2,.6],BCOL.crane,{hit:{type:'crane'}}));v.box(new V(x,.45,CZ1),[5.4,.5,.8],BCOL.craneD,{hit:{type:'crane'}})}
+function drawCraneTop(v,st){if(Math.abs(st.TX)>48)return;const c=st.crane;const x=st.TX+c.x;
+  // spreader + cables
+  const sp=new V(x,c.sy,c.tz);
+  const corners=[[-1,-1],[1,-1],[1,1],[-1,1]];
+  corners.forEach(([a,b])=>v.line(new V(x+a*.7,TROLLEY_Y-.4,c.tz+b*.6),new V(x+a*1.3,c.sy+.1,c.tz+b*1.0),'#c9d1da',1.2,.85));
+  v.box(sp,[3.02,.24,2.4],BCOL.spreader,{edge:BCOL.edge,hit:{type:'crane'}});
+  if(c.locked)corners.forEach(([a,b])=>v.box(new V(x+a*(MD.L/2-.09),c.sy-.15,c.tz+b*(MD.W/2-.08)),[.12,.08,.12],BCOL.pinOn,{}));
+  [-1.3,1.3].forEach(dx=>v.box(new V(x+dx,GIRDER_Y,(CZ1+CZ2)/2),[.55,.9,CZ2-CZ1+1.2],BCOL.crane,{edge:BCOL.edge,hit:{type:'crane'}}));
+  v.box(new V(x,TROLLEY_Y,c.tz),[2.4,.8,2.3],BCOL.craneD,{edge:BCOL.edge,hit:{type:'crane'}});
+  v.box(new V(x+1.7,TROLLEY_Y-.9,CZ2-.6),[1.3,1.4,1.5],'#3a4552',{});
+  [-2.4,2.4].forEach(dx=>v.box(new V(x+dx,5.6,CZ2),[.5,11.2,.6],BCOL.crane,{edge:BCOL.edge,hit:{type:'crane'}}));v.box(new V(x,.45,CZ2),[5.4,.5,.8],BCOL.craneD,{hit:{type:'crane'}});
+  v.box(new V(x,11.2,CZ1),[5.4,.7,.7],BCOL.crane,{});v.box(new V(x,11.2,CZ2),[5.4,.7,.7],BCOL.crane,{})}
+function drawWagon(v,st){
+  const X=st.wagonX;if(Math.abs(X)>60)return;
+  const bog=[-4.6,4.6];
+  bog.forEach(bx=>{[-1,1].forEach(side=>{if(side===-1)[-.95,.95].forEach(ax=>v.disc(X+bx+ax,.62,-.78,.46,BCOL.wheel,'#3a4552'))});
+    v.box(new V(X+bx,.72,0),[2.7,.42,1.9],BCOL.bogie,{edge:BCOL.edge});
+    v.box(new V(X+bx,.95,0),[.9,.2,2.3],BCOL.bogie,{});
+    [-.95,.95].forEach(ax=>{v.disc(X+bx+ax,.62,.78,.46,BCOL.wheel,'#3a4552');v.disc(X+bx+ax,.62,.79,.12,'#6b7684')})});
+  v.box(new V(X,1.0,0),[13.6,.34,.55],BCOL.frame,{});
+  [-1,1].forEach(s=>v.box(new V(X,1.08,s*1.18),[13.6,.36,.22],BCOL.frame,{edge:BCOL.edge}));
+  v.box(new V(X,1.25,0),[13.6,.1,2.6],BCOL.deck,{edge:BCOL.edge,hit:{type:'wagon'}});
+  [-6.95,6.95].forEach(x=>v.box(new V(X+x,1.0,0),[.35,.25,.35],'#6b7684',{}));
+  // mounting points
+  SLOT_X.forEach((sx,si)=>{const occ=Object.values(st.mods).find(m=>m.where==='wagon'&&m.slot===si);const on=occ&&occ.lock>.95;
+    for(const a of [-1,1])for(const b of [-1,1])v.box(new V(X+sx+a*(MD.L/2-.09),DECK+.03,b*(MD.W/2-.08)),[.2,.07,.2],on?BCOL.pinOn:BCOL.pinOff,{hit:{type:'pin',slot:si}})});
+  // locomotive
+  const lx=X+15.4;const body=new V(lx,2.55,0);
+  [-4.8,4.8].forEach(bx=>{[-1.1,1.1].forEach(ax=>v.disc(lx+bx+ax,.62,-.78,.46,BCOL.wheel));v.box(new V(lx+bx,.85,0),[3.4,.5,2.0],BCOL.bogie,{});[-1.1,1.1].forEach(ax=>v.disc(lx+bx+ax,.62,.78,.46,BCOL.wheel,'#3a4552'))});
+  v.box(new V(lx,1.25,0),[15,.4,2.9],BCOL.frame,{});
+  v.box(body,[14.4,2.4,2.9],BCOL.loco,{edge:BCOL.edge});
+  [1,-1].forEach(s=>v.line(new V(lx-7.2,1.75,s*1.46),new V(lx+7.2,1.75,s*1.46),BCOL.locoStripe,3));
+  v.box(new V(lx+6.2,2.9,0),[1.6,1.2,2.6],'#0E1D33',{});
+  v.text(lx,2.6,1.47,'RAIL OPERATOR LOCOMOTIVE (ILLUSTRATIVE)',{size:9,col:'#C2CDDB',weight:500});
+}
+function drawTruck(v,st){const t=st.truck;if(!t.on)return;const x=st.TX+t.x;
+  [-2.2,-1.2,2.4].forEach(ax=>{v.disc(x+ax,.5,t.z-1.15,.48,BCOL.wheel)});
+  v.box(new V(x-.2,1.05,t.z),[6.4,.32,2.4],BCOL.chassis,{edge:BCOL.edge});
+  v.box(new V(x+3.9,1.6,t.z),[2.2,2.4,2.4],BCOL.tractor,{edge:BCOL.edge});
+  v.box(new V(x+4.6,2.2,t.z),[.9,.9,2.1],'#334155',{});
+  [-2.2,-1.2,2.4].forEach(ax=>{v.disc(x+ax,.5,t.z+1.15,.48,BCOL.wheel,'#3a4552')})}
+
+function renderScene(v,st,o){
+  o=o||{};if(!v.begin('#0E1621','#101923'))return;
+  const g=v.g;g.fillStyle=BCOL.ground;g.beginPath();const h1=v.proj(-80,0,-30),h2=v.proj(80,0,-30);if(h1[2]>0&&h2[2]>0){g.moveTo(0,Math.min(h1[1],h2[1]));g.lineTo(v.W,Math.min(h1[1],h2[1]));g.lineTo(v.W,v.H);g.lineTo(0,v.H);g.fill()}else g.fillRect(0,v.H*.3,v.W,v.H*.7);
+  drawShed(v,st);drawTerminalGround(v,st);drawCraneFar(v,st);drawTrack(v,st);drawWagon(v,st);
+  const items=[];Object.values(st.mods).forEach(m=>{if(m.where==='gone'||m.where==='carry')return;const p=posOf(st,m);if(!p)return;if(m.where!=='wagon'&&Math.abs(st.TX)>48)return;items.push({m,p})});
+  if(st.truck.on)items.push({truck:true,p:new V(st.TX+st.truck.x,1.2,st.truck.z)});
+  items.sort((a,b)=>v.d2(b.p)-v.d2(a.p)).forEach(it=>{if(it.truck){drawTruck(v,st);const tm=st.truck.mod;if(tm&&tm.where==='truck')drawModule(v,st,tm,posOf(st,tm))}else if(it.m.where!=='truck')drawModule(v,st,it.m,it.p)});
+  const cm=st.crane.carry;if(cm)drawModule(v,st,cm,posOf(st,cm));
+  drawCraneTop(v,st);
+}
+function renderPlan(v,st){
+  if(!v.W){v.resize();if(!v.W)return}const g=v.g;g.setTransform(v.dpr,0,0,v.dpr,0,0);v.hits=[];
+  g.fillStyle='#0E1621';g.fillRect(0,0,v.W,v.H);
+  const ex={x0:-16,x1:24,z0:-6,z1:13.5};const s=Math.min(v.W/(ex.x1-ex.x0),v.H/(ex.z1-ex.z0))*.94*v.zoom;const cx=v.W/2,cz=v.H/2,mx=(ex.x0+ex.x1)/2,mz=(ex.z0+ex.z1)/2;
+  const P=(x,z)=>[cx+(x-mx)*s,cz+(z-mz)*s];const R=(x,z,w,d,fill,stroke,dash)=>{const a=P(x-w/2,z-d/2);g.setLineDash(dash||[]);if(fill){g.fillStyle=fill;g.fillRect(a[0],a[1],w*s,d*s)}if(stroke){g.strokeStyle=stroke;g.lineWidth=1.5;g.strokeRect(a[0],a[1],w*s,d*s)}g.setLineDash([]);return a};
+  const T=st.TX;if(Math.abs(T)<48){R(T,8.2,30,10.5,BCOL.pad);SLOT_X.forEach(x=>R(T+x,STORE_Z,3.3,2.7,null,'#F5C02A'))}
+  R(0,0,60,3.3,BCOL.ballast);R(0,-.7175,60,.08,BCOL.rail);R(0,.7175,60,.08,BCOL.rail);
+  R(st.wagonX,0,13.6,2.6,BCOL.deck,'#6b7684');R(st.wagonX+15.4,0,15,2.9,BCOL.loco);
+  g.font='600 11px "IBM Plex Mono",monospace';g.textAlign='center';g.textBaseline='middle';
+  const lp=P(st.wagonX+15.4,0);g.fillStyle='#C2CDDB';g.fillText('LOCOMOTIVE',lp[0],lp[1]);
+  const drawM=(m,p)=>{const a=R(p.x,p.z,MD.L,MD.W,BCOL[m.id],m.hi?'#F5C02A':'#0B111A');v.hits.push({polys:[[[a[0],a[1]],[a[0]+MD.L*s,a[1]],[a[0]+MD.L*s,a[1]+MD.W*s],[a[0],a[1]+MD.W*s]]],info:{type:'mod',id:m.id}});
+    if(st.myCargo&&st.myCargo.mod===m.id){const f=clamp(st.myCargo.vol/MOD_VOL,.04,1);g.fillStyle='rgba(47,107,240,.85)';g.fillRect(a[0]+2,a[1]+2,(MD.L*s-4)*f,MD.W*s-4)}
+    const c=P(p.x,p.z);g.fillStyle='#fff';g.font=`700 ${clamp(s*.42,9,13)}px "IBM Plex Mono",monospace`;g.fillText(m.id,c[0],c[1]-s*.4);g.font=`500 ${clamp(s*.28,8,11)}px "IBM Plex Mono",monospace`;g.fillText(MODS[m.id].name.split(' (')[0].toUpperCase(),c[0],c[1]+s*.25);
+    if(m.where==='wagon'){const lk=m.lock>.95;g.fillStyle=lk?BCOL.pinOn:BCOL.pinOff;[[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([u,w])=>{const q=P(p.x+u*(MD.L/2-.1),p.z+w*(MD.W/2-.1));g.fillRect(q[0]-3,q[1]-3,6,6)})}};
+  if(st.truck.on){R(T+st.truck.x-.2,st.truck.z,6.4,2.4,BCOL.chassis);R(T+st.truck.x+3.9,st.truck.z,2.2,2.4,BCOL.tractor)}
+  Object.values(st.mods).forEach(m=>{if(m.where==='gone')return;const p=posOf(st,m);if(!p)return;if(m.where!=='wagon'&&Math.abs(T)>48)return;drawM(m,p)});
+  if(Math.abs(T)<48){const x=T+st.crane.x;R(x,(CZ1+CZ2)/2,5.4,CZ2-CZ1,null,'#D9A22B',[6,4]);R(x,st.crane.tz,2.4,2.3,'rgba(217,162,43,.35)','#D9A22B')}
+  g.fillStyle='#9FB0C4';g.textAlign='left';g.font='500 11px "IBM Plex Mono",monospace';g.fillText('TOP-DOWN · destinations and cargo allocation',10,v.H-44);
+}
+
+/* ---- connection close-up scene ---- */
+const DETAIL={lock:0,explode:0};
+function renderDetail(v,d,o){
+  o=o||{};if(!v.begin('#0A1018','#0F1824'))return;const g=v.g;const e=d.explode,a=d.lock*Math.PI/2;
+  const green=d.lock>.95;const lockCol=green?'#2FD27E':'#8a95a3';
+  // ground grid
+  g.strokeStyle='rgba(255,255,255,.05)';g.beginPath();for(let x=-1.2;x<=1.2;x+=.2){const p=v.proj(x,-.48,-1),q=v.proj(x,-.48,1);if(p[2]>.1&&q[2]>.1){g.moveTo(p[0],p[1]);g.lineTo(q[0],q[1])}}g.stroke();
+  const parts=[];
+  parts.push({p:new V(0,-.3,0),s:[1.2,.36,.3],c:BCOL.frame,k:'beam'});
+  parts.push({p:new V(0,-.07,0),s:[.32,.1,.28],c:green?'#2a7a52':'#55606d',k:'pad'});
+  parts.push({p:new V(0,.02,0),s:[.13,.08,.11],c:lockCol,k:'shear'});
+  const hx=.115*Math.abs(Math.cos(a))+.055*Math.abs(Math.sin(a)),hz=.115*Math.abs(Math.sin(a))+.055*Math.abs(Math.cos(a));
+  parts.push({p:new V(0,.09,0),s:[hx,.06,hz],c:lockCol,k:'head'});
+  const my=.06+e;
+  parts.push({p:new V(0,my+.06,0),s:[.178,.118,.162],c:'#3a4048',k:'cast'});
+  parts.push({p:new V(0,my+.12+.42,0),s:[.15,.84,.13],c:'#3a4048',k:'post'});
+  parts.push({p:new V(-.6,my+.06,-.02),s:[1.0,.12,.1],c:'#3a4048',k:'rail'});
+  parts.push({p:new V(-.6,my+.55,-.06),s:[1.0,.84,.02],c:BCOL[o.mod||'C'],k:'wall'});
+  parts.sort((x,y)=>v.d2(y.p)-v.d2(x.p)).forEach(pt=>v.box(pt.p,pt.s,pt.c,{edge:'rgba(0,0,0,.5)'}));
+  // casting aperture
+  const ap=v.proj(.0,my+.06,.082);if(ap[2]>.1&&v.faceVis(new V(0,my+.06,0),[0,0,1],[.089,.059,.081])){g.fillStyle='#0b0e12';g.beginPath();g.ellipse(ap[0],ap[1],v.cam.F*.03/ap[2],v.cam.F*.02/ap[2],0,0,Math.PI*2);g.fill()}
+  // alignment guide
+  if(e>.02){v.line(new V(0,.13,0),new V(0,my,0),'#F5C02A',1.5,.9)}
+  if(o.callouts){
+    const C=[[new V(.09,my+.1,.08),'Corner fitting (ISO-style casting, proposed)','r'],[new V(0,my+.98,.06),'Lifting interface: top corner fittings take the crane spreader','r'],
+      [new V(.06,.1,.05),'Securing hardware: twistlock-style (concept)','l'],[new V(.16,-.06,.13),'Wagon mounting point (proposed)','l'],[new V(-.4,-.3,.15),'Structural support: wagon side beam','l']];
+    g.font='500 11.5px "IBM Plex Sans",system-ui,sans-serif';
+    C.forEach(([p,s,side],i)=>{const q=v.proj(p.x,p.y,p.z);if(q[2]<.1)return;const lx=side==='r'?v.W-12:12;const top=o.top||24;const ly=top+i*Math.min(48,(v.H-top-40)/5);
+      g.strokeStyle='rgba(245,192,42,.7)';g.lineWidth=1;g.beginPath();g.moveTo(q[0],q[1]);g.lineTo(side==='r'?lx-g.measureText(s).width-10:lx+g.measureText(s).width+10,ly);g.stroke();
+      g.fillStyle='#F5C02A';g.beginPath();g.arc(q[0],q[1],3,0,7);g.fill();
+      g.textAlign=side==='r'?'right':'left';g.textBaseline='middle';const w=g.measureText(s).width;g.fillStyle='rgba(10,16,24,.88)';g.fillRect(side==='r'?lx-w-6:lx-4,ly-10,w+10,20);g.fillStyle='#E6ECF3';g.fillText(s,side==='r'?lx:lx+1,ly)})}
+  g.textAlign='left';g.fillStyle=green?'#2FD27E':'#9FB0C4';g.font='600 12px "IBM Plex Mono",monospace';g.fillText(green?'LOCKED · simulated connection':d.lock>.05?'LOCKING…':'UNLOCKED',12,o.statusY||v.H-14);
+}
+
+/* ================= SCREEN B: CLOCK + TWEENS ================= */
+const CLK={t:0,paused:false,speed:2,last:performance.now()};
+const TW=[];const GRP={main:0,cmp:0,crane:0};let skipFlag=false;
+function tw(grp,dur,fn,ease){const id=GRP[grp];return new Promise((res,rej)=>TW.push({grp,id,t0:CLK.t,dur:Math.max(1,reduce?Math.min(dur,150):dur),fn,res,rej,ease:ease||easeIO}))}
+const wait=(grp,ms)=>tw(grp,ms,null);
+function cancelGrp(g){GRP[g]++}
+function stepTweens(){
+  for(let i=TW.length-1;i>=0;i--){const w=TW[i];
+    if(w.id!==GRP[w.grp]){TW.splice(i,1);w.rej(new Error('cancel'));continue}
+    let t=clamp((CLK.t-w.t0)/w.dur,0,1);if(skipFlag&&w.grp==='main')t=1;
+    if(w.fn)w.fn(w.ease(t));if(t>=1){TW.splice(i,1);w.res()}}
+  skipFlag=false}
+
+/* ================= SCREEN B: UI HELPERS ================= */
+let view,pipView,insView,cLeftV,cRightV;let camMode='3d';
+let msgT;
+function msg(text,kind){const m=$('#bmsg');m.textContent=text;m.className='bmsg '+(kind==='ok'?'':kind==='warn'?'warn':'info');m.hidden=false;clearTimeout(msgT);msgT=setTimeout(()=>m.hidden=true,kind==='ok'?3200:4200)}
+function status(t,dot){$('#bstatus').textContent=t;$('#bdot').style.background=dot||'#93A2B5'}
+const mobileR=()=>view&&view.W<640?1.45:1;
+const CAMS={'3d':{theta:.62,phi:1.06,R:36,target:new V(1.5,2.6,3.2)},side:{theta:0.0001,phi:1.47,R:32,target:new V(2,3.2,0)},close:{},top:{}};
+function setCam(mode){camMode=mode;$$('.camtools [data-cam]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.cam===mode));
+  if(mode==='3d'||mode==='side'){const c=CAMS[mode];view.goal={theta:c.theta,phi:c.phi,R:c.R*mobileR(),target:c.target.clone()}}}
+function focus(x,y,z,R){if(!view.goal)return;if(camMode==='3d'){view.goal.target=new V(x,y,z);view.goal.R=(R||26)*mobileR()}else if(camMode==='side'){view.goal.target=new V(x,3.2,0);view.goal.R=(R?R+6:32)*mobileR()}}
+function overview(){if(camMode==='3d'){view.goal.target=CAMS['3d'].target.clone();view.goal.R=CAMS['3d'].R*mobileR()}else if(camMode==='side'){view.goal.target=CAMS.side.target.clone();view.goal.R=CAMS.side.R*mobileR()}}
+let pipMod='C';
+function showPip(id){pipMod=id;$('#pip').hidden=false;$('#pipState').textContent='ALIGNING';pipView.resize()}
+function hidePip(){$('#pip').hidden=true}
+
+/* ================= SCREEN B: OPERATIONS ================= */
+async function craneMove(st,grp,x,z){const c=st.crane;const dx=Math.abs(x-c.x);if(dx>.01){const x0=c.x;await tw(grp,dx/2.4*1000+400,t=>c.x=lerp(x0,x,t))}
+  const dz=Math.abs(z-c.tz);if(dz>.01){const z0=c.tz;await tw(grp,dz/1.7*1000+400,t=>c.tz=lerp(z0,z,t))}}
+async function hoist(st,grp,y){const c=st.crane;const y0=c.sy;const d=Math.abs(y-y0);if(d<.01)return;await tw(grp,d/1.4*1000+300,t=>c.sy=lerp(y0,y,t))}
+const CARRY_SY=CARRY_B+MD.H+.14;
+async function pickUp(st,grp,m,main){
+  const p=posOf(st,m);if(main)focus(p.x,3.5,p.z*.6+1.2,24);
+  if(st.crane.sy<CARRY_SY)await hoist(st,grp,CARRY_SY);
+  await craneMove(st,grp,p.x-st.TX,p.z);
+  if(main)msg(`Crane spreader lowers onto Module ${m.id}'s top corner fittings`);
+  await hoist(st,grp,p.y+MD.H/2+.14);
+  if(m.where==='wagon'){if(main){msg(`Releasing Module ${m.id}'s wagon securing hardware (simulated)`,'warn');showPip(m.id);DETAIL.explode=0;$('#pipState').textContent='UNLOCKING'}
+    await tw(grp,1100,t=>{m.lock=1-t;if(main)DETAIL.lock=1-t});m.locked=false;if(main){$('#pipState').textContent='UNLOCKED';await wait(grp,400);hidePip()}}
+  st.crane.locked=true;if(main)msg('Spreader locks engage the four top corner fittings');
+  await wait(grp,700);m.where='carry';st.crane.carry=m;
+  if(main)msg(`Lifting Module ${m.id} vertically before any sideways movement`);
+  await hoist(st,grp,CARRY_SY)}
+async function putOnWagon(st,grp,m,slot,main){
+  const x=st.wagonX+SLOT_X[slot]-st.TX;if(main)focus(x+st.TX,3,1.4,22);
+  await craneMove(st,grp,x,0);const fin=DECK+MD.H+.14,hover=fin+.5;await hoist(st,grp,hover);
+  if(main){msg('Aligning corner fittings with the proposed wagon mounting points');showPip(m.id);DETAIL.explode=.38;DETAIL.lock=0}
+  await tw(grp,1900,t=>{st.crane.sy=lerp(hover,fin,t);if(main)DETAIL.explode=.38*(1-t)});
+  m.where='wagon';m.slot=slot;m.lock=0;st.crane.carry=null;
+  if(main){msg('Securing hardware rotates from unlocked to locked');$('#pipState').textContent='LOCKING'}
+  await tw(grp,1200,t=>{m.lock=t;if(main)DETAIL.lock=t});m.locked=true;
+  if(main){msg('Module positioned and secured — simulated connection.','ok');$('#pipState').textContent='LOCKED'}
+  await wait(grp,1000);st.crane.locked=false;if(main)hidePip();await hoist(st,grp,IDLE_SY)}
+async function putDown(st,grp,m,place,main){
+  const tx=place==='truck'?st.truck.x:place.x,tz=place==='truck'?st.truck.z:place.z;
+  if(main)focus(tx+st.TX,2.5,tz*.6+1,24);
+  await craneMove(st,grp,tx,tz);const base=place==='truck'?TRUCK_DECK:.03;await hoist(st,grp,base+MD.H+.14);
+  if(place==='truck'){m.where='truck';st.truck.mod=m}else{m.where='storage';m.sx=tx;m.sz=tz}
+  st.crane.carry=null;await wait(grp,500);st.crane.locked=false;if(main)msg(`Spreader released. Module ${m.id} is down as one closed unit.`);await hoist(st,grp,IDLE_SY)}
+function idleCrane(st){st.crane={x:SLOT_X[0]+3.4,tz:STORE_Z,sy:IDLE_SY,carry:null,locked:false}}
+
+/* ---- states ---- */
+function stateLoading(wagonPresent){const s=newState();s.wagonX=wagonPresent?0:-52;s.myCargo=S.myCargo;return s}
+function stateAssembled(){const s=newState();['A','B','C','D'].forEach((k,i)=>{const m=s.mods[k];m.where='wagon';m.slot=i;m.lock=1;m.locked=true});s.myCargo=S.myCargo;return s}
+function stateAtStop(i){const s=stateAssembled();for(let k=1;k<i;k++){STOPS[k].unload.forEach(id=>s.mods[id].where='gone');if(STOPS[k].truck)s.mods[STOPS[k].truck].where='gone'}
+  s.term=STOPS[i].key;s.route=i;return s}
+let lastSeq=null,running=false;
+async function runSeq(name,fn){cancelGrp('main');TW.length=TW.length;CLK.paused=false;$('#pPause').textContent='Pause';lastSeq=name;running=true;hidePip();
+  try{await fn()}catch(e){if(e.message!=='cancel'){console.error(e);msg('Animation stopped: '+e.message,'warn')}}finally{running=false;renderRoute()}}
+
+/* ---- sequences ---- */
+async function seqAssemble(arrive){
+  S=stateLoading(!arrive);S.route=0;renderRoute();
+  $('#checkCard').hidden=true;
+  status('Loading terminal · Kunming hub (simulated)','#F5C02A');
+  if(arrive){msg('An empty rail wagon arrives at the loading terminal');focus(0,1.5,1,30);await tw('main',5200,t=>S.wagonX=-52*(1-t),easeOut);S.wagonX=0}
+  msg('Wagon stopped. The deck and its proposed mounting points are visible.');focus(0,1.4,.5,20);await wait('main',2400);
+  msg('Four separate 10 ft cargo modules wait in the terminal storage area');focus(0,1.5,4,28);await wait('main',2200);
+  for(const [i,id] of ['A','B','C','D'].entries()){const m=S.mods[id];Object.values(S.mods).forEach(x=>x.hi=false);m.hi=true;showInfo(id);
+    msg(`Operator selects Module ${id} · ${MODS[id].name}`);await wait('main',900);
+    await pickUp(S,'main',m,true);await putOnWagon(S,'main',m,i,true);m.hi=false;S.progress=i+1}
+  overview();status('Assembled · four modules secured (simulated checks passed)','#2FD27E');
+  msg('All four modules positioned and secured. Each one stays a separate unit on the wagon.','ok');
+  showChecks('assembly')}
+async function departAndTravel(i){const stop=STOPS[i];
+  status(`Departing for ${stop.short}`,'#F5C02A');msg('All remaining modules secured. The train only moves when no crane work is in progress.');overview();
+  await wait('main',1200);
+  await tw('main',3400,t=>{S.speed=t;S.TX=-58*t*t},x=>x);
+  Object.values(S.mods).forEach(m=>{if(m.where==='storage'||m.where==='truck')m.where='gone'});S.truck.on=false;S.TX=60;S.term=stop.key;idleCrane(S);
+  status(`In transit to ${stop.short} · simulated`,'#F5C02A');const r0=S.route;
+  await tw('main',2800,t=>{S.route=r0+(i-r0)*t;renderRoute()},x=>x);S.route=i;
+  await tw('main',3800,t=>{S.TX=60*(1-t);S.speed=1-t},easeOut);S.TX=0;S.speed=0;renderRoute();
+  status(`Stopped at ${stop.name}`,'#2FD27E');msg(`Train has come to a complete stop at ${stop.name}.`);await wait('main',1400)}
+async function unloadAt(i,id){const stop=STOPS[i];const m=S.mods[id];
+  Object.values(S.mods).forEach(x=>{x.dim=x.where==='wagon'&&x.id!==id;x.hi=x.id===id});showInfo(id);
+  msg(`Module ${id} highlighted for ${MODS[id].name}. Other modules stay closed and secured.`);await wait('main',1500);
+  await pickUp(S,'main',m,true);await putDown(S,'main',m,{x:SLOT_X[m.slot]-S.TX,z:STORE_Z},true);
+  Object.values(S.mods).forEach(x=>{x.dim=false;x.hi=false});
+  msg(stop.msg+' Customs and handling at the terminal happen after the module is down.','ok');await wait('main',2600)}
+async function truckLeg(id){const m=S.mods[id];
+  msg('A road vehicle arrives for the Singapore-bound module (separate arrangement)');S.truck={on:true,x:42,z:TRUCK_Z,mod:null};focus(SLOT_X[3],2,7,26);
+  await tw('main',3600,t=>S.truck.x=lerp(42,SLOT_X[3],t),easeOut);
+  Object.values(S.mods).forEach(x=>{x.dim=x.where==='wagon'&&x.id!==id;x.hi=x.id===id});showInfo(id);
+  await pickUp(S,'main',m,true);await putDown(S,'main',m,'truck',true);m.hi=false;Object.values(S.mods).forEach(x=>x.dim=false);
+  msg('Singapore-bound cargo continues by road with its own cross-border clearance. This is not an all-rail journey into Singapore.','warn');await wait('main',2600);
+  await tw('main',3600,t=>S.truck.x=lerp(SLOT_X[3],48,t),easeIn);m.where='gone';S.truck.on=false}
+async function seqDispatch(from){
+  if(!['A','B','C','D'].every(k=>S.mods[k].where==='wagon'&&S.mods[k].locked)||S.term!=='CN'){S=stateAssembled();S.route=0}
+  $('#checkCard').hidden=true;renderRoute();
+  for(let i=from||1;i<STOPS.length;i++){await departAndTravel(i);for(const id of STOPS[i].unload)await unloadAt(i,id);if(STOPS[i].truck)await truckLeg(STOPS[i].truck)}
+  status('Rail leg complete · all modules delivered to their terminals (simulated)','#2FD27E');overview();
+  msg('Each destination module came off as one handling unit. No other module was opened on the way.','ok')}
+async function seqReplace(){
+  S=stateAtStop(2);S.mods.B.where='storage';S.mods.B.sx=SLOT_X[1];S.mods.B.sz=STORE_Z;S.TX=0;renderRoute();
+  status('Bangkok-area terminal · Position 2 vacant','#F5C02A');focus(SLOT_X[1],2,2,24);
+  msg('Module B was lifted off here. Position 2 on the wagon is now vacant.');await wait('main',2600);
+  msg('The platform checks for a compatible, pre-approved module travelling onward in the same direction');showChecks('replace',true);await wait('main',4200);
+  const E=S.mods.E;E.where='truck';S.truck={on:true,x:44,z:TRUCK_Z,mod:E};showInfo('E');
+  msg('Module E (Bangkok → Malaysia) is brought to the loading position by terminal equipment');focus(SLOT_X[1],2,6,26);
+  await tw('main',4200,t=>S.truck.x=lerp(44,SLOT_X[1],t),easeOut);
+  E.hi=true;await pickUp(S,'main',E,true);await putOnWagon(S,'main',E,1,true);E.hi=false;
+  await tw('main',3200,t=>S.truck.x=lerp(SLOT_X[1],48,t),easeIn);S.truck.on=false;
+  msg('The train continues carrying a new shipment group in the vacated position.','ok');await wait('main',2400);
+  // continue to Malaysia with C and E off, D to road
+  await departAndTravel(3);await unloadAt(3,'C');
+  const st=STOPS[3];const sv=st.msg;st.msg='Module E removed as one handling unit.';await unloadAt(3,'E');st.msg=sv;
+  await truckLeg('D');status('Rail leg complete with one replacement module (simulated)','#2FD27E');overview()}
+async function seqJump(i){
+  if(i===0){S=stateLoading(true);S.route=0;renderRoute();status('Loading terminal · Kunming hub (simulated)');msg('Empty wagon at the loading terminal. Press Assemble cargo train.');overview();return}
+  S=stateAtStop(i);S.TX=0;renderRoute();status(`At ${STOPS[i].name} (jumped)`,'#2FD27E');overview();
+  msg(`Jumped to ${STOPS[i].name}. Modules unloaded earlier are no longer on the wagon.`);await wait('main',1800);
+  for(const id of STOPS[i].unload)await unloadAt(i,id);if(STOPS[i].truck)await truckLeg(STOPS[i].truck)}
+async function seqCraneDemo(){msg('Crane demonstration: gantry travel, trolley traverse and hoist');const c=S.crane;const x0=c.x,z0=c.tz;
+  await hoist(S,'main',IDLE_SY);await craneMove(S,'main',SLOT_X[1],2.5);await hoist(S,'main',CARRY_SY);await hoist(S,'main',IDLE_SY);await craneMove(S,'main',x0,z0);msg('Crane back at its parking position','ok')}
+
+/* ================= SCREEN B: PANELS ================= */
+function renderRoute(){
+  const r=S.route;const html=[];
+  STOPS.forEach((s,i)=>{const cls=Math.abs(r-i)<.01?'now':i<r?'done':'';
+    html.push(`<button class="rstop ${cls}" data-stop="${i}"><span class="pin">${s.key}</span><b>${s.short}</b><small>${s.sub}</small></button>`);
+    if(i<STOPS.length-1){const fill=clamp(r-i,0,1)*100;html.push(`<span class="rline"><i style="width:${fill}%"></i></span>`)}});
+  html.push(`<span class="rline road"></span><div class="rstop" style="cursor:default"><span class="pin" style="border-style:dashed">SG</span><b>Singapore</b><small>Onward by road<br>separate arrangement</small></div>`);
+  $('#route').innerHTML=html.join('')}
+$('#route').addEventListener('click',e=>{const b=e.target.closest('[data-stop]');if(!b)return;runSeq('jump'+b.dataset.stop,()=>seqJump(+b.dataset.stop))});
+function depForInfo(){return BK.dep||DEPS[1]}
+function showInfo(id){const M=MODS[id];const m=S.mods[id];const dep=depForInfo();const dm=dep.mods[id];
+  const vol=modVolUsed(dm),kg=modKgUsed(dm);const owners={};dm.secs.forEach(x=>{if(!x.owner)return;const k=x.owner;owners[k]=owners[k]||{u:0,kg:0,s:x.s};owners[k].u++;owners[k].kg+=x.kg||0});
+  const where=m.where==='wagon'?`Position ${m.slot+1} on wagon`:m.where==='storage'?'Terminal storage area':m.where==='carry'?'Lifted by crane':m.where==='truck'?'On road vehicle':'Not at this terminal';
+  const conn=m.where==='wagon'?(m.locked?'<span class="st ok">Locked · simulated</span>':'<span class="st go">Unlocked</span>'):'<span class="st off">Not connected</span>';
+  const mine=S.myCargo&&S.myCargo.mod===id;
+  $('#minfo').innerHTML=`<h3>Module ${id} · ${M.code}</h3><dl><dt>Destination</dt><dd>${M.name}</dd><dt>Handled at</dt><dd>${M.term}</dd><dt>Location</dt><dd>${where}</dd><dt>Connection</dt><dd>${conn}</dd>
+    <dt>Volume booked</dt><dd>${f1(vol)} / ${f1(MOD_VOL)} m³</dd><dt>Weight booked</dt><dd>${fmtKg(kg)} / ${fmtKg(MOD_KG)}</dd><dt>Departure data</dt><dd>${dep.id}</dd></dl>
+    <div class="minv">${Object.entries(owners).sort((a,b)=>b[1].u-a[1].u).slice(0,6).map(([k,o])=>`<div class="${k==='You'?'you':''}"><span>${k==='You'?'Your booking':k}</span><span>${f1(o.u*UNIT_VOL)} m³ · ${fmtKg(o.kg)}</span></div>`).join('')||'<div><span class="small">No bookings yet</span></div>'}
+    ${mine&&!dm.secs.some(x=>x.owner==='You')?`<div class="you"><span>Your selection (not yet reserved)</span><span>${f1(S.myCargo.vol)} m³</span></div>`:''}</div>
+    ${M.note?`<p class="small" style="margin-top:8px;color:#C2CDDB">${M.note}</p>`:''}`;
+  $$('.mrow').forEach(r=>r.classList.toggle('sel',r.dataset.id===id))}
+let mlistSig='';
+function renderMList(){const sig=Object.values(S.mods).map(m=>m.where+m.locked+m.slot).join('|')+(S.myCargo?S.myCargo.mod:'');if(sig===mlistSig)return;mlistSig=sig;
+  $('#mlist').innerHTML=['A','B','C','D','E'].map(k=>{const m=S.mods[k];const M=MODS[k];
+    const st=m.where==='wagon'?(m.locked?'<span class="st ok">Secured</span>':'<span class="st go">Placing</span>'):m.where==='carry'?'<span class="st go">Lifting</span>':m.where==='storage'?'<span class="st">At terminal</span>':m.where==='truck'?'<span class="st go">Road</span>':'<span class="st off">'+(k==='E'?'Joins at Bangkok':'Delivered / away')+'</span>';
+    return `<button class="mrow" data-id="${k}"><span class="chip" style="background:${BCOL[k]}">${k}</span><span><b>${M.name}</b><small>${M.code}${S.myCargo&&S.myCargo.mod===k?' · your cargo':''}</small></span>${st}</button>`}).join('');
+  const onW=Object.values(S.mods).filter(m=>m.where==='wagon');$('#bprog').textContent=`On wagon ${onW.length} · secured ${onW.filter(m=>m.locked).length}`}
+$('#mlist').addEventListener('click',e=>{const r=e.target.closest('.mrow');if(r)showInfo(r.dataset.id)});
+function showChecks(kind,anim){const card=$('#checkCard');card.hidden=false;let items;
+  if(kind==='assembly')items=['A','B','C','D'].map(k=>`Module ${k}: fittings aligned, locks engaged (simulated)`).concat(['Train movement only after all checks pass']);
+  else items=['Travelling onward in the same direction (Bangkok → Malaysia)','Module pre-approved and sealed (simulated)','Transit customs documents ready (simulated)','Weight within wagon and axle limits (to be validated)','Terminal has compatible lifting equipment (assumed)','Enough dwell time at this stop (assumed)'];
+  $('#checks').innerHTML=items.map((t,i)=>`<span class="${anim?'no':''}" data-i="${i}">${t}</span>`).join('');
+  if(anim)items.forEach((_,i)=>setTimeout(()=>{const s=document.querySelector(`#checks [data-i="${i}"]`);if(s)s.classList.remove('no')},(i+1)*600/CLK.speed))}
+function renderFlow(ret){
+  const W=300,H=ret?170:120;let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${ret?'Southbound and separate northbound services':'One-way flow with replacement'}"><style>text{font-family:IBM Plex Mono,monospace;font-size:9px;fill:#C2CDDB}</style>`;
+  const st=[['CN',20],['LA',100],['TH',180],['MY',260]];
+  const row=(y,dir,label,col)=>{s+=`<line x1="20" y1="${y}" x2="260" y2="${y}" stroke="${col}" stroke-width="2"/>`;st.forEach(([k,x])=>{s+=`<circle cx="${x}" cy="${y}" r="5" fill="#0B111A" stroke="${col}" stroke-width="2"/><text x="${x}" y="${y+18}" text-anchor="middle">${k}</text>`});
+    s+=`<path d="M${dir>0?250:30} ${y-8} l${dir>0?10:-10} 8 l${dir>0?-10:10} 8" fill="none" stroke="${col}" stroke-width="2"/><text x="20" y="${y-12}">${label}</text>`};
+  row(40,1,'Southbound service',"#6c86ad");
+  s+=`<rect x="172" y="48" width="16" height="10" fill="${BCOL.B}"/><text x="180" y="72" text-anchor="middle" style="fill:#9FB0C4">B off</text><rect x="192" y="48" width="16" height="10" fill="${BCOL.E}"/><text x="214" y="${ret?84:96}" text-anchor="middle" style="fill:#55D597">E on → MY</text>`;
+  if(ret){row(130,-1,'Separately scheduled northbound service',"#a8742a");s+=`<rect x="250" y="138" width="16" height="10" fill="#a8742a"/><text x="160" y="160" text-anchor="middle" style="fill:#E0B45A">MY → TH / CN cargo rides northbound</text>`}
+  s+='</svg>';$('#flowSvg').innerHTML=s;
+  $('#flowText').textContent=ret?'Malaysia-to-Thailand or Malaysia-to-China cargo needs a northbound movement. It does not travel backwards on the southbound train.':'Replacement only happens at selected terminals with compatible equipment, approved service arrangements, customs permissions and enough dwell time. Cargo cannot be freely added at every station.';
+  $('#fOne').setAttribute('aria-selected',!ret);$('#fRet').setAttribute('aria-selected',!!ret)}
+$('#fOne').onclick=()=>renderFlow(false);$('#fRet').onclick=()=>renderFlow(true);
+
+/* ================= INSPECT ================= */
+const INS={lock:1,explode:0,mod:'C'};
+function openInspect(id){INS.mod=id||'C';INS.lock=1;INS.explode=0;$('#inspect').hidden=false;insView.resize();msg('Inspect connection: drag to rotate the close-up')}
+$('#bInspect').onclick=()=>{const m=Object.values(S.mods).find(x=>x.where==='wagon');openInspect(m?m.id:'C')};
+$('#iClose').onclick=()=>{$('#inspect').hidden=true};
+$('#iLock').onclick=()=>{const l0=INS.lock;tw('crane',900,t=>INS.lock=lerp(l0,1,t)).catch(()=>{})};
+$('#iUnlock').onclick=()=>{const l0=INS.lock;tw('crane',900,t=>INS.lock=lerp(l0,0,t)).catch(()=>{})};
+$('#iExplode').onclick=()=>{const e0=INS.explode,e1=e0>.1?0:.4;tw('crane',800,t=>INS.explode=lerp(e0,e1,t)).catch(()=>{});$('#iExplode').textContent=e1>0?'Assembled view':'Exploded view'};
+
+/* ================= COMPARISON ================= */
+let CL=null,SR=null;const cmpCount={moves:0,lifts:0};
+function makeConv(){const r=seeded(77);const ps=[];const dests=['A','B','C','D'];
+  for(let xi=0;xi<10;xi++)for(let zi=0;zi<2;zi++)for(let yi=0;yi<2;yi++){const d=dests[Math.floor(r()*4)];ps.push({d,home:new V(-5.4+xi*1.18,DECK+.6+yi*1.2,-.6+zi*1.2),p:new V(-5.4+xi*1.18,DECK+.6+yi*1.2,-.6+zi*1.2),out:false})}
+  return {ps,shift:0,worker:new V(7.2,.9,2.2)}}
+function renderConv(v,c){if(!v.begin('#0E1621','#101923'))return;const g=v.g;g.fillStyle=BCOL.ground;g.fillRect(0,v.H*.25,v.W,v.H);
+  for(let x=-14;x<14;x+=7)v.box(new V(x+3.5,.01,5),[7,.02,7],BCOL.pad,{});
+  drawTrack(v,{shift:0});
+  v.box(new V(0,1.0,0),[13.6,.34,.55],BCOL.frame,{});v.box(new V(0,1.25,0),[13.6,.1,2.6],BCOL.deck,{});
+  [-4.6,4.6].forEach(bx=>{v.box(new V(bx,.72,0),[2.7,.42,1.9],BCOL.bogie,{});[-.95,.95].forEach(ax=>v.disc(bx+ax,.62,.78,.46,BCOL.wheel,'#3a4552'))});
+  const cp=new V(0,DECK+1.295,0),cs=[12.03,2.59,2.44];
+  v.box(cp,cs,'#7f8a96',{back:true,alpha:.6,skip:['100'],light:.8});
+  // back faces: draw as faint
+  const inside=c.ps.filter(p=>!p.out&&Math.abs(p.p.x)<6.1&&Math.abs(p.p.z)<1.3&&p.p.y<4).sort((a,b)=>v.d2(b.p)-v.d2(a.p));
+  inside.forEach(p=>v.box(p.p,[1.08,1.1,1.1],BCOL[p.d],{edge:BCOL.edge}));
+  v.box(cp,cs,'#9aa5b1',{alpha:.14,skip:['100'],edge:'#9aa5b1'});v.text(-2,DECK+2.9,1.3,'40 FT CONTAINER · MIXED DESTINATIONS',{size:10,col:'#C2CDDB'});
+  // pads
+  v.poly([new V(8.2,.03,3.3),new V(11.4,.03,3.3),new V(11.4,.03,6.3),new V(8.2,.03,6.3)],null,1,BCOL.A,1.5);v.text(9.8,.05,6.9,'LAOS STAGING',{size:10,col:'#9FB0C4'});
+  v.poly([new V(-1,.03,3.3),new V(6.6,.03,3.3),new V(6.6,.03,6.3),new V(-1,.03,6.3)],null,1,'#93A2B5',1.5);v.text(2.8,.05,6.9,'TEMPORARY AREA (to reload)',{size:10,col:'#9FB0C4'});
+  c.ps.filter(p=>p.out||p.p.x>=6.1||Math.abs(p.p.z)>=1.3).sort((a,b)=>v.d2(b.p)-v.d2(a.p)).forEach(p=>v.box(p.p,[1.08,1.1,1.1],BCOL[p.d],{edge:BCOL.edge}));
+  v.box(c.worker,[.45,1.75,.35],'#F28C28',{});v.box(new V(c.worker.x,1.9,c.worker.z),[.3,.3,.3],'#E6ECF3',{})}
+async function runCompare(){cancelGrp('cmp');CL=makeConv();SR=stateAssembled();SR.crane.x=SLOT_X[0]+3.4;cmpCount.moves=0;cmpCount.lifts=0;updCmp();
+  const left=(async()=>{
+    const order=CL.ps.slice().sort((a,b)=>b.home.x-a.home.x||b.home.y-a.home.y);const lastLaos=order.map(p=>p.d).lastIndexOf('A');const temp=[];let li=0,ti=0;
+    for(let k=0;k<=lastLaos;k++){const p=order[k];const isL=p.d==='A';const to=isL?new V(8.8+(li%3)*1.15,.6+Math.floor(li/3)*1.15*0,3.9+Math.floor(li/3)*1.15):new V(-.4+(ti%6)*1.18,.6,3.9+Math.floor(ti/6)*1.18);
+      if(isL)li++;else{ti++;temp.push(p)}
+      const from=p.p.clone();const door=new V(6.5,1.7,0);p.out=true;
+      await tw('cmp',900,t=>{const a=t<.5?t*2:1,b=t<.5?0:(t-.5)*2;if(t<.5)p.p.set(lerp(from.x,door.x,a),lerp(from.y,door.y,a),lerp(from.z,door.z,a));else p.p.set(lerp(door.x,to.x,b),lerp(door.y,to.y,b)+Math.sin(Math.PI*b)*.6,lerp(door.z,to.z,b));CL.worker.set(p.p.x,.9,p.p.z+.9)});
+      cmpCount.moves++;updCmp()}
+    for(const p of temp.reverse()){const from=p.p.clone();const door=new V(6.5,1.7,0);
+      await tw('cmp',900,t=>{const a=t<.5?t*2:1,b=t<.5?0:(t-.5)*2;if(t<.5)p.p.set(lerp(from.x,door.x,a),lerp(from.y,door.y,a)+Math.sin(Math.PI*a)*.6,lerp(from.z,door.z,a));else p.p.set(lerp(door.x,p.home.x,b),lerp(door.y,p.home.y,b),lerp(door.z,p.home.z,b));CL.worker.set(p.p.x,.9,p.p.z+.9)});
+      p.out=false;cmpCount.moves++;updCmp()}})();
+  const right=(async()=>{const A=SR.mods.A;await wait('cmp',800);await pickUp(SR,'cmp',A,false);await putDown(SR,'cmp',A,{x:SLOT_X[0],z:STORE_Z},false);cmpCount.lifts=1;updCmp()})();
+  try{await Promise.all([left,right])}catch(e){}}
+function updCmp(){$('#cLeftN').textContent=`Parcel moves ${cmpCount.moves}`;$('#cRightN').textContent=`Module lifts ${cmpCount.lifts} · parcels touched 0`}
+const COSTS=[['Manpower','Parcel handling labour at the stop'],['Lifting','Crane moves per module'],['Equipment','Spreaders, locks, cranes (share)'],['Terminal dwell','Time the train waits'],['Module repositioning','Returning empty modules'],['Capital expenses','Modules, wagon adaptation (amortised)']];
+function renderCosts(){$('#costBody').innerHTML=COSTS.map(([k,s],i)=>`<tr><td>${k}<small>${s}</small></td><td><input inputmode="decimal" placeholder="assumption" data-c="${i}" data-s="c"></td><td><input inputmode="decimal" placeholder="assumption" data-c="${i}" data-s="m"></td></tr>`).join('')+`<tr><td><b>Total entered</b><small>Blank values are left out, not treated as zero</small></td><td id="totC">—</td><td id="totM">—</td></tr>`;
+  $('#costBody').addEventListener('input',()=>{['c','m'].forEach(s=>{const v=$$(`#costBody input[data-s="${s}"]`).map(i=>parseFloat(i.value)).filter(x=>!isNaN(x));$('#tot'+s.toUpperCase()).textContent=v.length?fmtRM(v.reduce((a,b)=>a+b,0))+` (${v.length}/6 entered)`:'—'})})}
+$('#cRun').onclick=()=>runCompare();
+$('#bCompare').onclick=()=>{$('#compareSec').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});runCompare()};
+
+/* ================= CONTROLS ================= */
+$('#bAssemble').onclick=()=>runSeq('assemble',()=>seqAssemble(true));
+$('#bDispatch').onclick=()=>runSeq('dispatch',()=>seqDispatch(1));
+$('#bReplace').onclick=()=>runSeq('replace',()=>seqReplace());
+$('#pStart').onclick=()=>{if(CLK.paused){CLK.paused=false;$('#pPause').textContent='Pause';return}if(running)return;
+  const assembled=['A','B','C','D'].every(k=>S.mods[k].where==='wagon'&&S.mods[k].locked)&&S.term==='CN';runSeq(assembled?'dispatch':'assemble',()=>assembled?seqDispatch(1):seqAssemble(S.wagonX!==0))};
+$('#pPause').onclick=()=>{CLK.paused=!CLK.paused;$('#pPause').textContent=CLK.paused?'Resume':'Pause';$('#gPause').textContent=CLK.paused?'Resume':'Pause'};
+$('#pReplay').onclick=()=>{const n=lastSeq||'assemble';if(n==='assemble')$('#bAssemble').click();else if(n==='dispatch')$('#bDispatch').click();else if(n==='replace')$('#bReplace').click();else if(n.startsWith('jump'))runSeq(n,()=>seqJump(+n.slice(4)));else $('#bAssemble').click()};
+$('#pNext').onclick=()=>{if(CLK.paused){CLK.paused=false;$('#pPause').textContent='Pause'}skipFlag=true};
+$('#pReset').onclick=()=>{cancelGrp('main');running=false;S=stateLoading(true);S.route=0;hidePip();$('#checkCard').hidden=true;renderRoute();status('Loading terminal · Kunming hub (simulated)');overview();msg('Reset: empty wagon at the loading terminal, modules in storage.')};
+$('#bSpeed').onchange=e=>{CLK.speed=+e.target.value};
+$$('.camtools [data-cam]').forEach(b=>b.onclick=()=>setCam(b.dataset.cam));
+$('#bzin').onclick=()=>{view.zoom=clamp(view.zoom*1.2,.6,2.4)};$('#bzout').onclick=()=>{view.zoom=clamp(view.zoom/1.2,.6,2.4)};
+function onTapB(x,y){const h=camMode==='close'?null:view.hitTest(x,y);if(!h)return;
+  if(h.type==='mod')showInfo(h.id);
+  else if(h.type==='pin'){const m=Object.values(S.mods).find(q=>q.where==='wagon'&&q.slot===h.slot);openInspect(m?m.id:'C')}
+  else if(h.type==='crane'){if(running){toast('The crane is busy with the current sequence.',true);return}runSeq('crane',seqCraneDemo)}
+  else if(h.type==='wagon')msg('Container-carrying flat wagon. Length, mounting positions and clearances are provisional placeholders.')}
+
+/* ================= SCREENS + LINK ================= */
+let current='A';
+function showScreen(k,noScroll){current=k;$('#screenA').hidden=k!=='A';$('#screenB').hidden=k!=='B';$('#tabA').setAttribute('aria-selected',k==='A');$('#tabB').setAttribute('aria-selected',k==='B');
+  if(k==='B'){view.resize();pipView.resize();cLeftV.resize();cRightV.resize();renderMList()}
+  if(!noScroll)window.scrollTo({top:0,behavior:reduce?'auto':'smooth'})}
+$$('[data-go]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();showScreen(b.dataset.go)}));
+$('#viewCargo').onclick=()=>linkCargo(true);
+function linkCargo(go){
+  if(!BK.dep){toast('Choose a departure and some space first.',true);return false}
+  const dm=BK.dep.mods[BK.mod.id];const units=dm.secs.filter(x=>x.owner==='You').length||BK.sel.length;
+  if(!units){toast('Select or reserve some space first.',true);return false}
+  S.myCargo={mod:BK.mod.id,vol:units*UNIT_VOL};
+  if(go){showScreen('B');setTimeout(()=>{showInfo(BK.mod.id);const m=S.mods[BK.mod.id];
+    if(m.where==='gone'&&BK.mod.id==='E')msg('Module E joins at the Bangkok-area terminal. Press Demonstrate replacement to see it loaded.');
+    else{const p=posOf(S,m);if(p)focus(p.x,2.4,p.z,22);m.hi=true;setTimeout(()=>m.hi=false,4000);msg(`Your cargo is allocated to Module ${BK.mod.id}. It travels as part of the coordinated freight movement.`)}},120)}
+  mlistSig='';return true}
+
+/* ================= GUIDED DEMO ================= */
+const GUIDE=[
+  {t:'Click 1 · Choose departure',d:'A Malaysian SME ships from China to Malaysia. The calendar shows simulated departures with remaining space. Next: select the first departure with space.',
+   run:async()=>{showScreen('A');$('#origin').value='CN';$('#dest').value='MY';BK.dep=null;BK.stage='select';renderSchedule();$('#schedule').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'})},
+   next:async()=>{const o='CN',m=compatMod('CN','MY');const ready=new Date($('#ready').value+'T00:00:00');const dep=DEPS.find(d=>freeCount(d.mods[m.id])>=12&&cutoff(d,o)>=ready)||DEPS.find(d=>freeCount(d.mods[m.id])>0);selectDeparture(dep.id)}},
+  {t:'Click 2 · Book space',d:'The Malaysia-bound Module C is highlighted. We select the space this cargo needs, hold it, and pay the simulated deposit.',
+   next:async()=>{await autoSelect();await new Promise(r=>setTimeout(r,500));if(BK.stage==='select'||BK.stage==='released')hold();await new Promise(r=>setTimeout(r,600));if(BK.stage==='held')pay();$('#viewCargo').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'})}},
+  {t:'Click 3 · View physical modules',d:'The booking links to a physical unit. Four separate cargo modules wait beside an empty rail wagon at the loading terminal.',
+   next:async()=>{linkCargo(false);showScreen('B');cancelGrp('main');S=stateLoading(true);S.myCargo=S.myCargo||null;linkCargo(false);setCam('3d');renderRoute();status('Loading terminal · Kunming hub (simulated)');showInfo('C');msg('Four independent modules next to an empty wagon. Each has its own walls, doors and corner fittings.')}},
+  {t:'Click 4 · Connect modules',d:'The crane lifts each module vertically, lowers it onto the wagon and engages the proposed locking interface. Watch the close-up.',
+   next:async()=>{runSeq('assemble',()=>seqAssemble(false))}},
+  {t:'Click 5 · Run dispatch',d:'The train travels to Laos, the Laos module comes off as one unit, and the train continues. The same happens in Thailand and Malaysia.',
+   next:async()=>{runSeq('dispatch',()=>seqDispatch(1))}},
+  {t:'Click 6 · Demonstrate replacement',d:'At the Thailand terminal, Position 2 is vacant. A compatible onward module is lifted on and secured, then the train continues.',
+   next:async()=>{runSeq('replace',()=>seqReplace())}},
+  {t:'Click 7 · Compare handling methods',d:'Left: workers unpack and re-sort a mixed container. Right: the destination module is lifted as one unit. Costs stay blank until verified.',
+   next:async()=>{$('#compareSec').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});runCompare()}},
+  {t:'Summary',d:'Choose a departure. Reserve cargo space. See the module. Watch it connect. Follow its movement. The booking platform is software; the modular system is an engineering concept that needs validation.',
+   next:async()=>{$('#finalSum').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'})}}];
+let gi=-1;
+function guideShow(){const s=GUIDE[gi];$('#gTitle').textContent=s.t;$('#gText').textContent=s.d;$('#gsteps').innerHTML=GUIDE.slice(0,7).map((_,i)=>`<span class="${i<gi?'done':i===gi?'on':''}">${i+1}</span>`).join('');
+  $('#gNext').textContent=gi===GUIDE.length-1?'Finish':gi===GUIDE.length-2?'Show summary':`Do click ${gi+1}`}
+$('#guideBtn').onclick=async()=>{gi=0;$('#guide').hidden=false;document.documentElement.style.setProperty('--gpad','90px');guideShow();await GUIDE[0].run()};
+$('#gNext').onclick=async()=>{if(gi<0)return;const s=GUIDE[gi];if(gi===GUIDE.length-1){$('#guide').hidden=true;gi=-1;return}
+  $('#gNext').disabled=true;try{await s.next()}catch(e){console.error(e)}$('#gNext').disabled=false;gi++;guideShow()};
+$('#gPause').onclick=()=>$('#pPause').click();
+$('#gExit').onclick=()=>{$('#guide').hidden=true;gi=-1;document.documentElement.style.setProperty('--gpad','0px')};
+
+/* ================= BOOT B ================= */
+function bootB(){
+  view=makeView($('#bview'),{ignore:'button,.inspect,.pip',theta:CAMS['3d'].theta,phi:CAMS['3d'].phi,R:CAMS['3d'].R,target:CAMS['3d'].target,onTap:onTapB,
+    noRotate:()=>camMode==='top',onResize:v=>{if(v.goal)setCam(camMode)}});
+  pipView=makeView($('#pip'),{theta:.75,phi:1.18,R:2.5,target:new V(-.1,.25,0),fov:36,limits:{t:[-3.2,3.2],p:[.2,1.55]}});
+  insView=makeView($('#ic'),{theta:.75,phi:1.12,R:2.7,target:new V(-.15,.3,0),fov:38,limits:{t:[-3.2,3.2],p:[.15,1.6]}});
+  cLeftV=makeView($('#cLeft'),{theta:.5,phi:1.12,R:27,target:new V(2,1.8,2.4),limits:{t:[-1.2,1.2],p:[.4,1.5]}});
+  cRightV=makeView($('#cRight'),{theta:.5,phi:1.12,R:31,target:new V(1.5,2.6,3),limits:{t:[-1.2,1.2],p:[.4,1.5]}});
+  setCam('3d');S=stateLoading(true);CL=makeConv();SR=stateAssembled();renderRoute();renderFlow(false);renderCosts();updCmp();
+  status('Loading terminal · Kunming hub (simulated)');
+}
+let lastF=performance.now(),uiT=0;
+function frame(now){
+  const dt=Math.min(64,now-CLK.last);CLK.last=now;if(!CLK.paused)CLK.t+=dt*CLK.speed;
+  try{
+    stepTweens();
+    if(!CLK.paused)S.shift+=S.speed*dt*CLK.speed*.012;
+    if(current==='B'){
+      view.smooth();
+      if(camMode==='top')renderPlan(view,S);
+      else if(camMode==='close'){const m=Object.values(S.mods).find(x=>x.where==='wagon');const sv={R:view.R,t:view.target.clone(),fov:view.fov,z:view.zoom};view.R=2.8;view.target.set(-.15,.3,0);view.fov=38;
+        try{renderDetail(view,{lock:m?m.lock:0,explode:0},{callouts:true,mod:m?m.id:'C',top:64,statusY:view.H-56})}finally{view.R=sv.R;view.target.copy(sv.t);view.fov=sv.fov}}
+      else renderScene(view,S);
+      $('#pip').style.visibility=camMode==='close'?'hidden':'visible';if(!$('#pip').hidden&&camMode!=='close')renderDetail(pipView,DETAIL,{mod:pipMod});
+      if(!$('#inspect').hidden)renderDetail(insView,INS,{callouts:true,mod:INS.mod});
+      const cr=$('#compareSec').getBoundingClientRect();if(cr.top<innerHeight&&cr.bottom>0){renderConv(cLeftV,CL);renderScene(cRightV,SR)}
+      if(now-uiT>250){uiT=now;renderMList()}
+    }
+  }catch(err){console.error(err);msg('Render error: '+err.message,'warn')}
+  requestAnimationFrame(frame)}
+bootB();requestAnimationFrame(frame);
+if(location.hash==='#screenB')showScreen('B',true);
+
+})();
+</script>
+
+</body>
+</html>
