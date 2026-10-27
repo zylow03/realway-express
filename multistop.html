@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RealWay Multi-Stop Kongsi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout (multistop): network → 3D cage exchange → capacity reuse → business model. Base styles shared with journey: freight operations console — shared tracking strip, then Demo A (journey) / Demo B (inside container) each with a 3D stage + explanation rail */
+:root{
+  --bg:#F3F5F8;--surface:#FFFFFF;--sunk:#E8ECF2;--ink:#0F1B2D;--muted:#5B6879;--line:#D5DCE5;--navy:#0F2340;--cobalt:#1F5BD8;--green:#18905A;--warn:#B45309;--brand:#F2B705;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;--f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;--r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0D131B;--surface:#141C27;--sunk:#0A0F15;--ink:#E6ECF3;--muted:#95A3B5;--line:#253244;--navy:#C9D6EA;--cobalt:#5B8CFF;--green:#3CC284;--warn:#F2A35F;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0D131B;--surface:#141C27;--sunk:#0A0F15;--ink:#E6ECF3;--muted:#95A3B5;--line:#253244;--navy:#C9D6EA;--cobalt:#5B8CFF;--green:#3CC284;--warn:#F2A35F;color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1360px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3,h4{font-family:var(--f-display);font-weight:700;line-height:1.05;text-wrap:balance;margin:0}
+h2{font-size:clamp(26px,3.6vw,38px);text-transform:uppercase}h3{font-size:17px;text-transform:uppercase;letter-spacing:.03em}
+p{margin:0}button,select{font:inherit;color:inherit}:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
+.small{font-size:12.5px;color:var(--muted)}.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.sim{display:inline-block;font-family:var(--f-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:3px;background:rgba(127,140,160,.18);color:inherit;opacity:.85;vertical-align:middle}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);padding:7px 12px;border-radius:var(--r);font-weight:600;font-size:13.5px;cursor:pointer;white-space:nowrap;text-decoration:none;color:inherit}
+.btn:hover{border-color:var(--muted)}.btn.primary{background:var(--cobalt);border-color:var(--cobalt);color:#fff}.btn.navy{background:var(--navy);border-color:var(--navy);color:var(--bg)}.btn.sm{padding:5px 9px;font-size:12.5px}
+.btn[aria-pressed="true"]{background:var(--navy);color:var(--bg);border-color:var(--navy)}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:25;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;min-height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex-shrink:0}.brand-mark{width:30px;height:30px;border-radius:4px;background:var(--brand);display:grid;place-items:center}.brand-name{font-family:var(--f-display);font-weight:700;font-size:24px}
+.top nav{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none;min-width:0}.top nav a{text-decoration:none;color:var(--muted);font-size:14px;padding:8px 10px;border-radius:4px;white-space:nowrap}.top nav a:hover{background:var(--sunk);color:var(--ink)}.top nav a[aria-current]{color:var(--ink);font-weight:600}
+@media (max-width:640px){.top nav a.hide-sm{display:none}}
+.notice{margin-top:16px;border:1px solid #c99a1a;background:color-mix(in srgb,#F2B705 12%,var(--surface));border-radius:8px;padding:10px 14px;font-size:13.5px;display:flex;gap:10px;align-items:flex-start}
+.notice b{white-space:nowrap}
+.intro{display:grid;gap:8px;padding-block:18px 10px}
+.track{background:var(--navy);color:var(--bg);border-radius:10px;padding:12px 16px;display:grid;gap:10px;margin-top:6px}
+.track .tid{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;font-size:13px}
+.track .tid b{font-family:var(--f-display);font-size:20px;letter-spacing:.02em}
+.tf{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+@media (max-width:980px){.tf{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:520px){.tf{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tf div{min-width:0}.tf span{display:block;font-family:var(--f-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;opacity:.7}.tf b{font-size:13px;font-weight:600;display:block;overflow-wrap:anywhere}
+.evt{font-family:var(--f-mono);font-size:10.5px;padding:2px 7px;border-radius:3px;border:1px dashed currentColor;opacity:.85}
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface);margin-block:16px 12px}
+.tabs button{border:0;background:transparent;padding:10px 16px;font-weight:600;cursor:pointer}.tabs button[aria-selected="true"]{background:var(--navy);color:var(--bg)}
+.demo{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;align-items:start;padding-bottom:30px}
+@media (max-width:1060px){.demo{grid-template-columns:minmax(0,1fr)}}
+.stagecol{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;min-width:0}
+.view{position:relative;height:540px;background:#0E1621;border:1px solid #243244;border-radius:8px;overflow:hidden;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;color:#E6ECF3}
+.view.dragging{cursor:grabbing}.view canvas{position:absolute;left:0;top:0;display:block}
+@media (max-width:760px){.view{height:min(66vh,440px);min-height:330px}}
+.hud{position:absolute;left:10px;top:10px;right:10px;display:flex;gap:8px;justify-content:space-between;pointer-events:none;flex-wrap:wrap}
+.pill{background:rgba(11,17,26,.88);border:1px solid #243244;border-radius:4px;padding:6px 10px;font-family:var(--f-mono);font-size:12px;max-width:100%}
+.msg{position:absolute;left:50%;bottom:54px;transform:translateX(-50%);background:rgba(11,17,26,.93);border:1px solid #3a5b8f;padding:8px 14px;border-radius:6px;font-size:13.5px;font-weight:600;text-align:center;max-width:calc(100% - 24px);pointer-events:none}
+.msg.ok{border-color:#2f8f5f}
+@media (max-width:640px){.msg{bottom:100px;font-size:12.5px}}.msg.warn{border-color:#a8742a}
+.ov{position:absolute;right:10px;top:50px;width:min(300px,calc(100% - 20px));max-height:calc(100% - 120px);overflow:auto;background:rgba(240,244,248,.97);color:#0F1B2D;border-radius:8px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.4);font-size:13px}
+.ov h4{font-size:17px;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;gap:6px;align-items:baseline}
+.ov .small{color:#4b5768;margin-top:6px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0}.kv dt{color:#5b6879}.kv dd{margin:0;text-align:right;font-weight:600}
+.checks{display:grid;gap:3px}.checks span::before{content:"✓ ";color:#18905A;font-weight:700}.checks span.no{color:#8a95a3}.checks span.no::before{content:"○ ";color:#8a95a3}
+.bar2{display:grid;grid-template-columns:1fr;gap:3px;margin-bottom:8px;font-size:12px;position:relative}.bar2 i{display:block;height:8px;background:#1F5BD8;border-radius:3px}.bar2 b{font-family:var(--f-mono);font-size:11px}
+.smes{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px}.smes i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+.outc{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.outc .btn{background:#fff;color:#0F1B2D}
+.camrow{position:absolute;left:10px;bottom:10px;display:flex;gap:4px;flex-wrap:wrap;max-width:calc(100% - 100px)}
+.camrow button,.zoom button{background:rgba(18,27,39,.92);border:1px solid #243244;color:#E6ECF3;border-radius:4px;padding:5px 9px;font-size:12px;font-weight:600;cursor:pointer}
+.camrow button[aria-pressed="true"]{background:#E6ECF3;color:#0B111A}
+.zoom{position:absolute;right:10px;bottom:10px;display:flex;gap:4px}.zoom button{width:32px}
+.ctl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ctl select{padding:6px 8px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);max-width:100%;min-width:0;flex:1 1 150px}
+.segs{display:grid;gap:2px;min-width:0}.segs button{min-width:0;height:10px;border:0;border-radius:2px;background:var(--sunk);cursor:pointer;padding:0}.segs button.done{background:color-mix(in srgb,var(--cobalt) 45%,var(--sunk))}.segs button.now{background:var(--cobalt)}
+.narr{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:grid;gap:6px}
+.narr .st{font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.narr h3{font-size:22px}.narr p{font-size:15px;max-width:80ch}
+.side{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-width:0}
+.card h3{margin-bottom:8px}
+.q{display:grid;gap:7px;margin:0}.q dt{font-weight:600;font-size:13px}.q dd{margin:0 0 0 0;font-size:13px;color:var(--muted)}
+.terms{display:flex;flex-wrap:wrap;gap:6px}.terms button{border:1px dashed var(--line);background:none;border-radius:4px;padding:2px 8px;font-size:12px;cursor:pointer}
+.termdef{font-size:13px;margin-top:6px;color:var(--muted)}
+.risk{border-left:3px solid var(--warn);padding-left:10px;font-size:13px}
+.map svg{width:100%;height:auto;display:block}
+.map text{font-family:var(--f-mono);font-size:10.5px;fill:var(--muted)}
+.map .on text{fill:var(--ink);font-weight:600}
+.dash{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.dash div span{display:block;font-family:var(--f-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.dash div b{font-family:var(--f-display);font-size:24px;line-height:1.1}
+.wd{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;align-items:end;height:70px;margin-top:6px}.wd i{display:block;background:var(--cobalt);border-radius:2px 2px 0 0;min-height:2px}
+.wdl{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;font-family:var(--f-mono);font-size:10px;color:var(--muted);text-align:center}
+.cl{width:100%;border-collapse:collapse;font-size:12px}.cl td,.cl th{padding:4px 5px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.cl th{font-family:var(--f-mono);font-size:10px;text-transform:uppercase;color:var(--muted);font-weight:500}
+.cl tr.sel td{background:color-mix(in srgb,var(--cobalt) 12%,transparent)}.cl i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px}
+.cagecard{border:2px solid var(--cobalt)}
+details.val{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-top:12px}
+details.val summary{cursor:pointer;font-weight:700}
+.valgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:10px;font-size:13px}
+.valgrid ul{margin:4px 0 0;padding-left:18px;color:var(--muted)}
+.phases{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+@media (max-width:820px){.phases{grid-template-columns:1fr}}
+.phases div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px}
+.phases b{font-family:var(--f-display);font-size:20px;text-transform:uppercase;display:block}
+.refs{font-size:13px;display:grid;gap:4px;margin-top:8px}.refs a{color:var(--cobalt)}
+footer{padding-block:26px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);margin-top:20px}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;top:calc(74px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:40;background:var(--navy);color:var(--bg);padding:9px 16px;border-radius:var(--r);font-size:14px;font-weight:600;max-width:calc(100% - 32px);text-align:center}
+.notice span{min-width:0}.notice span b{white-space:normal}
+
+section{padding-block:26px 6px}
+.sec-h{display:grid;gap:6px;margin-bottom:14px}.sec-h p{max-width:78ch;color:var(--muted)}
+.lab{display:inline-flex;align-items:center;gap:5px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:3px;font-weight:600;color:#fff;white-space:nowrap}
+.lab.E{background:#2B7BD8}.lab.X{background:#18905A}.lab.P{background:#C2410C}
+.legend3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:820px){.legend3{grid-template-columns:minmax(0,1fr)}}
+.legend3 div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:6px;font-size:13.5px}
+.legend3 div.P{border-color:#C2410C;border-width:2px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:980px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.net svg{width:100%;height:auto;display:block}.net text{font-family:var(--f-mono);font-size:11px;fill:var(--ink)}.net .mut{fill:var(--muted);font-size:10px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}.tbl th,.tbl td{text-align:left;padding:6px 6px;border-bottom:1px solid var(--line);vertical-align:top}.tbl th{font-family:var(--f-mono);font-size:10.5px;text-transform:uppercase;color:var(--muted);font-weight:500}
+.tblwrap{overflow-x:auto;max-width:100%}
+.flag{font-family:var(--f-mono);font-size:11px;padding:1px 5px;border-radius:3px;background:var(--sunk);white-space:nowrap}
+.dir{font-family:var(--f-mono);font-size:10.5px;white-space:nowrap}.dir.n{color:#B45309}.dir.s{color:var(--cobalt)}
+form.bk{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+form.bk label{display:grid;gap:4px;font-size:12.5px;color:var(--muted);min-width:0}
+form.bk select,form.bk input{padding:8px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);font:inherit;color:var(--ink);min-width:0;width:100%}
+form.bk .full{grid-column:1/-1}
+.res{margin-top:10px;font-size:13.5px;border-left:3px solid var(--cobalt);padding:6px 10px;background:var(--sunk);border-radius:0 6px 6px 0}
+.res.bad{border-color:var(--warn)}
+.occ{display:grid;grid-template-columns:44px repeat(3,minmax(0,1fr));gap:2px;font-family:var(--f-mono);font-size:10px;margin-top:8px}
+.occ b{font-weight:500;color:var(--muted);text-align:center;padding:2px 0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.occ span{color:var(--muted);padding:3px 0}
+.occ i{display:block;height:18px;border-radius:2px;background:var(--sunk);font-style:normal;color:#fff;font-size:9.5px;line-height:18px;padding-left:4px;overflow:hidden;white-space:nowrap}
+.occ i.new{outline:2px solid #F5C02A;outline-offset:-2px}
+.lane{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}.lane button{border:0;background:var(--surface);padding:5px 10px;font-size:12.5px;font-weight:600;cursor:pointer}.lane button[aria-pressed="true"]{background:var(--navy);color:var(--bg)}
+.htabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.htabs button{border:1px solid var(--line);background:var(--surface);padding:8px 12px;border-radius:6px;font-weight:600;cursor:pointer;font-size:13.5px}.htabs button[aria-selected="true"]{background:var(--navy);color:var(--bg);border-color:var(--navy)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.steplist{display:grid;gap:2px;margin:0;padding:0;list-style:none;font-size:12.5px;max-height:330px;overflow:auto}
+.steplist li button{width:100%;text-align:left;border:0;background:none;padding:4px 6px;border-radius:4px;cursor:pointer;display:grid;grid-template-columns:22px 1fr;gap:4px;color:var(--muted)}
+.steplist li button.now{background:var(--sunk);color:var(--ink);font-weight:600}.steplist li button.done{color:var(--ink)}
+.steplist .no{font-family:var(--f-mono)}
+.wd{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;align-items:end;height:80px;margin:6px 0}.wd div{position:relative;height:100%;display:flex;align-items:flex-end;justify-content:center}
+.wd i{display:block;width:70%;background:#1F5BD8;border-radius:2px 2px 0 0;min-height:2px}.wd s{position:absolute;bottom:14px;left:15%;width:70%;border:1.5px dashed #8a95a3;border-bottom:0;text-decoration:none;max-height:calc(100% - 14px)}
+.wd span{position:absolute;bottom:-2px;font-family:var(--f-mono);font-size:9.5px;color:#5b6879}.wd div{padding-bottom:14px}
+.ov hr{border:0;border-top:1px solid #cdd5df;margin:6px 0}
+.restr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.restr{grid-template-columns:minmax(0,1fr)}}
+.restr svg{width:100%;height:auto;display:block;background:var(--sunk);border-radius:6px}
+.restr ul{margin:6px 0 0;padding-left:18px;font-size:13.5px}
+.ok{color:var(--green);font-weight:700}.no2{color:var(--warn);font-weight:700}
+.tl{display:grid;gap:8px}
+.tlrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+.tlrow div{border-radius:4px;padding:8px 9px;color:#fff;font-size:12.5px;min-width:0}
+.tlrow div b{display:block;font-size:13px}.tlhead{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;font-family:var(--f-mono);font-size:10.5px;color:var(--muted);text-transform:uppercase}
+.tlev{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;font-size:12px;color:var(--muted)}
+.calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:900px){.calc{grid-template-columns:minmax(0,1fr)}}
+.inputs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.inputs label{display:grid;gap:3px;font-size:12px;color:var(--muted);min-width:0}.inputs input{padding:7px 8px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);font:inherit;font-family:var(--f-mono);width:100%;min-width:0}
+.inputs h4{grid-column:1/-1;font-size:14px;text-transform:uppercase;margin-top:6px}
+.out .big{font-family:var(--f-display);font-size:34px;line-height:1}
+.out .neg{color:#C2410C}.out .pos{color:var(--green)}
+.out table td:last-child,.out table th:last-child{text-align:right;font-family:var(--f-mono)}
+.qlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.qlist div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:13.5px}
+.qlist b{display:block;margin-bottom:4px}
+.temp{color:#B45309;font-weight:600}
+</style>
+
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="https://zylow03.github.io/realway-express/" aria-label="RealWay Express home"><span class="brand-mark"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="9" rx="1" stroke="#1A1400" stroke-width="2"/><circle cx="5.5" cy="14.5" r="1.5" fill="#1A1400"/><circle cx="12.5" cy="14.5" r="1.5" fill="#1A1400"/><path d="M6 3v9M10 3v9" stroke="#1A1400" stroke-width="1.5"/></svg></span><span class="brand-name">RealWay Express</span></a>
+  <nav aria-label="Pages"><a class="hide-sm" href="https://zylow03.github.io/realway-express/">Website</a><a class="hide-sm" href="https://zylow03.github.io/realway-express/journey.html">Freight journey</a><a class="hide-sm" href="https://zylow03.github.io/realway-express/pooling.html">Pooling</a><a aria-current="page" href="#exchange">Multi-stop</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="notice" role="note"><b>⚠ Concept under investigation</b><span>Open-top and hardtop containers, cranes and cargo restraints already exist. The <b>multi-stop cage exchange</b> shown here is an <b>unverified RealWay operating concept</b>, not an approved railway or customs service. It has not been tested, certified or authorised at any hub. All names, IDs, seals, weights and prices are illustrative.</span></div>
+  <div class="intro">
+    <p class="eyebrow">Multi-Stop Kongsi · China ⇄ Laos ⇄ Thailand ⇄ Malaysia</p>
+    <h1 style="font-size:clamp(34px,5.4vw,58px);text-transform:uppercase">One container, many customers, many borders</h1>
+    <p style="max-width:76ch;font-size:16.5px">RealWay is not only for importing from China into Malaysia. It is proposed as a <b>pooling network between participating hubs</b>: an SME in any of the four countries books cage space from its own hub to any later hub on the line. This page shows how that could work, what already exists, and what still has to be proven.</p>
+  </div>
+
+  <div class="legend3" aria-label="Label key">
+    <div><span class="lab E">Existing technology</span><span>Open-top containers, hardtop containers, cranes and cargo restraints. In use today.</span></div>
+    <div><span class="lab X">Established logistics practice</span><span>Authorised container handling, customs transit and warehouse consolidation. Done daily, under rules.</span></div>
+    <div class="P"><span class="lab P">Proposed RealWay innovation</span><span>Repeated cage exchanges at intermediate hubs and resale of freed capacity along a cross-border rail corridor. <b>Not yet proven.</b></span></div>
+  </div>
+
+  <!-- 1. NETWORK -->
+  <section id="network">
+    <div class="sec-h"><p class="eyebrow">1 · Multi-country customers</p><h2>SMEs in four countries book their own segments</h2><p>Each customer picks an origin hub and a destination hub. Southbound and northbound are separate train movements with their own containers.</p></div>
+    <div class="grid2">
+      <div class="card net"><h3>Corridor & sample bookings</h3><div id="netSvg"></div><p class="small" style="margin:4px 0 8px">Each arrow is one booking, coloured by the customer’s home country. Dashed = northbound.</p>
+        <div class="tblwrap"><table class="tbl" id="bkTable"><thead><tr><th>Booking</th><th>SME (country)</th><th>Route</th><th>Lane</th><th>Space</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="card"><h3>Book space <span class="sim">prototype</span></h3>
+        <form class="bk" id="bkForm" novalidate>
+          <label class="full">Company name<input id="fName" placeholder="e.g. Luang Prabang Coffee" autocomplete="organization"></label>
+          <label>Origin hub<select id="fOrg"></select></label>
+          <label>Destination hub<select id="fDst"></select></label>
+          <label>Cages<select id="fN"><option>1</option><option>2</option><option>3</option></select></label>
+          <label>Gross per cage (kg)<input id="fKg" type="number" min="50" max="800" value="400" inputmode="numeric"></label>
+          <div class="full" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" type="submit">Check segment capacity</button><button class="btn" type="button" id="fReset">Reset demo</button></div>
+        </form>
+        <div class="res" id="bkRes" hidden></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap"><b style="font-size:13px">Cage positions × segments</b><div class="lane" role="group" aria-label="Lane"><button data-lane="S" aria-pressed="true">Southbound</button><button data-lane="N" aria-pressed="false">Northbound</button></div></div>
+        <div class="occ" id="occ"></div><p class="small" style="margin-top:6px">Colour = customer’s home country: <span style="color:#2B7BD8">■</span> China <span style="color:#1F9D63">■</span> Laos <span style="color:#C2410C">■</span> Thailand <span style="color:#8B5CF6">■</span> Malaysia</p>
+        <p class="small" style="margin-top:6px">A position freed at a hub can be sold again for the next segment. Allocation is first-fit and illustrative; real capacity depends on train slots, hub authorisation and customs approval.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 3D EXCHANGE -->
+  <section id="exchange">
+    <div class="sec-h"><p class="eyebrow">2 · Open-top / hardtop container · cage exchange</p><h2>How a cage could be swapped at a hub</h2><p>Follow the 13 steps at an authorised Lao hub, then again at a Thai hub. Every step is tagged with what kind of practice it is.</p></div>
+    <div class="htabs" role="tablist"><button role="tab" data-hub="INTRO" aria-selected="true">The container</button><button role="tab" data-hub="LA" aria-selected="false">Laos exchange (13 steps)</button><button role="tab" data-hub="TH" aria-selected="false">Thailand exchange (13 steps)</button></div>
+    <div class="demo">
+      <div class="stagecol">
+        <div class="view" id="v3"><div class="hud"><span class="pill" id="pill">—</span><span class="pill" id="pill2">—</span></div>
+          <div class="msg" id="msg" hidden></div><div class="ov" id="ov" hidden></div>
+          <div class="camrow"><button data-cam="step" aria-pressed="true">Step view</button><button data-cam="wide" aria-pressed="false">Wide</button><button data-cam="top" aria-pressed="false">Top</button><button id="wallBtn" aria-pressed="false">Solid wall</button></div>
+          <div class="zoom"><button id="zIn" aria-label="Zoom in">+</button><button id="zOut" aria-label="Zoom out">−</button></div></div>
+        <div class="ctl"><button class="btn" id="bPrev">◀ Prev</button><button class="btn primary" id="bPlay">▶ Play all</button><button class="btn" id="bPause">Pause</button><button class="btn" id="bNext">Next ▶</button><button class="btn" id="bReplay">↻ Replay step</button>
+          <select id="bSpeed" aria-label="Speed" style="flex:0 0 auto"><option value="1">1×</option><option value="1.5" selected>1.5×</option><option value="2.5">2.5×</option></select>
+          <div class="lane" role="group" aria-label="Cover type"><button data-cover="tarp" aria-pressed="true">Tarpaulin</button><button data-cover="hard" aria-pressed="false">Hardtop</button></div></div>
+        <div class="narr"><span class="st" id="sSt">—</span><h3 id="sTitle">—</h3><div class="chips" id="sLabs"></div><p id="sNarr"></p>
+          <dl class="kv" style="font-size:13px;margin-top:4px"><dt>Who</dt><dd id="sWho" style="text-align:left;font-weight:500"></dd><dt>Records</dt><dd id="sDocs" style="text-align:left;font-weight:500"></dd></dl></div>
+      </div>
+      <div class="side">
+        <div class="card"><h3 id="listH">Steps</h3><ol class="steplist" id="sList"></ol></div>
+        <div class="card"><h3>Cage tracking <span class="sim">live in demo</span></h3><div class="tblwrap"><table class="cl" id="trk"><thead><tr><th>Cage</th><th>Route</th><th>Pos</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+          <p class="small" style="margin-top:6px">Tap a cage in the 3D view to see its ID record. Colour = destination: <span style="color:#2B7BD8">■</span> Laos <span style="color:#1F9D63">■</span> Thailand <span style="color:#8B5CF6">■</span> Malaysia</p><div id="cageRec" class="small" style="margin-top:6px"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. RESTRAINT -->
+  <section id="restraint">
+    <div class="sec-h"><p class="eyebrow">3 · Cargo dividers</p><h2>Restraint is engineered, not a loose plate</h2><p>Between positions RealWay proposes a removable blocking frame. It only stops cargo moving if it is designed for the actual cage masses and train forces, installed correctly and locked to the container’s structure.</p></div>
+    <div class="restr">
+      <div class="card"><svg viewBox="0 0 320 150" role="img" aria-label="Engineered blocking frame pinned between two cages">
+        <rect x="10" y="20" width="300" height="110" fill="none" stroke="#8a95a3" stroke-width="3"/><text x="14" y="15" font-size="10" fill="#8a95a3" font-family="monospace">container wall (plan view)</text>
+        <rect x="30" y="35" width="110" height="80" fill="#1F9D63" opacity=".85" rx="3"/><text x="85" y="80" text-anchor="middle" fill="#fff" font-size="12" font-family="monospace">cage P5</text>
+        <rect x="180" y="35" width="110" height="80" fill="#8B5CF6" opacity=".85" rx="3"/><text x="235" y="80" text-anchor="middle" fill="#fff" font-size="12" font-family="monospace">cage P7</text>
+        <rect x="150" y="22" width="20" height="106" fill="#E07A2F"/><line x1="150" y1="22" x2="170" y2="128" stroke="#7a3d10" stroke-width="2"/>
+        <rect x="153" y="16" width="14" height="10" fill="#2FD27E"/><rect x="153" y="124" width="14" height="10" fill="#2FD27E"/>
+        <text x="160" y="146" text-anchor="middle" font-size="10" fill="#2FD27E" font-family="monospace">pinned to wall + floor fittings</text></svg>
+        <ul><li><span class="ok">✓</span> Rated frame, designed for the real load and train accelerations</li><li><span class="ok">✓</span> Locked to the container structure with pins (green = locked)</li><li><span class="ok">✓</span> Hold-down bar over each cage</li><li><span class="ok">✓</span> Inspected and signed off after every exchange</li></ul></div>
+      <div class="card"><svg viewBox="0 0 320 150" role="img" aria-label="A loose divider plate is not sufficient restraint">
+        <rect x="10" y="20" width="300" height="110" fill="none" stroke="#8a95a3" stroke-width="3"/>
+        <rect x="30" y="35" width="110" height="80" fill="#1F9D63" opacity=".5" rx="3"/><rect x="190" y="35" width="110" height="80" fill="#8B5CF6" opacity=".5" rx="3"/>
+        <rect x="158" y="40" width="5" height="70" fill="#9aa5b1" transform="rotate(12 160 75)"/>
+        <path d="M100 75 h60" stroke="#C2410C" stroke-width="2" marker-end="url(#ar)"/><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8z" fill="#C2410C"/></marker></defs>
+        <text x="160" y="146" text-anchor="middle" font-size="10" fill="#C2410C" font-family="monospace">loose plate: not attached, not rated</text></svg>
+        <ul><li><span class="no2">✗</span> A loose divider plate is <b>not</b> sufficient restraint</li><li><span class="no2">✗</span> Gaps let cages build up speed when the train brakes</li><li><span class="no2">✗</span> Never move the container while any frame is out</li><li><span class="no2">!</span> Whenever a cage is removed or replaced, the remaining cargo must be re-secured</li></ul></div>
+    </div>
+  </section>
+
+  <!-- 4. CAPACITY REUSE -->
+  <section id="reuse">
+    <div class="sec-h"><p class="eyebrow">4 · Capacity reuse</p><h2>One position, three customers, three segments</h2><p>Position P5 in the southbound container is used three times on one trip. Each time a cage is delivered, the freed space can be sold to an SME at that hub. <span class="lab P">Proposed</span></p></div>
+    <div class="card tl">
+      <div class="tlhead"><span>China → Laos</span><span>Laos → Thailand</span><span>Thailand → Malaysia</span></div>
+      <div class="tlrow"><div style="background:#2B7BD8"><b>Yunnan Tea Co.</b>China SME · RW-CAGE-C01</div><div style="background:#1F9D63"><b>Vientiane Handicrafts</b>Lao SME · RW-CAGE-L01</div><div style="background:#8B5CF6"><b>Bangkok Auto Parts</b>Thai SME · RW-CAGE-T01</div></div>
+      <div class="tlev"><span>Loaded at Kunming hub · delivered at Vientiane South</span><span>Space resold at Vientiane · delivered at Bangkok-area hub</span><span>Space resold at Bangkok · delivered in Malaysia</span></div>
+      <p class="small">Compare: in a through-only model P5 carries one China → Malaysia cage. Reuse only adds value if extra segment revenue is larger than the extra cost of every exchange — see below. If no buyer is found at a hub, the position travels empty for that segment.</p>
+    </div>
+  </section>
+
+  <!-- 5. BUSINESS MODEL -->
+  <section id="model">
+    <div class="sec-h"><p class="eyebrow">5 · Business model check</p><h2>Is the exchange worth it?</h2><p>Compares one cage position sold three times (two exchanges) with the same position sold once, China → Malaysia. Fields start empty — no profit is assumed. Enter your own figures or load example placeholders.</p></div>
+    <div class="calc">
+      <div class="card"><div class="inputs" id="inputs">
+        <h4>Revenue per cage (USD)</h4>
+        <label>China → Laos<input data-k="s1" type="number" inputmode="decimal"></label><label>Laos → Thailand<input data-k="s2" type="number" inputmode="decimal"></label>
+        <label>Thailand → Malaysia<input data-k="s3" type="number" inputmode="decimal"></label><label>Through China → Malaysia<input data-k="thr" type="number" inputmode="decimal"></label>
+        <label>Chance freed space is resold (%)<input data-k="sold" type="number" inputmode="decimal"></label><label>Cages exchanged per hub stop<input data-k="nx" type="number" inputmode="decimal"></label>
+        <h4>Cost per hub stop (shared by the cages exchanged)</h4>
+        <label>Cover open + close labour<input data-k="cover" type="number" inputmode="decimal"></label><label>Terminal time (hours)<input data-k="hrs" type="number" inputmode="decimal"></label>
+        <label>Terminal time cost per hour<input data-k="hr" type="number" inputmode="decimal"></label><label>Customs complexity / documentation<input data-k="cus" type="number" inputmode="decimal"></label>
+        <label>Equipment per stop (lifting frame, restraint frames, amortised)<input data-k="eq" type="number" inputmode="decimal"></label><label>Container lifts off + on wagon<input data-k="clift" type="number" inputmode="decimal"></label>
+        <h4>Cost per cage exchanged</h4>
+        <label>Crane lifts (out + in)<input data-k="lift" type="number" inputmode="decimal"></label><label>Repositioning (empty cage return)<input data-k="rep" type="number" inputmode="decimal"></label>
+        <div style="grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;margin-top:4px"><button class="btn" id="exBtn" type="button">Load example assumptions</button><button class="btn" id="clrBtn" type="button">Clear</button></div>
+      </div></div>
+      <div class="card out" id="out"><h3>Result for position P5</h3><p class="small">Enter all fields to see the comparison.</p></div>
+    </div>
+  </section>
+
+  <!-- 6. VALIDATION -->
+  <section id="validate">
+    <div class="sec-h"><p class="eyebrow">6 · What must be proven</p><h2>Open questions before any pilot</h2></div>
+    <div class="qlist">
+      <div><b>Customs</b>Whether Lao and Thai customs will authorise partial unloading and loading of a container in transit, and under which procedure (for example national transit rules or the ASEAN Customs Transit System).</div>
+      <div><b>Hub capability</b>Which hubs have the crane, hardstanding, staging space, customs presence and time window. Not every station can do this.</div>
+      <div><b>Engineering</b>Cage design, rated lifting lugs and frame, blocking-frame strength, container lashing-point capacity and certification for rail forces.</div>
+      <div><b>Railway approval</b>Rail operators in each country must accept the load securing method and the extra dwell time at hubs.</div>
+      <div><b>Terminal time</b>How long one exchange takes, and whether it fits the train schedule without delaying other customers.</div>
+      <div><b>Liability & insurance</b>Who is responsible for each cage at each handover, and how claims work across four countries.</div>
+    </div>
+    <p class="small" style="margin-top:12px">Open-top (22U/U1-type) and hardtop containers are standard ISO equipment. Every other element here is a proposal for investigation.</p>
+  </section>
+</main>
+<footer><div class="wrap"><span>RealWay Express · Multi-Stop Kongsi concept demo · Prototype</span><span><a href="https://zylow03.github.io/realway-express/journey.html" style="color:inherit">Freight journey demo →</a></span></div></footer>
+<div class="toast" id="toast" hidden></div>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const f1=v=>(Math.round(v*10)/10).toFixed(1);
+const f2=v=>(Math.round(v*100)/100).toFixed(2);
+const fmtKg=v=>Math.round(v).toLocaleString('en-MY')+' kg';
+let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,3200)}
+
+
+/* ================= SCREEN B: RENDERER ================= */
+class V{constructor(x=0,y=0,z=0){this.x=x;this.y=y;this.z=z}set(x,y,z){this.x=x;this.y=y;this.z=z;return this}copy(v){return this.set(v.x,v.y,v.z)}clone(){return new V(this.x,this.y,this.z)}}
+const lerp=(a,b,t)=>a+(b-a)*t;
+const easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const easeOut=t=>1-Math.pow(1-t,3);
+const easeIn=t=>t*t*t;
+const FACES=[[[1,0,0],[1,3,7,5],.82],[[-1,0,0],[0,2,6,4],.74],[[0,1,0],[2,3,7,6],1.0],[[0,-1,0],[0,1,5,4],.45],[[0,0,1],[4,5,7,6],.66],[[0,0,-1],[0,1,3,2],.58]];
+const shadeCache={};
+function hexRgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return [n>>16&255,n>>8&255,n&255]}
+function shade(col,f){const k=col+'|'+f;if(shadeCache[k])return shadeCache[k];const c=hexRgb(col);return shadeCache[k]=`rgb(${c.map(v=>clamp(Math.round(v*f),0,255)).join(',')})`}
+
+function makeView(host,o){
+  const cv=document.createElement('canvas');host.prepend(cv);const g=cv.getContext('2d');
+  const v={host,cv,g,theta:o.theta,phi:o.phi,R:o.R,zoom:1,target:o.target.clone(),fov:o.fov||40,W:0,H:0,dpr:1,hits:[],
+    cam:{p:new V(),r:[0,0,0],u:[0,0,0],f:[0,0,0],F:1},goal:null,limits:o.limits||{t:[-1.25,1.25],p:[.25,1.52]},dragging:false};
+  const pts=new Array(8);
+  v.resize=()=>{const W=host.clientWidth,H=host.clientHeight;if(!W||!H)return;v.W=W;v.H=H;v.dpr=Math.min(window.devicePixelRatio||1,2);
+    cv.width=Math.round(W*v.dpr);cv.height=Math.round(H*v.dpr);cv.style.width=W+'px';cv.style.height=H+'px';o.onResize&&o.onResize(v)};
+  if(window.ResizeObserver)new ResizeObserver(v.resize).observe(host);window.addEventListener('resize',v.resize);v.resize();
+  v.updCam=()=>{const R=v.R/v.zoom,c=v.cam,t=v.target;
+    c.p.set(t.x+R*Math.sin(v.phi)*Math.sin(v.theta),t.y+R*Math.cos(v.phi),t.z+R*Math.sin(v.phi)*Math.cos(v.theta));
+    let f=[t.x-c.p.x,t.y-c.p.y,t.z-c.p.z];let l=Math.hypot(...f);f=f.map(x=>x/l);let r=[-f[2],0,f[0]];l=Math.hypot(...r)||1;r=r.map(x=>x/l);
+    c.f=f;c.r=r;c.u=[r[1]*f[2]-r[2]*f[1],r[2]*f[0]-r[0]*f[2],r[0]*f[1]-r[1]*f[0]];c.F=(v.H/2)/Math.tan(v.fov*Math.PI/360)};
+  v.proj=(x,y,z)=>{const c=v.cam;const dx=x-c.p.x,dy=y-c.p.y,dz=z-c.p.z;const cz=dx*c.f[0]+dy*c.f[1]+dz*c.f[2];
+    return [v.W/2+c.F*(dx*c.r[0]+dy*c.r[1]+dz*c.r[2])/cz,v.H/2-c.F*(dx*c.u[0]+dy*c.u[1]+dz*c.u[2])/cz,cz]};
+  v.d2=(p)=>{const c=v.cam.p;return (p.x-c.x)**2+(p.y-c.y)**2+(p.z-c.z)**2};
+  v.begin=(top,bot)=>{if(!v.W){v.resize();if(!v.W)return false}v.updCam();g.setTransform(v.dpr,0,0,v.dpr,0,0);v.hits=[];
+    const gr=g.createLinearGradient(0,0,0,v.H);gr.addColorStop(0,top);gr.addColorStop(1,bot);g.fillStyle=gr;g.fillRect(0,0,v.W,v.H);g.lineJoin='round';return true};
+  v.faceVis=(p,n,h)=>{const c=v.cam.p;return n[0]*(c.x-(p.x+n[0]*h[0]))+n[1]*(c.y-(p.y+n[1]*h[1]))+n[2]*(c.z-(p.z+n[2]*h[2]))>0};
+  v.corners=(p,s)=>{const hx=s[0]/2,hy=s[1]/2,hz=s[2]/2;for(let i=0;i<8;i++){const q=v.proj(p.x+(i&1?hx:-hx),p.y+(i&2?hy:-hy),p.z+(i&4?hz:-hz));if(q[2]<.15)return null;pts[i]=q}return [hx,hy,hz]};
+  v.box=(p,s,col,op)=>{op=op||{};const h=v.corners(p,s);if(!h)return null;const polys=[];
+    for(const [n,idx,lf] of FACES){if(op.skip&&op.skip.includes(n.join('')))continue;const fv=v.faceVis(p,n,h);if(op.back?fv:!fv)continue;
+      g.beginPath();g.moveTo(pts[idx[0]][0],pts[idx[0]][1]);for(let k=1;k<4;k++)g.lineTo(pts[idx[k]][0],pts[idx[k]][1]);g.closePath();
+      g.globalAlpha=op.alpha==null?1:op.alpha;g.fillStyle=shade(col,lf*(op.light||1));g.fill();
+      if(op.edge){g.strokeStyle=op.edge;g.lineWidth=op.lw||1;g.stroke()}
+      polys.push(idx.map(k=>[pts[k][0],pts[k][1]]))}
+    g.globalAlpha=1;if(op.hit&&polys.length)v.hits.push({polys,info:op.hit});return h};
+  v.line=(a,b,col,w,al)=>{const p=v.proj(a.x,a.y,a.z),q=v.proj(b.x,b.y,b.z);if(p[2]<.15||q[2]<.15)return;g.globalAlpha=al==null?1:al;g.strokeStyle=col;g.lineWidth=w||1;g.beginPath();g.moveTo(p[0],p[1]);g.lineTo(q[0],q[1]);g.stroke();g.globalAlpha=1};
+  v.poly=(P,col,al,stroke,lw)=>{const q=P.map(p=>v.proj(p.x,p.y,p.z));if(q.some(x=>x[2]<.15))return;g.beginPath();g.moveTo(q[0][0],q[0][1]);q.slice(1).forEach(x=>g.lineTo(x[0],x[1]));g.closePath();g.globalAlpha=al==null?1:al;if(col){g.fillStyle=col;g.fill()}if(stroke){g.strokeStyle=stroke;g.lineWidth=lw||1;g.stroke()}g.globalAlpha=1;return q};
+  v.disc=(cx,cy,cz,r,col,edge)=>{const P=[];for(let i=0;i<14;i++){const a=i/14*Math.PI*2;P.push(new V(cx+Math.cos(a)*r,cy+Math.sin(a)*r,cz))}v.poly(P,col,1,edge,1)};
+  v.text=(x,y,z,s,op)=>{op=op||{};const q=v.proj(x,y,z);if(q[2]<.15)return null;const size=op.size||12;g.font=`${op.weight||600} ${size}px "IBM Plex Mono",ui-monospace,monospace`;g.textAlign=op.align||'center';g.textBaseline='middle';
+    const w=g.measureText(s).width;const px=op.align==='left'?q[0]:q[0]-w/2;
+    if(op.bg){g.fillStyle=op.bg;g.fillRect(px-6,q[1]-size*.75,w+12,size*1.5)}g.fillStyle=op.col||'#fff';g.fillText(s,q[0],q[1]);return q};
+  v.hitTest=(x,y)=>{for(let i=v.hits.length-1;i>=0;i--)for(const poly of v.hits[i].polys)if(pip(x,y,poly))return v.hits[i].info;return null};
+  // input
+  let drag=null,moved=false;
+  host.addEventListener('pointerdown',e=>{if(e.target.closest(o.ignore||'button'))return;drag={x:e.clientX,y:e.clientY,t:v.theta,p:v.phi};moved=false;try{host.setPointerCapture(e.pointerId)}catch(_){}});
+  host.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>5){moved=true;host.classList.add('dragging')}if(!moved||o.noRotate&&o.noRotate())return;
+    v.theta=clamp(drag.t-dx*.008,v.limits.t[0],v.limits.t[1]);v.phi=clamp(drag.p-dy*.006,v.limits.p[0],v.limits.p[1]);v.dragging=true;if(v.goal){v.goal.theta=v.theta;v.goal.phi=v.phi}});
+  const end=e=>{if(drag&&!moved&&o.onTap){const r=host.getBoundingClientRect();o.onTap(e.clientX-r.left,e.clientY-r.top)}drag=null;v.dragging=false;host.classList.remove('dragging')};
+  host.addEventListener('pointerup',end);host.addEventListener('pointercancel',()=>{drag=null;v.dragging=false;host.classList.remove('dragging')});
+  host.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();v.zoom=clamp(v.zoom*(e.deltaY<0?1.1:.9),.6,2.4)},{passive:false});
+  v.smooth=()=>{if(!v.goal||v.dragging)return;const k=.07;v.theta=lerp(v.theta,v.goal.theta,k);v.phi=lerp(v.phi,v.goal.phi,k);v.R=lerp(v.R,v.goal.R,k);
+    v.target.set(lerp(v.target.x,v.goal.target.x,k),lerp(v.target.y,v.goal.target.y,k),lerp(v.target.z,v.goal.target.z,k))};
+  return v}
+function pip(x,y,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const [xi,yi]=poly[i],[xj,yj]=poly[j];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c}return c}
+
+
+
+/* ================= WORLD MODEL & DRAWING ================= */
+const CT={L:12.19,H:2.896,W:2.438,iL:12.03,iW:2.35,iH:2.70,doorW:2.34,doorH:2.58};
+const CG={L:1.35,W:1.10,H:2.04};
+const GAUGE={SG:1.435,MG:1.0};
+const DECK={SG:1.18,MG:1.12};
+const TRAILER_DECK=1.32;
+const COL={ground:'#151D27',ground2:'#1A2430',concrete:'#2C3540',concrete2:'#353F4B',line:'#F5C02A',ballast:'#2c3036',sleeper:'#5b4c3e',rail:'#A9B4C0',frame:'#2C3440',deck:'#4A5562',bogie:'#1D232B',wheel:'#101419',
+  crane:'#D9A22B',craneD:'#8f6a17',spreader:'#E8B23A',contRed:'#9B3B2E',contBlue:'#2E5C8A',floor:'#6b5843',steel:'#48525e',steelD:'#2f363f',mesh:'#b8c2cc',fork:'#E8892B',forkD:'#2a2f36',
+  tractor:'#C9D1DA',tractorD:'#334155',shed:'#26313d',shedRoof:'#1d2630',pinOff:'#8a95a3',pinOn:'#2FD27E',locoSG:'#1f5a46',locoMG:'#1F3B66',stripe:'#F2B705',sig:'#3a4552',
+  A:'#3B7DD8',B:'#22A06B',C:'#8B5CF6',D:'#E07A2F',none:'#5b6676',edge:'rgba(0,0,0,.45)'};
+const SME={A:{name:'SME A',full:'SME A · Klang Valley importer',col:COL.A},B:{name:'SME B',full:'SME B · Penang retailer',col:COL.B},C:{name:'SME C',full:'SME C · Johor distributor',col:COL.C},D:{name:'SME D',full:'SME D · Ipoh trader',col:COL.D}};
+/* 16 cages: Row 1 at the front wall, Row 8 nearest the doors. Left = +z (viewer's left facing forward from the doors). */
+const CAGE_PLAN=(()=>{const own={1:['B'],2:['B'],3:['A'],4:['C','D'],5:['B'],6:['B'],7:['C'],8:['C'],9:['C'],10:['C'],11:['D'],12:['D'],13:['D']};
+  const kg={1:520,2:480,3:450,4:390,5:610,6:560,7:430,8:470,9:500,10:440,11:380,12:350,13:300};
+  const out=[];for(let i=1;i<=16;i++){const row=Math.ceil(i/2),left=i%2===1;out.push({id:'RW-CAGE-'+String(i).padStart(3,'0'),n:i,row,side:left?'left':'right',own:own[i]||[],kg:kg[i]||0})}return out})();
+const BOOKED=CAGE_PLAN.filter(c=>c.own.length);
+function cageLocal(c){// centre of cage relative to container centre (floor-level based)
+  const x0=-CT.iL/2+.08;const x=x0+(c.row-1)*(CG.L+.02)+CG.L/2;const z=(c.side==='left'?1:-1)*(CG.W/2+.04);return {x,z}}
+
+function newWorld(){return {tracks:[],wagons:[],locos:[],trucks:[],containers:[],cages:[],forklift:null,crane:null,buildings:[],zones:[],labels:[],props:[],cartons:[],scroll:0,speed:0,scenery:false,people:[],signals:[]}}
+
+/* ---------- primitives ---------- */
+function drawTrack(v,w,t){
+  const g=t.gauge==='SG'?GAUGE.SG:GAUGE.MG;const x0=t.x0??-40,x1=t.x1??40;const sc=t.scroll?w.scroll:0;
+  for(let x=x0;x<x1;x+=8)v.box(new V(x+4,-.06,t.z),[8,.12,3.2],COL.ballast,{});
+  const sl=[];const off=((sc%0.65)+0.65)%0.65;for(let x=x0+.3;x<x1;x+=.65)sl.push(new V(x-off,.06,t.z));
+  sl.sort((a,b)=>v.d2(b)-v.d2(a)).forEach(p=>v.box(p,[.24,.12,g+.9],COL.sleeper,{}));
+  for(const s of [-1,1])for(let x=x0;x<x1;x+=4)v.box(new V(x+2,.19,t.z+s*g/2),[4,.14,.07],COL.rail,{});
+  if(t.label)v.text(t.labelX??(x0+4),.1,t.z+(g/2+1.1),t.label,{size:11,col:t.gauge==='SG'?'#ffb4a3':'#a8c6ff',bg:'rgba(11,17,26,.8)',align:'left'})}
+function drawWagon(v,w,wg){
+  const g=GAUGE[wg.gauge],d=DECK[wg.gauge];const X=wg.x,Z=wg.z;if(Math.abs(X)>70)return;
+  [-5.3,5.3].forEach(bx=>{[-.9,.9].forEach(ax=>v.disc(X+bx+ax,.5,Z-g/2-.06,.42,COL.wheel,'#3a4552'));
+    v.box(new V(X+bx,.62,Z),[2.5,.36,g+.5],COL.bogie,{edge:COL.edge});
+    [-.9,.9].forEach(ax=>{v.disc(X+bx+ax,.5,Z+g/2+.06,.42,COL.wheel,'#3a4552');v.disc(X+bx+ax,.5,Z+g/2+.07,.1,'#6b7684')})});
+  v.box(new V(X,d-.3,Z),[13.4,.3,.5],COL.frame,{});
+  [-1,1].forEach(s=>v.box(new V(X,d-.22,Z+s*1.1),[13.4,.34,.2],COL.frame,{edge:COL.edge}));
+  v.box(new V(X,d-.06,Z),[13.4,.08,2.5],COL.deck,{edge:COL.edge});
+  [-6.8,6.8].forEach(x=>v.box(new V(X+x,d-.35,Z),[.4,.25,.35],'#6b7684',{}));
+  for(const a of [-1,1])for(const b of [-1,1])v.box(new V(X+a*(CT.L/2-.1),d+.03,Z+b*(CT.W/2-.08)),[.22,.08,.22],wg.locked?COL.pinOn:COL.pinOff,{hit:{type:'pin'}});
+  if(wg.label)v.text(X,d-.2,Z+1.6,wg.label,{size:10,col:'#C2CDDB',bg:'rgba(11,17,26,.75)'})}
+function drawLoco(v,w,l){const g=GAUGE[l.gauge];const X=l.x,Z=l.z;if(Math.abs(X)>80)return;const col=l.gauge==='SG'?COL.locoSG:COL.locoMG;
+  [-5,5].forEach(bx=>{[-1.1,1.1].forEach(ax=>v.disc(X+bx+ax,.55,Z-g/2-.06,.48,COL.wheel));v.box(new V(X+bx,.78,Z),[3.3,.5,g+.5],COL.bogie,{});[-1.1,1.1].forEach(ax=>v.disc(X+bx+ax,.55,Z+g/2+.06,.48,COL.wheel,'#3a4552'))});
+  v.box(new V(X,1.25,Z),[15,.4,2.9],COL.frame,{});v.box(new V(X,2.55,Z),[14.2,2.4,2.9],col,{edge:COL.edge});
+  [1,-1].forEach(s=>v.line(new V(X-7.1,1.75,Z+s*1.46),new V(X+7.1,1.75,Z+s*1.46),COL.stripe,3));
+  v.box(new V(X+(l.dir||1)*6.2,2.95,Z),[1.6,1.2,2.6],'#0E1D33',{});
+  v.text(X,2.6,Z+1.47,(l.label||(l.gauge==='SG'?'STANDARD-GAUGE LOCOMOTIVE':'METRE-GAUGE LOCOMOTIVE'))+' · ILLUSTRATIVE',{size:9,col:'#C2CDDB',weight:500})}
+function drawTruck(v,w,t){const X=t.x,Z=t.z;if(Math.abs(X)>80)return;
+  [-4.6,-3.4,-2.2].forEach(ax=>v.disc(X+ax,.5,Z-1.15,.5,COL.wheel));[4.6,6.6,7.6].forEach(ax=>v.disc(X+ax,.5,Z-1.15,.5,COL.wheel));
+  v.box(new V(X,1.08,Z),[12.4,.28,2.4],COL.frame,{edge:COL.edge});
+  v.box(new V(X+7.6,1.75,Z),[2.6,2.5,2.45],t.col||COL.tractor,{edge:COL.edge});v.box(new V(X+8.45,2.35,Z),[.9,.95,2.2],COL.tractorD,{});
+  for(const a of [-1,1])for(const b of [-1,1])v.box(new V(X+a*(CT.L/2-.1),TRAILER_DECK-.08,Z+b*(CT.W/2-.08)),[.2,.08,.2],t.locked?COL.pinOn:COL.pinOff,{});
+  [-4.6,-3.4,-2.2].forEach(ax=>v.disc(X+ax,.5,Z+1.15,.5,COL.wheel,'#3a4552'));[4.6,6.6,7.6].forEach(ax=>v.disc(X+ax,.5,Z+1.15,.5,COL.wheel,'#3a4552'));
+  if(t.label)v.text(X+7.6,3.4,Z,t.label,{size:10,col:'#E6ECF3',bg:'rgba(11,17,26,.8)'})}
+
+/* ---------- container ---------- */
+function contPos(w,c){
+  if(c.mount&&c.mount.startsWith('wagon:')){const wg=w.wagons.find(x=>x.id===c.mount.slice(6));return new V(wg.x,DECK[wg.gauge]+CT.H/2,wg.z)}
+  if(c.mount&&c.mount.startsWith('truck:')){const t=w.trucks.find(x=>x.id===c.mount.slice(6));return new V(t.x,TRAILER_DECK+CT.H/2,t.z)}
+  if(c.mount==='crane'){const cr=w.crane;return new V(cr.x,cr.sy-.16-CT.H/2,cr.tz)}
+  return c.p}
+function drawContainer(v,w,c,opt){
+  opt=opt||{};const p=contPos(w,c);const hL=CT.L/2,hH=CT.H/2,hW=CT.W/2;const g=v.g;
+  const base=c.col||COL.contRed;const cut=opt.ext?0:Math.max(opt.cutaway||0,c.cut||0);const roofA=1-Math.max(cut,c.roofOff||0),nearA=1-Math.max(cut*0.88,c.sideClear||0)*1;
+  const bottom=p.y-hH;
+  const panel=(pp,s,col,al,o)=>v.box(pp,s,col,Object.assign({alpha:al,edge:al>.5?COL.edge:null},o||{}));
+  // floor
+  panel(new V(p.x,bottom+.08,p.z),[CT.L,.16,CT.W],COL.floor,1,{hit:{type:'container',id:c.id}});
+  // far side wall & front wall (interior visible faces first)
+  panel(new V(p.x,p.y,p.z-hW+.03),[CT.L,CT.H,.06],base,1,{light:.78});
+  panel(new V(p.x-hL+.04,p.y,p.z),[.08,CT.H,CT.W],base,1,{light:.78});
+  corrugate(v,p,-1,base,1);
+  // cages inside
+  const inside=w.cages.filter(k=>k.in===c.id).map(k=>{const l=cageLocal(k.plan);return {k,pp:new V(p.x+l.x+(k.dx||0),bottom+.16+CG.H/2,p.z+l.z)}});
+  inside.sort((a,b)=>v.d2(b.pp)-v.d2(a.pp)).forEach(o=>drawCage(v,o.k,o.pp,{dim:opt.dimOthers&&!o.k.hi}));
+  (c.restraints||[]).forEach(r=>drawRestraint(v,p,r));
+  // forklift inside container must be drawn before near wall
+  if(opt.inner)opt.inner();
+  // near side wall
+  if(nearA>.02){panel(new V(p.x,p.y,p.z+hW-.03),[CT.L,CT.H,.06],base,nearA,{hit:{type:'container',id:c.id}});if(nearA>.5)corrugate(v,p,1,base,nearA)}
+  else v.line(new V(p.x-hL,bottom+.16,p.z+hW),new V(p.x+hL,bottom+.16,p.z+hW),'#9aa5b1',1.2,.8);
+  // roof
+  const ry=p.y+hH-.04+(c.roofOff||0)*2.2;if(roofA>.02)panel(new V(p.x,ry,p.z),[CT.L,.08,CT.W],base,roofA,{light:1.05});
+  // frame edges (always visible as outline)
+  g.globalAlpha=.9;v.line(new V(p.x-hL,p.y+hH,p.z+hW),new V(p.x+hL,p.y+hH,p.z+hW),'#c9d1da',1.1,.6);v.line(new V(p.x-hL,p.y+hH,p.z-hW),new V(p.x+hL,p.y+hH,p.z-hW),'#c9d1da',1.1,.5);
+  v.line(new V(p.x-hL,bottom,p.z+hW),new V(p.x-hL,p.y+hH,p.z+hW),'#c9d1da',1.1,.6);g.globalAlpha=1;
+  // corner castings
+  for(const sx of [-1,1])for(const sy of [-1,1])for(const sz of [-1,1])if(sz>0||sx>0||sy>0)v.box(new V(p.x+sx*(hL-.09),p.y+sy*(hH-.06),p.z+sz*(hW-.08)),[.18,.12,.16],'#22272e',{});
+  // doors at +x
+  drawDoors(v,p,c,base);
+  // marking
+  if(nearA>.5&&!opt.noLabel){v.text(p.x-3.6,p.y+.7,p.z+hW+.02,c.code||'RWCU 001001 4 · 45G1',{size:11,col:'#fff',weight:600});v.text(p.x-3.6,p.y+.3,p.z+hW+.02,(c.id||'RW-CONT-001')+' (illustrative)',{size:10,col:'#E6ECF3',weight:500})}
+  if(c.hi){const q=v.proj(p.x,p.y+hH+.8+(c.roofOff||0)*2.2,p.z);if(q[2]>.15){g.fillStyle='#F5C02A';g.beginPath();g.moveTo(q[0],q[1]+8);g.lineTo(q[0]-7,q[1]-4);g.lineTo(q[0]+7,q[1]-4);g.closePath();g.fill()}}
+}
+function shadeFar(c){return shade(c,.72)}function shadeRoof(c){return shade(c,1.05)}
+function corrugate(v,p,side,col,al){const z=p.z+side*(CT.W/2+.005);const g=v.g;if(!v.faceVis(p,[0,0,side],[CT.L/2,CT.H/2,CT.W/2])&&side>0)return;
+  g.globalAlpha=.25*al;g.strokeStyle='#000';g.lineWidth=1;g.beginPath();for(let x=-CT.L/2+.2;x<CT.L/2-.15;x+=.28){const a=v.proj(p.x+x,p.y-CT.H/2+.15,z),b=v.proj(p.x+x,p.y+CT.H/2-.12,z);if(a[2]>.15&&b[2]>.15){g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1])}}g.stroke();g.globalAlpha=1}
+function drawDoors(v,p,c,base){const a=(c.doors||0)*Math.PI*.82;const x=p.x+CT.L/2,y0=p.y-CT.H/2+.05,y1=p.y+CT.H/2-.05;
+  [-1,1].forEach(s=>{const hz=p.z+s*CT.W/2;const dx=Math.sin(a)*CT.W/2,dz=-s*Math.cos(a)*CT.W/2;
+    const P=[new V(x,y0,hz),new V(x+dx,y0,hz+dz),new V(x+dx,y1,hz+dz),new V(x,y1,hz)];v.poly(P,shade(base,.85),1,'rgba(0,0,0,.6)',1.2);
+    // locking bars
+    [.3,.7].forEach(f=>v.line(new V(x+dx*f+.01,y0+.1,hz+dz*f),new V(x+dx*f+.01,y1-.1,hz+dz*f),'#c9d1da',1.6,.85));
+    if(s>0&&c.sealed&&a<.05){v.box(new V(x+.05,p.y-.1,hz+dz*.7),[.06,.16,.06],'#F5C02A',{});v.text(x+.3,p.y-.45,hz+dz*.7,c.seal||'SEAL RWS-0451207',{size:9,col:'#F5C02A',bg:'rgba(11,17,26,.8)'})}})}
+function drawRestraint(v,p,r){const b=p.y-CT.H/2+.16;
+  if(r.type==='block'){v.box(new V(p.x+r.x,b+.6,p.z),[.18,1.2,CT.iW-.1],'#B8834A',{edge:COL.edge});v.box(new V(p.x+r.x+.25,b+.6,p.z+.9),[.5,.12,.12],'#B8834A',{});v.box(new V(p.x+r.x+.25,b+.6,p.z-.9),[.5,.12,.12],'#B8834A',{})}
+  if(r.type==='lash'){[-1,1].forEach(s=>v.line(new V(p.x+r.x-.6,b+1.4,p.z+s*(CT.iW/2)),new V(p.x+r.x+.6,b+1.6,p.z),'#F2B705',2.2,.95))}
+  if(r.type==='bag'){v.box(new V(p.x+r.x,b+1.0,p.z),[1.2,1.8,.07],'#d7dde4',{alpha:.85})}}
+
+/* ---------- cage ---------- */
+function drawCage(v,k,p,o){o=o||{};const g=v.g;const hL=CG.L/2,hW=CG.W/2,hH=CG.H/2;const dim=o.dim?.4:1;const sc=o.scale||1;
+  const own=k.plan?k.plan.own:[];const col=own.length?SME[own[0]].col:COL.none;
+  g.globalAlpha=dim;
+  v.box(new V(p.x,p.y-hH+.075,p.z),[CG.L,.15,CG.W],COL.steelD,{edge:COL.edge,hit:{type:'cage',id:k.plan.id}});
+  // fork pockets on +x / -x
+  [1,-1].forEach(s=>{if(!v.faceVis(new V(p.x,p.y-hH+.075,p.z),[s,0,0],[hL,.075,hW]))return;[-.3,.3].forEach(dz=>{const P=[new V(p.x+s*(hL+.003),p.y-hH+.03,p.z+dz-.11),new V(p.x+s*(hL+.003),p.y-hH+.03,p.z+dz+.11),new V(p.x+s*(hL+.003),p.y-hH+.12,p.z+dz+.11),new V(p.x+s*(hL+.003),p.y-hH+.12,p.z+dz-.11)];v.poly(P,'#0b0e12',dim)})});
+  // cartons
+  if(k.cartons!==0&&own.length){const n=k.cartons??12;const cs=[];let i=0;
+    for(let ly=0;ly<3;ly++)for(let ix=0;ix<2;ix++)for(let iz=0;iz<2;iz++){if(i>=n)break;const o2=own[own.length>1&&i>=n/2?1:0];cs.push({p:new V(p.x-.3+ix*.6,p.y-hH+.15+.3+ly*.6,p.z-.25+iz*.5),c:SME[o2].col});i++}
+    cs.sort((a,b)=>v.d2(b.p)-v.d2(a.p)).forEach(c=>v.box(c.p,[.56,.56,.46],c.c,{edge:'rgba(0,0,0,.35)',alpha:dim,light:.95}));
+    if(k.strap)[-.2,.3].forEach(dy=>v.line(new V(p.x+hL-.02,p.y+dy,p.z+hW-.02),new V(p.x+hL-.02,p.y+dy,p.z-hW+.02),'#F2B705',1.5,dim))}
+  // posts + rails
+  for(const a of [-1,1])for(const b of [-1,1])v.box(new V(p.x+a*(hL-.03),p.y+.075,p.z+b*(hW-.03)),[.06,CG.H-.15,.06],COL.steel,{});
+  [[0,1],[0,-1]].forEach(([_,b])=>v.box(new V(p.x,p.y+hH-.03,p.z+b*(hW-.03)),[CG.L,.05,.05],COL.steel,{}));
+  [1,-1].forEach(a=>v.box(new V(p.x+a*(hL-.03),p.y+hH-.03,p.z),[.05,.05,CG.W],COL.steel,{}));
+  // mesh on visible faces
+  const h=[hL,hH,hW];
+  [[1,0,0],[-1,0,0],[0,0,1],[0,0,-1],[0,1,0]].forEach(n=>{if(!v.faceVis(p,n,h))return;mesh(v,p,n,dim)});
+  // gate (+x face) frame, latch, ID plate & colour label
+  if(v.faceVis(p,[1,0,0],h)){const x=p.x+hL+.005;const gx=k.gate?Math.sin(k.gate*1.4)*.9:0,gz=k.gate?(1-Math.cos(k.gate*1.4))*.9:0;
+    const G=[new V(x,p.y-hH+.2,p.z+hW-.06),new V(x+gx,p.y-hH+.2,p.z-hW+.06+gz*0),new V(x+gx,p.y+hH-.08,p.z-hW+.06),new V(x,p.y+hH-.08,p.z+hW-.06)];
+    if(!k.gate){v.poly(G,null,dim,'#d5dce4',2);v.box(new V(x+.02,p.y,p.z-hW+.14),[.05,.12,.05],'#F2B705',{})}
+    const pl=[new V(x+.01,p.y+.55,p.z+.12),new V(x+.01,p.y+.55,p.z+.5),new V(x+.01,p.y+.85,p.z+.5),new V(x+.01,p.y+.85,p.z+.12)];const q=v.poly(pl,'#F1F4F7',dim,col,2);
+    const band=[new V(x+.01,p.y+.9,p.z-hW+.08),new V(x+.01,p.y+.9,p.z+hW-.08),new V(x+.01,p.y+.98,p.z+hW-.08),new V(x+.01,p.y+.98,p.z-hW+.08)];v.poly(band,col,dim);
+    if(q){const wpx=Math.abs(q[1][0]-q[0][0])+Math.abs(q[1][1]-q[0][1]);if(wpx>26){const c=v.proj(x+.01,p.y+.7,p.z+.31);g.fillStyle='#0B111A';g.font=`700 ${clamp(wpx*.14,7,12)}px "IBM Plex Mono",monospace`;g.textAlign='center';g.textBaseline='middle';g.fillText(k.plan.id.slice(3),c[0],c[1]-wpx*.08);
+      // QR
+      const qs=clamp(wpx*.11,3,9);const qx=c[0]-qs*1.5,qy=c[1]+wpx*.02;const bits=qrBits(k.plan.n);for(let i=0;i<9;i++)if(bits[i]){g.fillRect(qx+(i%3)*qs,qy+Math.floor(i/3)*qs,qs,qs)}}}}
+  if(k.lugs)for(const a of [-1,1])for(const b of [-1,1]){v.box(new V(p.x+a*(hL-.08),p.y+hH+.05,p.z+b*(hW-.08)),[.09,.1,.09],'#F5C02A',{})}
+  if(k.hi){const q=v.proj(p.x,p.y+hH+.45,p.z);if(q[2]>.15){g.fillStyle='#F5C02A';g.beginPath();g.moveTo(q[0],q[1]+8);g.lineTo(q[0]-7,q[1]-4);g.lineTo(q[0]+7,q[1]-4);g.closePath();g.fill()}}
+  if(k.scan){const a=v.proj(p.x+hL,p.y+.7,p.z+.3);if(a[2]>.15){g.strokeStyle='rgba(47,210,126,.9)';g.lineWidth=2;g.strokeRect(a[0]-14,a[1]-14,28,28)}}
+  g.globalAlpha=1}
+function qrBits(n){return [1,(n>>1)&1,1,(n>>2)&1,1,n&1,1,(n>>3)&1,1]}
+function mesh(v,p,n,dim){const g=v.g;const hL=CG.L/2,hH=CG.H/2,hW=CG.W/2;
+  const pts=[];const st=.17;
+  if(n[0]){const x=p.x+n[0]*hL;for(let z=-hW+.06;z<hW;z+=st)pts.push([[x,p.y-hH+.15,p.z+z],[x,p.y+hH-.05,p.z+z]]);for(let y=-hH+.15;y<hH;y+=st)pts.push([[x,p.y+y,p.z-hW],[x,p.y+y,p.z+hW]])}
+  else if(n[2]){const z=p.z+n[2]*hW;for(let x=-hL+.06;x<hL;x+=st)pts.push([[p.x+x,p.y-hH+.15,z],[p.x+x,p.y+hH-.05,z]]);for(let y=-hH+.15;y<hH;y+=st)pts.push([[p.x-hL,p.y+y,z],[p.x+hL,p.y+y,z]])}
+  else{const y=p.y+hH-.02;for(let x=-hL+.06;x<hL;x+=st*1.4)pts.push([[p.x+x,y,p.z-hW],[p.x+x,y,p.z+hW]])}
+  g.globalAlpha=.42*dim;g.strokeStyle=COL.mesh;g.lineWidth=.7;g.beginPath();
+  for(const [a,b] of pts){const q=v.proj(...a),r=v.proj(...b);if(q[2]<.15||r[2]<.15)continue;g.moveTo(q[0],q[1]);g.lineTo(r[0],r[1])}g.stroke();g.globalAlpha=1}
+
+/* ---------- forklift ---------- */
+function drawForklift(v,w,f){const h=f.dir||1,X=f.x,Z=f.z;const g=v.g;
+  const parts=[];
+  const push=(x,y,z,s,c,o)=>parts.push({p:new V(x,y,z),s,c,o});
+  [-1,1].forEach(s=>{v.disc(X-h*.25,.32,Z+s*.62,.32,COL.wheel,'#3a4552');v.disc(X-h*2.0,.28,Z+s*.58,.28,COL.wheel,'#3a4552')});
+  push(X-h*1.15,.62,Z,[2.0,.8,1.15],COL.fork);push(X-h*2.25,.85,Z,[.4,1.1,1.1],'#a3601f');
+  push(X-h*1.3,1.2,Z,[.5,.35,.5],COL.forkD);
+  [-.5,.5].forEach(dz=>{push(X-h*.55,1.45,Z+dz,[.06,1.5,.06],COL.forkD);push(X-h*1.9,1.45,Z+dz,[.06,1.5,.06],COL.forkD)});
+  push(X-h*1.22,2.15,Z,[1.45,.06,1.1],COL.forkD);
+  [-.36,.36].forEach(dz=>push(X+h*.08,1.15,Z+dz,[.1,2.2,.1],'#3a4048'));
+  push(X+h*.16,f.fy+.25,Z,[.08,.55,.95],'#3a4048');
+  [-.3,.3].forEach(dz=>push(X+h*.78,f.fy,Z+dz,[1.2,.05,.12],'#9aa5b1'));
+  parts.sort((a,b)=>v.d2(b.p)-v.d2(a.p)).forEach(q=>v.box(q.p,q.s,q.c,{edge:COL.edge,hit:{type:'forklift'}}));
+  if(f.carry){const cp=new V(X+h*(.2+CG.L/2),f.fy+.05+CG.H/2,Z);drawCage(v,f.carry,cp,{})}}
+
+/* ---------- crane ---------- */
+function drawCraneFar(v,w){const c=w.crane;if(!c)return;[-2.6,2.6].forEach(dx=>v.box(new V(c.x+dx,6.2,c.z1),[.55,12.4,.6],COL.crane,{hit:{type:'crane'}}));v.box(new V(c.x,.45,c.z1),[5.8,.5,.8],COL.craneD,{})}
+function drawCraneTop(v,w){const c=w.crane;if(!c)return;const sp=new V(c.x,c.sy,c.tz);const TY=13.3;
+  [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([a,b])=>v.line(new V(c.x+a*.8,TY-.4,c.tz+b*.7),new V(c.x+a*5.6,c.sy+.12,c.tz+b*1.0),'#c9d1da',1.2,.85));
+  v.box(sp,[12.2,.28,2.4],COL.spreader,{edge:COL.edge,hit:{type:'crane'}});
+  [-1,1].forEach(a=>[-1,1].forEach(b=>v.box(new V(c.x+a*(CT.L/2-.1),c.sy-.18,c.tz+b*(CT.W/2-.08)),[.14,.1,.14],c.locked?COL.pinOn:COL.pinOff,{})));
+  [-1.4,1.4].forEach(dx=>v.box(new V(c.x+dx,12.7,(c.z1+c.z2)/2),[.6,1,c.z2-c.z1+1.4],COL.crane,{edge:COL.edge,hit:{type:'crane'}}));
+  v.box(new V(c.x,TY,c.tz),[2.6,.8,2.4],COL.craneD,{edge:COL.edge});
+  [-2.6,2.6].forEach(dx=>v.box(new V(c.x+dx,6.2,c.z2),[.55,12.4,.6],COL.crane,{edge:COL.edge,hit:{type:'crane'}}));v.box(new V(c.x,.45,c.z2),[5.8,.5,.8],COL.craneD,{});
+  v.box(new V(c.x,12.1,c.z1),[5.8,.7,.7],COL.crane,{});v.box(new V(c.x,12.1,c.z2),[5.8,.7,.7],COL.crane,{});
+  if(c.label)v.text(c.x,13.9,c.z2,c.label,{size:10,col:'#E6ECF3',bg:'rgba(11,17,26,.8)'})}
+
+/* ---------- buildings, zones, props ---------- */
+function drawBuilding(v,b){v.box(new V(b.x,b.h/2,b.z),[b.w,b.h,b.d],b.col||COL.shed,{edge:'rgba(255,255,255,.06)'});
+  if(b.doors)b.doors.forEach(dx=>{const P=[new V(b.x+dx-1.4,.05,b.z+b.d/2+.01),new V(b.x+dx+1.4,.05,b.z+b.d/2+.01),new V(b.x+dx+1.4,3.4,b.z+b.d/2+.01),new V(b.x+dx-1.4,3.4,b.z+b.d/2+.01)];v.poly(P,'#0f151d',1,'#4b5d75',1)});
+  if(b.label)v.text(b.x,b.h+.6,b.z,b.label,{size:10,col:'#9FB0C4'})}
+function drawZone(v,z){const P=[new V(z.x-z.w/2,.02,z.z-z.d/2),new V(z.x+z.w/2,.02,z.z-z.d/2),new V(z.x+z.w/2,.02,z.z+z.d/2),new V(z.x-z.w/2,.02,z.z+z.d/2)];
+  v.poly(P,z.fill||null,z.alpha??.35,z.col||COL.line,1.5);if(z.label)v.text(z.x,.05,z.z+z.d/2+.5,z.label,{size:10,col:z.tcol||'#C2CDDB',bg:'rgba(11,17,26,.7)'})}
+function drawProp(v,w,p){
+  if(p.type==='signal'){const x=p.x-(p.scroll?w.scroll:0)%(p.wrap||80);const X=((x+40)%80+80)%80-40;v.box(new V(X,2.2,p.z),[.15,4.4,.15],COL.sig,{});v.box(new V(X,4.4,p.z),[.4,.9,.3],'#151b22',{});v.disc(X,4.6,p.z+.16,.1,p.state==='red'?'#ff5a4f':'#2FD27E')}
+  else if(p.type==='tunnel'){const X=((p.x-w.scroll%120+60)%120+120)%120-60;v.box(new V(X,3.2,p.z-2.6),[6,6.4,1.4],'#3a3530',{});v.box(new V(X,5.6,p.z),[6,1.6,6.6],'#3a3530',{});v.box(new V(X,3.2,p.z+2.6),[6,6.4,1.4],'#3a3530',{})}
+  else if(p.type==='pier'){const X=((p.x-w.scroll%60+30)%60+60)%60-30;v.box(new V(X,-1.6,p.z),[1.6,3,2.6],'#4b4f55',{})}
+  else if(p.type==='booth'){v.box(new V(p.x,1.4,p.z),[3,2.8,2.4],p.col||'#2b4a6e',{edge:COL.edge});v.box(new V(p.x,2.95,p.z),[3.6,.3,3],'#1b2633',{});if(p.label)v.text(p.x,3.6,p.z,p.label,{size:10,col:'#E6ECF3',bg:'rgba(11,17,26,.8)'})}
+  else if(p.type==='gate'){[-1,1].forEach(s=>v.box(new V(p.x,1.6,p.z+s*4.2),[.4,3.2,.4],'#3a4552',{}));v.box(new V(p.x,3.3,p.z),[.4,.4,8.8],'#3a4552',{});v.box(new V(p.x,1.1,p.z+(p.open?2.6:0)),[.12,.12,p.open?3.4:8],'#F5C02A',{});if(p.label)v.text(p.x,4.1,p.z,p.label,{size:10,col:'#E6ECF3',bg:'rgba(11,17,26,.8)'})}
+  else if(p.type==='rack'){for(let i=0;i<p.n;i++){const x=p.x+i*2.8;[-1,1].forEach(s=>v.box(new V(x+s*1.3,2.2,p.z),[.1,4.4,1.1],'#3b6ea5',{}));[1.4,2.8,4.2].forEach(y=>v.box(new V(x,y,p.z),[2.7,.08,1.1],'#E07A2F',{}));v.box(new V(x,2.0,p.z),[2.2,.9,.9],'#8c6b4f',{})}}
+  else if(p.type==='scale'){v.box(new V(p.x,.05,p.z),[1.6,.1,1.6],'#5b6676',{});v.box(new V(p.x+.95,.7,p.z),[.1,1.4,.1],'#3a4552',{});v.text(p.x+.95,1.6,p.z,p.text||'WEIGHT',{size:9,col:'#2FD27E',bg:'#0b0e12'})}
+  else if(p.type==='person'){v.box(new V(p.x,.9,p.z),[.4,1.8,.32],p.col||'#F28C28',{});v.box(new V(p.x,1.95,p.z),[.28,.28,.28],'#e3c6a6',{});v.box(new V(p.x,2.12,p.z),[.32,.1,.32],'#F5C02A',{})}
+  else if(p.type==='carton'){v.box(p.p||new V(p.x,p.y||.3,p.z),p.s||[.56,.56,.46],p.col,{edge:'rgba(0,0,0,.35)'})}
+  else if(p.type==='pallet'){v.box(new V(p.x,.08,p.z),[1.2,.15,1.0],'#9b7b56',{})}
+  else if(p.type==='stack'){for(let i=0;i<(p.n||3);i++)v.box(new V(p.x,CT.H/2+i*CT.H,p.z),[CT.L,CT.H,CT.W],p.cols[i%p.cols.length],{edge:COL.edge})}
+}
+
+/* ---------- full scene ---------- */
+function renderWorld(v,w,opt){opt=opt||{};if(!v.begin('#0E1621','#101923'))return;const g=v.g;
+  g.fillStyle=COL.ground;const h1=v.proj(-120,0,-60),h2=v.proj(120,0,-60);const hy=(h1[2]>0&&h2[2]>0)?Math.min(h1[1],h2[1]):v.H*.25;g.fillRect(0,Math.max(0,hy),v.W,v.H);
+  (w.pads||[]).forEach(pd=>{for(let x=pd.x-pd.w/2;x<pd.x+pd.w/2-.01;x+=Math.min(10,pd.w)){const ww=Math.min(10,pd.x+pd.w/2-x);v.box(new V(x+ww/2,.0,pd.z),[ww,.02,pd.d],pd.col||COL.concrete,{})}});
+  w.zones.forEach(z=>drawZone(v,z));
+  w.buildings.filter(b=>b.z<0).forEach(b=>drawBuilding(v,b));
+  w.props.filter(p=>p.type==='pier').forEach(p=>drawProp(v,w,p));
+  drawCraneFar(v,w);
+  w.tracks.forEach(t=>drawTrack(v,w,t));
+  w.props.filter(p=>p.type==='signal'&&p.z<0).forEach(p=>drawProp(v,w,p));
+  // sortable objects
+  const items=[];
+  w.wagons.forEach(o=>items.push({p:new V(o.x,.8,o.z),f:()=>drawWagon(v,w,o),k:'w'}));
+  w.locos.forEach(o=>items.push({p:new V(o.x,2,o.z),f:()=>drawLoco(v,w,o)}));
+  w.trucks.forEach(o=>items.push({p:new V(o.x,1,o.z),f:()=>drawTruck(v,w,o)}));
+  w.buildings.filter(b=>b.z>=0).forEach(b=>items.push({p:new V(b.x,b.h/2,b.z),f:()=>drawBuilding(v,b)}));
+  w.props.filter(p=>!['pier','tunnel'].includes(p.type)&&!(p.type==='signal'&&p.z<0)).forEach(p=>items.push({p:p.p||new V(p.x,1,p.z),f:()=>drawProp(v,w,p)}));
+  w.cages.filter(k=>!k.in&&!k.onFork&&k.p).forEach(k=>items.push({p:k.p,f:()=>drawCage(v,k,k.p,{dim:opt.dimOthers&&!k.hi})}));
+  const fl=w.forklift;const flInside=fl&&w.containers.some(c=>c.mount!=='crane'&&insideCont(w,c,fl));
+  if(fl&&!flInside)items.push({p:new V(fl.x,1,fl.z),f:()=>drawForklift(v,w,fl)});
+  w.containers.filter(c=>c.mount!=='crane').forEach(c=>items.push({p:contPos(w,c).clone().set(contPos(w,c).x,1.6,contPos(w,c).z),f:()=>drawContainer(v,w,c,Object.assign({},opt,{inner:flInside&&insideCont(w,c,fl)?()=>drawForklift(v,w,fl):null}))}));
+  // wagons first, then others by depth (wagon decks lie under their containers)
+  items.filter(i=>i.k==='w').sort((a,b)=>v.d2(b.p)-v.d2(a.p)).forEach(i=>i.f());
+  items.filter(i=>i.k!=='w').sort((a,b)=>v.d2(b.p)-v.d2(a.p)).forEach(i=>i.f());
+  w.props.filter(p=>p.type==='tunnel').forEach(p=>drawProp(v,w,p));
+  const cc=w.containers.find(c=>c.mount==='crane');if(cc)drawContainer(v,w,cc,opt);
+  drawCraneTop(v,w);
+  w.labels.forEach(l=>v.text(l.x,l.y,l.z,l.t,{size:l.size||11,col:l.col||'#E6ECF3',bg:l.bg??'rgba(11,17,26,.8)',align:l.align}))}
+function insideCont(w,c,f){const p=contPos(w,c);return Math.abs(f.x-p.x)<CT.L/2+.3&&Math.abs(f.z-p.z)<CT.W/2}
+
+/* ---------- top-down plan of container ---------- */
+function renderPlan(v,w,opt){opt=opt||{};if(!v.W){v.resize();if(!v.W)return}const g=v.g;g.setTransform(v.dpr,0,0,v.dpr,0,0);v.hits=[];
+  g.fillStyle='#0E1621';g.fillRect(0,0,v.W,v.H);
+  const c=w.containers[0];const s=Math.min((v.W-60)/(CT.L+2.4),(v.H-110)/(CT.W+1.2))*v.zoom;const cx=v.W/2,cy=v.H/2-6;
+  const P=(x,z)=>[cx+x*s,cy-z*s];
+  const a=P(-CT.iL/2,CT.iW/2);g.fillStyle='#3b3128';g.fillRect(a[0],a[1],CT.iL*s,CT.iW*s);g.strokeStyle='#c9d1da';g.lineWidth=2;g.strokeRect(a[0],a[1],CT.iL*s,CT.iW*s);
+  g.font='600 11px "IBM Plex Mono",monospace';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#9FB0C4';
+  const fw=P(-CT.iL/2-.5,0);g.save();g.translate(fw[0],fw[1]);g.rotate(-Math.PI/2);g.fillText('FRONT WALL',0,0);g.restore();
+  const dr=P(CT.iL/2+.55,0);g.save();g.translate(dr[0],dr[1]);g.rotate(Math.PI/2);g.fillStyle='#F5C02A';g.fillText('REAR DOORS',0,0);g.restore();
+  for(let r=1;r<=8;r++){const l=cageLocal({row:r,side:'left'});const q=P(l.x,CT.iW/2+.32);g.fillStyle='#9FB0C4';g.fillText('R'+r,q[0],q[1])}
+  const lq=P(-CT.iL/2-1.0,CT.iW/4),rq=P(-CT.iL/2-1.0,-CT.iW/4);g.fillStyle='#9FB0C4';g.font='500 10px "IBM Plex Mono",monospace';g.fillText('LEFT',lq[0],lq[1]);g.fillText('RIGHT',rq[0],rq[1]);
+  CAGE_PLAN.forEach(pl=>{const k=w.cages.find(x=>x.plan.id===pl.id);const l=cageLocal(pl);const q=P(l.x-CG.L/2,l.z+CG.W/2);const loaded=k&&k.in;const col=pl.own.length?SME[pl.own[0]].col:COL.none;
+    g.globalAlpha=loaded?1:.28;g.fillStyle=col;g.fillRect(q[0]+1,q[1]+1,CG.L*s-2,CG.W*s-2);
+    if(pl.own.length>1){g.fillStyle=SME[pl.own[1]].col;g.beginPath();g.moveTo(q[0]+CG.L*s-1,q[1]+1);g.lineTo(q[0]+CG.L*s-1,q[1]+CG.W*s-1);g.lineTo(q[0]+1,q[1]+CG.W*s-1);g.closePath();g.fill()}
+    g.globalAlpha=1;g.strokeStyle=k&&k.hi?'#F5C02A':'rgba(255,255,255,.35)';g.lineWidth=k&&k.hi?3:1;g.strokeRect(q[0]+1,q[1]+1,CG.L*s-2,CG.W*s-2);
+    g.fillStyle='#fff';g.font=`700 ${clamp(s*.2,8,12)}px "IBM Plex Mono",monospace`;g.fillText(pl.id.slice(8),q[0]+CG.L*s/2,q[1]+CG.W*s/2-6);g.font=`500 ${clamp(s*.14,7,10)}px "IBM Plex Mono",monospace`;g.fillText(pl.own.length?pl.own.map(o=>SME[o].name).join('+'):'available',q[0]+CG.L*s/2,q[1]+CG.W*s/2+8);
+    v.hits.push({polys:[[[q[0],q[1]],[q[0]+CG.L*s,q[1]],[q[0]+CG.L*s,q[1]+CG.W*s],[q[0],q[1]+CG.W*s]]],info:{type:'cage',id:pl.id}})});
+  (c&&c.restraints||[]).forEach(r=>{if(r.type!=='block')return;const q=P(r.x-.09,CT.iW/2-.05);g.fillStyle='#B8834A';g.fillRect(q[0],q[1],.18*s,(CT.iW-.1)*s)});
+  // dimension notes
+  g.fillStyle='#C2CDDB';g.font='500 11px "IBM Plex Sans",system-ui,sans-serif';g.textAlign='left';
+  const b=P(-CT.iL/2,-CT.iW/2-.45);g.fillText(`Internal ≈ ${CT.iL} m × ${CT.iW} m · 2 × ${CG.W} m = 2.20 m across (≈0.15 m lateral clearance) · 8 × ${CG.L} m = 10.80 m (≈1.23 m left for restraint & handling)`,Math.max(8,b[0]),b[1]+6);
+  g.fillStyle='#F5C02A';g.fillText('Geometric illustration only · not a certified loading plan',Math.max(8,b[0]),b[1]+24)}
+
+/* ---------- cage inspection mini-scene ---------- */
+function renderCageInspect(v,k,opt){opt=opt||{};if(!v.begin('#0E1621','#121c28'))return;const g=v.g;
+  v.box(new V(0,-.01,0),[4,.02,3.4],COL.concrete,{});
+  const p=new V(0,CG.H/2+.0,0);drawCage(v,k,p,{});
+  if(opt.callouts){const C=[[new V(CG.L/2,.95,-.5),'Steel corner post & frame'],[new V(0,.6,CG.W/2),'Mesh side panel: cargo visible'],[new V(CG.L/2,-.95,.3),'Reinforced base with fork pockets'],[new V(CG.L/2+.02,0,-CG.W/2+.14),'Front gate latch'],[new V(CG.L/2,.7,.31),'ID plate: cage ID, QR, destination, weight'],[new V(.2,.2,0),'Cartons stacked & strapped inside'],[new V(0,-1.02,0),'No permanently attached wheels']];
+    g.font='500 11.5px "IBM Plex Sans",system-ui,sans-serif';
+    C.forEach(([pt,s],i)=>{const q=v.proj(p.x+pt.x,p.y+pt.y,p.z+pt.z);if(q[2]<.1)return;const right=i%2===0;const lx=right?v.W-12:12;const ly=46+i*Math.min(44,(v.H-90)/7);const w=g.measureText(s).width;
+      g.strokeStyle='rgba(245,192,42,.75)';g.lineWidth=1;g.beginPath();g.moveTo(q[0],q[1]);g.lineTo(right?lx-w-10:lx+w+10,ly);g.stroke();g.fillStyle='#F5C02A';g.beginPath();g.arc(q[0],q[1],3,0,7);g.fill();
+      g.fillStyle='rgba(10,16,24,.9)';g.fillRect(right?lx-w-6:lx-4,ly-10,w+10,20);g.fillStyle='#E6ECF3';g.textAlign=right?'right':'left';g.textBaseline='middle';g.fillText(s,lx,ly)})}
+  g.textAlign='left';g.fillStyle='#F5C02A';g.font='500 11px "IBM Plex Mono",monospace';g.fillText(`${k.plan.id} · ${CG.L} × ${CG.W} × ${CG.H} m (reference size, not a RealWay specification)`,12,v.H-50)}
+
+
+/* ================= CLOCK, TWEENS, OPERATIONS ================= */
+const CLK={t:0,paused:false,speed:1,last:performance.now()};
+const TW=[];const GRP={A:0,B:0,X:0};const SKIP={A:false,B:false};
+let FF=false;
+function tw(grp,dur,fn,ease){if(FF){if(fn)fn(1);return Promise.resolve()}const id=GRP[grp];return new Promise((res,rej)=>TW.push({grp,id,t0:CLK.t,dur:Math.max(1,reduce?Math.min(dur,120):dur),fn,res,rej,ease:ease||easeIO}))}
+const wait=(grp,ms)=>tw(grp,ms,null);
+function cancelGrp(g){GRP[g]++}
+function stepTweens(){for(let i=TW.length-1;i>=0;i--){const w=TW[i];if(w.id!==GRP[w.grp]){TW.splice(i,1);w.rej(new Error('cancel'));continue}
+  let t=clamp((CLK.t-w.t0)/w.dur,0,1);if(SKIP[w.grp])t=1;if(w.fn)w.fn(w.ease(t));if(t>=1){TW.splice(i,1);w.res()}}SKIP.A=false;SKIP.B=false}
+
+/* ---- builders ---- */
+function mkCages(w,inId){w.cages=CAGE_PLAN.map(pl=>({plan:pl,in:inId&&pl.own.length?inId:null,p:null,hi:false,gate:0,strap:true,status:pl.own.length?'In use':'Available'}));return w.cages}
+function mkContainer(w,o){const c=Object.assign({id:'RW-CONT-001',code:'RWCU 001001 4 · 45G1',mount:'ground',p:new V(0,CT.H/2,0),doors:0,roofOff:0,cut:0,sideClear:0,sealed:false,restraints:[]},o||{});w.containers.push(c);return c}
+function stdRestraints(){const r=[];for(let row=1;row<=8;row++){const l=cageLocal({row,side:'left'});r.push({type:'lash',x:l.x})}const last=cageLocal({row:7,side:'left'});r.push({type:'block',x:last.x+CG.L/2+.2});r.push({type:'block',x:-CT.iL/2+.03});return r}
+function mkCrane(w,o){w.crane=Object.assign({x:0,z1:-5,z2:9.5,tz:0,sy:10.5,locked:false},o||{});return w.crane}
+function railTerminal(w,o){o=o||{};w.pads=[{x:0,z:5,w:60,d:12}];w.tracks.push({z:0,gauge:o.gauge||'SG',x0:-45,x1:45});
+  w.buildings.push({x:-6,z:-14,w:26,h:7,d:8,label:o.office||'TERMINAL OPERATIONS & STORAGE',col:COL.shed});
+  w.props.push({type:'stack',x:-26,z:-6.5,n:2,cols:[COL.contBlue,'#5b6b3a','#7a4a6a']},{type:'stack',x:-26,z:-9.3,n:1,cols:['#6b6b6b']});
+  if(o.gate!==false)w.props.push({type:'gate',x:24,z:5,open:true,label:'TERMINAL GATE'})}
+function trainOn(w,gauge,x,withCont,o){o=o||{};const wg={id:'W1',x:x,z:o.z||0,gauge,locked:!!withCont,label:o.wlabel};w.wagons.push(wg);
+  w.locos.push({id:'L1',x:x+15.2,z:o.z||0,gauge,dir:1,label:o.llabel});
+  if(o.second!==false){w.wagons.push({id:'W2',x:x-14.2,z:o.z||0,gauge,locked:true});w.containers.push({id:'X2',code:'OTHR 552810 7',mount:'wagon:W2',col:COL.contBlue,doors:0,roofOff:0,cut:0,sideClear:0,sealed:true,restraints:[]})}
+  let c=null;if(withCont){c=mkContainer(w,{mount:'wagon:W1',sealed:true,restraints:stdRestraints()});mkCages(w,c.id)}else mkCages(w,null);
+  return {wg,c}}
+function trainShift(w,dx){w.wagons.forEach(o=>{if(o.train!==false)o.x+=dx});w.locos.forEach(o=>o.x+=dx)}
+async function trainMoveTo(g,w,target,dur,ease){const w1=w.wagons.find(x=>x.id==='W1');const start=w1.x;let last=0;w.speed=0;
+  await tw(g,dur,t=>{const nx=start+(target-start)*t;trainShift(w,nx-start-last);last=nx-start;w.speed=Math.abs(target-start)/dur*60},ease||easeIO);w.speed=0}
+
+/* crane */
+async function craneTo(g,w,x,z){const c=w.crane;const dx=Math.abs(x-c.x);if(dx>.02){const x0=c.x;await tw(g,dx/2.6*1000+400,t=>c.x=lerp(x0,x,t))}const dz=Math.abs(z-c.tz);if(dz>.02){const z0=c.tz;await tw(g,dz/1.8*1000+400,t=>c.tz=lerp(z0,z,t))}}
+async function hoistTo(g,w,y){const c=w.crane;const y0=c.sy;const d=Math.abs(y-y0);if(d<.02)return;await tw(g,d/1.3*1000+350,t=>c.sy=lerp(y0,y,t))}
+const CARRY_SY=5.6+CT.H+.16;
+function mountXZY(w,m){if(m.startsWith('wagon:')){const wg=w.wagons.find(x=>x.id===m.slice(6));return [wg.x,wg.z,DECK[wg.gauge],wg]}
+  if(m.startsWith('truck:')){const t=w.trucks.find(x=>x.id===m.slice(6));return [t.x,t.z,TRAILER_DECK,t]}
+  const p=m.split(':');return [+p[1],+p[2],0,null]}
+async function liftContainer(g,w,c,toMount,say){
+  const cr=w.crane;const p=contPos(w,c);
+  if(cr.sy<CARRY_SY)await hoistTo(g,w,CARRY_SY);
+  say&&say('Crane moves into position above the container');await craneTo(g,w,p.x,p.z);
+  say&&say('Spreader lowers and aligns with the four upper corner fittings');await hoistTo(g,w,p.y+CT.H/2+.16);
+  const src=c.mount.startsWith('wagon:')||c.mount.startsWith('truck:')?mountXZY(w,c.mount)[3]:null;
+  if(src){say&&say('Securing devices on the carrying equipment are released');await wait(g,700);src.locked=false;await wait(g,500)}
+  cr.locked=true;say&&say('Spreader twistlocks engage. Operator confirms the lift is ready.');await wait(g,900);
+  c.mount='crane';say&&say('The complete container is lifted vertically. The wagon stays still on the track.');await hoistTo(g,w,CARRY_SY);
+  const [tx,tz,ty,dst]=mountXZY(w,toMount);
+  say&&say('The suspended container moves to the receiving position');await craneTo(g,w,tx,tz);
+  await hoistTo(g,w,ty+CT.H+.16+.35);say&&say('Careful alignment with the receiving fittings');await hoistTo(g,w,ty+CT.H+.16);
+  if(toMount.startsWith('ground:')){c.p=new V(tx,CT.H/2,tz);c.mount='ground'}else c.mount=toMount;
+  cr.locked=false;await wait(g,500);if(dst){dst.locked=true;say&&say('Container secured to the receiving equipment')}
+  await hoistTo(g,w,CARRY_SY)}
+
+/* forklift with a pick point in front of the doors */
+function dockGeo(c){const p=contPos({wagons:[],trucks:[],crane:null},c);const rear=p.x+CT.L/2;return {rear,P:rear+3.2,F:rear+6.4,qZ:6.4}}
+async function flMove(g,w,x,z){const f=w.forklift;const dz=Math.abs(z-f.z);if(dz>.02){const z0=f.z;await tw(g,dz/1.6*1000+300,t=>f.z=lerp(z0,z,t))}const dx=Math.abs(x-f.x);if(dx>.02){const x0=f.x;await tw(g,dx/1.8*1000+300,t=>f.x=lerp(x0,x,t))}}
+async function flFork(g,w,y){const f=w.forklift;const y0=f.fy;await tw(g,500,t=>f.fy=lerp(y0,y,t))}
+function queuePositions(w,geo){const q=w.cages.filter(k=>k.queue!=null).sort((a,b)=>a.queue-b.queue);q.forEach((k,i)=>{k.p=new V(geo.P,CG.H/2,geo.qZ+i*1.35)})}
+async function loadCage(g,w,c,k,say){const geo=dockGeo(c);const l=cageLocal(k.plan);const zs=l.z;
+  // pallet jack brings cage from the queue to the pick point
+  say&&say(`${k.plan.id} brought to the pick point by pallet jack`);k.queue=null;const z0=k.p.z;const worker=w.props.find(p=>p.type==='person'&&p.jack);
+  await tw(g,1100,t=>{k.p.z=lerp(z0,zs,t);if(worker){worker.x=geo.P+1;worker.z=k.p.z+.9}});queuePositions(w,geo);
+  await flMove(g,w,geo.F,zs);await flFork(g,w,.05);await flMove(g,w,k.p.x+.2+CG.L/2,zs);await flFork(g,w,.15);
+  w.forklift.carry=k;k.onFork=true;k.p=null;
+  say&&say(`Forklift carries ${k.plan.id} through the rear doors to Row ${k.plan.row}, ${k.plan.side}`);
+  await flMove(g,w,contPos(w,c).x+l.x+.2+CG.L/2,zs);await flFork(g,w,.02);
+  w.forklift.carry=null;k.onFork=false;k.in=c.id;await flMove(g,w,geo.F,zs)}
+async function unloadCage(g,w,c,k,say){const geo=dockGeo(c);const l=cageLocal(k.plan);const zs=l.z;
+  await flMove(g,w,geo.F,zs);await flFork(g,w,.02);say&&say(`Forklift reaches ${k.plan.id}, the cage nearest the doors`);
+  await flMove(g,w,contPos(w,c).x+l.x+.2+CG.L/2,zs);await flFork(g,w,.15);k.in=null;w.forklift.carry=k;k.onFork=true;
+  await flMove(g,w,geo.P+.2+CG.L/2,zs);await flFork(g,w,.02);w.forklift.carry=null;k.onFork=false;k.p=new V(geo.P,CG.H/2,zs);
+  k.scan=true;say&&say(`${k.plan.id} scanned against the manifest`);await wait(g,700);k.scan=false;
+  await flMove(g,w,geo.F,zs);
+  const z0=k.p.z;const target=geo.qZ+(w.outQ=(w.outQ||0)+1)*0;// move to outbound lane
+  const lane=w.outbound||(w.outbound=[]);lane.unshift(k);
+  await tw(g,900,t=>k.p.z=lerp(z0,geo.qZ+1.2,t));lane.forEach((q,i)=>{q.p=new V(geo.P+2.2+Math.floor(i/6)*1.6,CG.H/2,geo.qZ+1.2+(i%6)*1.3)})}
+async function doorsTo(g,c,v){const d0=c.doors;await tw(g,1400,t=>c.doors=lerp(d0,v,t))}
+function dockWorld(o){o=o||{};const w=newWorld();w.pads=[{x:4,z:3,w:44,d:22,col:COL.concrete}];
+  w.buildings.push({x:12,z:-9,w:24,h:8,d:9,label:o.building||'CONSOLIDATION WAREHOUSE',doors:[-6,0,6]});
+  const c=mkContainer(w,{mount:'ground',p:new V(0,CT.H/2,0),doors:o.doors??0,sealed:!!o.sealed,restraints:o.restraints||[]});
+  mkCages(w,o.loaded?c.id:null);const geo=dockGeo(c);
+  w.zones.push({x:geo.P,z:0,w:1.8,d:3.2,label:'PICK POINT',col:'#F5C02A'});
+  w.forklift={x:geo.F,z:.6,dir:-1,fy:.02,carry:null};
+  w.props.push({type:'person',x:geo.P+1,z:4.2,jack:true,col:'#F28C28'},{type:'person',x:geo.rear+1,z:-2.2,col:'#2FD27E'});
+  return {w,c,geo}}
+
+
+/* ================= OPEN-TOP / HARDTOP CONTAINER + CAGE EXCHANGE ================= */
+SME.LA={name:'Laos-bound',full:'Laos-bound',col:'#2B7BD8'};SME.TH={name:'Thailand-bound',full:'Thailand-bound',col:'#1F9D63'};SME.MY={name:'Malaysia-bound',full:'Malaysia-bound',col:'#8B5CF6'};
+const PAD_Z=5.6,RECV_Z=11.2,TRACK_Z=0;
+const HUBS={CN:'Kunming hub, China',LA:'Vientiane hub, Laos',TH:'Bangkok-area hub, Thailand',MY:'Malaysian hub (PIP / Klang)'};
+function msCage(id,pos,org,dest,sme,kg){const row=Math.ceil(pos/2),side=pos%2===1?'left':'right';return {plan:{id:'RW-CAGE-'+id,n:pos,row,side,own:[dest],kg,org,dest,sme,pos},in:null,p:null,lugs:true,strap:true,hold:true,status:'',hi:false,gate:0}}
+function initialCages(){const out=[];const my=[['M01','Kunming Lighting'],['M02','Kunming Lighting'],['M03','Yunnan Ceramics'],['M04','Yunnan Ceramics'],['M06','Guangxi Textiles'],['M07','Guangxi Textiles'],['M08','Kunming Lighting'],['M10','Chongqing Tools'],['M11','Chongqing Tools'],['M12','Yunnan Ceramics'],['M13','Guangxi Textiles'],['M14','Chongqing Tools']];
+  const posMY=[1,2,3,4,6,7,8,10,11,12,13,14];posMY.forEach((p,i)=>out.push(msCage(my[i][0],p,'CN','MY',my[i][1],420+(i*37)%180)));
+  out.push(msCage('C01',5,'CN','LA','Yunnan Tea Co. (China SME)',380));out.push(msCage('C02',9,'CN','TH','Kunming Hardware (China SME)',460));
+  return out}
+function otPos(w){const c=w.ot;if(c.mount==='crane')return new V(w.crane.x,w.crane.sy-.16-CT.H/2,w.crane.tz);if(c.mount&&c.mount.startsWith('wagon:')){const wg=w.wagons.find(x=>x.id===c.mount.slice(6));return new V(wg.x,DECK[wg.gauge]+CT.H/2,wg.z)}return c.p}
+function cageWorldPos(w,k){const p=otPos(w);const l=cageLocal(k.plan);return new V(p.x+l.x,p.y-CT.H/2+.16+CG.H/2,p.z+l.z)}
+function msWorld(o){o=o||{};const w=newWorld();w.pads=[{x:0,z:7,w:56,d:14,col:COL.concrete}];
+  w.tracks.push({z:TRACK_Z,gauge:o.gauge||'SG',x0:-45,x1:45});if(o.track2){w.tracks.push({z:-2.9,gauge:o.track2,x0:-45,x1:45});w.wagons.push({id:'W2',x:0,z:-2.9,gauge:o.track2,locked:false,train:false});w.locos.push({id:'L2',x:15.2,z:-2.9,gauge:o.track2,dir:1})}w.wagons.push({id:'W1',x:0,z:TRACK_Z,gauge:o.gauge||'SG',locked:true,train:true});w.locos.push({id:'L1',x:15.2,z:TRACK_Z,gauge:o.gauge||'SG',dir:1});
+  w.buildings.push({x:-2,z:-13,w:30,h:7,d:7,label:o.hub||'AUTHORISED HUB (ILLUSTRATIVE)'});
+  w.zones.push({x:0,z:PAD_Z,w:13.2,d:3.2,label:'APPROVED HANDLING POSITION',col:'#F5C02A'},{x:-3,z:RECV_Z,w:5.6,d:2.4,label:'AUTHORISED RECEIVING AREA',col:'#2FD27E'},{x:4.5,z:RECV_Z,w:5.6,d:2.4,label:'OUTBOUND CAGE STAGING',col:'#5B8CFF'});
+  w.ot={mount:'wagon:W1',p:new V(0,CT.H/2,PAD_Z),cover:o.cover||'tarp',tarp:1,bows:[...Array(9)].map((_,i)=>({x:-CT.L/2+.7+i*1.33,on:true,p:null})),roofs:[{x:-CT.L/4,on:true,p:null},{x:CT.L/4,on:true,p:null}],doors:0,sealed:true,seal:'SEAL RWS-0451207',
+    frames:[1,2,3,4,5,6,7].flatMap(r=>['left','right'].map(side=>({r,side,x:cageLocal({row:r,side:'left'}).x+CG.L/2+.01,locked:true,lift:0,out:false}))),nearA:o.nearA??.18};
+  mkCrane(w,{x:-12,z1:-4.6,z2:15.2,tz:PAD_Z,sy:CARRY_SY+.6});w.crane.spr=[12.2,.28,2.4];w.crane.label='OVERHEAD GANTRY CRANE';
+  w.cages=initialCages();w.cages.forEach(k=>k.in='OT');w.stackBows=[];return w}
+
+/* ---------- drawing ---------- */
+function drawFrame(v,p,f){const s=f.side==='left'?1:-1;const hw=CT.iW/2-.1;const zc=p.z+s*(CT.iW/4+.02);
+  if(f.out){const x=p.x+f.x;v.box(new V(x,.07,p.z+CT.W/2+1.1+(s>0?0:.45)),[.3,.12,hw],'#c06a28',{edge:COL.edge});return}
+  const x=p.x+f.x;const b=p.y-CT.H/2+.16;const lift=f.lift||0;const col=f.locked?'#E07A2F':'#9aa5b1';
+  [-1,1].forEach(e=>v.box(new V(x,b+.95+lift,zc+e*hw/2),[.09,1.9,.09],col,{edge:COL.edge}));
+  [.12,.95,1.82].forEach(y=>v.box(new V(x,b+y+lift,zc),[.07,.08,hw],col,{}));
+  v.line(new V(x,b+.12+lift,zc-hw/2),new V(x,b+1.82+lift,zc+hw/2),col,2,.9);
+  v.box(new V(x,b+1.45+lift,p.z+s*(CT.iW/2-.02)),[.16,.16,.06],f.locked?COL.pinOn:COL.pinOff,{});
+  v.box(new V(x,b+.08,zc),[.18,.06,.18],f.locked?COL.pinOn:COL.pinOff,{})}
+function drawOT(v,w,opt){opt=opt||{};const c=w.ot;const p=otPos(w);const hL=CT.L/2,hH=CT.H/2,hW=CT.W/2;const base=c.col||'#3E6E8E';const g=v.g;const bottom=p.y-hH;
+  v.box(new V(p.x,bottom+.08,p.z),[CT.L,.16,CT.W],COL.floor,{edge:COL.edge,hit:{type:'ot'}});
+  v.box(new V(p.x,p.y,p.z-hW+.03),[CT.L,CT.H,.06],base,{light:.78,edge:COL.edge});
+  v.box(new V(p.x-hL+.04,p.y,p.z),[.08,CT.H,CT.W],base,{light:.78,edge:COL.edge});
+  // cages + frames inside, back to front
+  const items=[];w.cages.filter(k=>k.in==='OT').forEach(k=>items.push({p:cageWorldPos(w,k),f:pp=>{drawCage(v,k,pp,{dim:opt.dim&&!k.hi});if(k.temp){v.text(pp.x,pp.y+CG.H/2+.45,pp.z,'! re-secure',{size:10,col:'#0B111A',bg:'#F2A35F'})}if(k.hold){const hh=pp.y+CG.H/2+.07;v.box(new V(pp.x,hh,pp.z),[.1,.07,CG.W+.06],'#E07A2F',{});v.box(new V(pp.x,hh,pp.z+(k.plan.side==='left'?1:-1)*(CG.W/2+.06)),[.14,.14,.08],COL.pinOn,{})}}}));
+  c.frames.forEach(f=>items.push({p:new V(p.x+f.x,p.y,p.z+(f.side==='left'?.6:-.6)),f:()=>drawFrame(v,p,f)}));
+  items.sort((a,b)=>v.d2(b.p)-v.d2(a.p)).forEach(i=>i.f(i.p));
+  // near wall
+  const nA=opt.ext?1:c.nearA;v.box(new V(p.x,p.y,p.z+hW-.03),[CT.L,CT.H,.06],base,{alpha:nA,edge:nA>.5?COL.edge:null,hit:{type:'ot'}});
+  if(nA>.5){g.globalAlpha=.25;g.strokeStyle='#000';g.beginPath();for(let x=-hL+.2;x<hL-.15;x+=.28){const a=v.proj(p.x+x,bottom+.15,p.z+hW+.005),b2=v.proj(p.x+x,p.y+hH-.15,p.z+hW+.005);if(a[2]>.15&&b2[2]>.15){g.moveTo(a[0],a[1]);g.lineTo(b2[0],b2[1])}}g.stroke();g.globalAlpha=1;
+    v.text(p.x-3.6,p.y+.6,p.z+hW+.02,'RWOU 200045 · 45U1 '+(c.cover==='hard'?'HARDTOP':'OPEN-TOP'),{size:11,col:'#fff'});v.text(p.x-3.6,p.y+.2,p.z+hW+.02,'RW-CONT-OT1 (illustrative)',{size:10,col:'#E6ECF3',weight:500})}
+  // top rails
+  [-1,1].forEach(s=>v.box(new V(p.x,p.y+hH-.08,p.z+s*(hW-.06)),[CT.L,.16,.12],shade(base,1)?base:base,{light:.9,edge:COL.edge}));
+  v.box(new V(p.x-hL+.08,p.y+hH-.08,p.z),[.16,.16,CT.W],base,{light:.9});
+  for(const sx of [-1,1])for(const sy of [-1,1])for(const sz of [-1,1])if(sz>0||sx>0||sy>0)v.box(new V(p.x+sx*(hL-.09),p.y+sy*(hH-.06),p.z+sz*(hW-.08)),[.18,.12,.16],'#22272e',{});
+  drawDoors(v,p,c,base);
+  // roof bows
+  if(c.cover==='tarp'){c.bows.forEach(b=>{if(!b.on)return;const x=p.x+b.x,y=p.y+hH;const P=[];for(let i=0;i<=6;i++){const t=i/6,z=-hW+.06+t*(CT.W-.12);P.push(new V(x,y+.02+Math.sin(Math.PI*t)*.16,p.z+z))}for(let i=0;i<6;i++)v.line(P[i],P[i+1],'#9aa5b1',2.4,.95)});
+    if(c.tarp>.01){const x0=p.x-hL+.02,x1=x0+(CT.L-.04)*c.tarp,y=p.y+hH+.02;const ridge=.16;const T=[[x0,-hW],[x1,-hW],[x1,0],[x0,0]],U=[[x0,0],[x1,0],[x1,hW],[x0,hW]];
+      v.poly([new V(x0,y,p.z-hW),new V(x1,y,p.z-hW),new V(x1,y+ridge,p.z),new V(x0,y+ridge,p.z)],'#35574a',.92,'rgba(0,0,0,.4)',1);
+      v.poly([new V(x0,y+ridge,p.z),new V(x1,y+ridge,p.z),new V(x1,y,p.z+hW),new V(x0,y,p.z+hW)],'#41685a',.92,'rgba(0,0,0,.4)',1);
+      v.poly([new V(x0,y,p.z+hW+.01),new V(x1,y,p.z+hW+.01),new V(x1,y-.3,p.z+hW+.01),new V(x0,y-.3,p.z+hW+.01)],'#41685a',.95,null);
+      if(c.tarp>.97)v.line(new V(x0,y-.28,p.z+hW+.02),new V(x1,y-.28,p.z+hW+.02),'#F5C02A',1.5,.9);
+      if(c.tarp<.99){const P=[];for(let i=0;i<=6;i++){const t=i/6;P.push(new V(x1,y+.05+Math.sin(Math.PI*t)*.25,p.z-hW+t*CT.W))}for(let i=0;i<6;i++)v.line(P[i],P[i+1],'#2b463c',6,1)}}}
+  else c.roofs.forEach(r=>{if(!r.on)return;v.box(new V(p.x+r.x,p.y+hH+.05,p.z),[CT.L/2-.04,.1,CT.W],'#4f7f9d',{edge:COL.edge,light:1.05});[-.3,0,.3].forEach(dx=>v.line(new V(p.x+r.x+dx*CT.L/2,p.y+hH+.11,p.z-hW+.05),new V(p.x+r.x+dx*CT.L/2,p.y+hH+.11,p.z+hW-.05),'rgba(0,0,0,.3)',1))})}
+function drawCrane2(v,w){const c=w.crane;if(!c)return;const TY=13.3;const sp=c.spr;const sp3=new V(c.x,c.sy,c.tz);
+  [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([a,b])=>v.line(new V(c.x+a*.8,TY-.4,c.tz+b*.7),new V(c.x+a*(sp[0]/2-.3),c.sy+.12,c.tz+b*(sp[2]/2-.2)),'#c9d1da',1.2,.85));
+  v.box(sp3,sp,COL.spreader,{edge:COL.edge,hit:{type:'crane'}});
+  [-1,1].forEach(a=>[-1,1].forEach(b=>v.box(new V(c.x+a*(sp[0]/2-.1),c.sy-.15,c.tz+b*(sp[2]/2-.08)),[.12,.1,.12],c.locked?COL.pinOn:COL.pinOff,{})));
+  [-1.4,1.4].forEach(dx=>v.box(new V(c.x+dx,12.7,(c.z1+c.z2)/2),[.6,1,c.z2-c.z1+1.4],COL.crane,{edge:COL.edge,hit:{type:'crane'}}));
+  v.box(new V(c.x,TY,c.tz),[2.6,.8,2.4],COL.craneD,{edge:COL.edge});
+  [-2.6,2.6].forEach(dx=>v.box(new V(c.x+dx,6.2,c.z2),[.55,12.4,.6],COL.crane,{edge:COL.edge,hit:{type:'crane'}}));v.box(new V(c.x,.45,c.z2),[5.8,.5,.8],COL.craneD,{});
+  v.box(new V(c.x,12.1,c.z1),[5.8,.7,.7],COL.crane,{});v.box(new V(c.x,12.1,c.z2),[5.8,.7,.7],COL.crane,{});
+  if(c.label)v.text(c.x,13.9,c.z2,c.label,{size:10,col:'#E6ECF3',bg:'rgba(11,17,26,.8)'});
+  if(c.attach)v.text(c.x,c.sy+.7,c.tz,c.attach,{size:10,col:'#0B111A',bg:'#F5C02A'})}
+function renderMS(v,w,opt){opt=opt||{};if(!v.begin('#0E1621','#101923'))return;const g=v.g;
+  g.fillStyle=COL.ground;const h1=v.proj(-120,0,-60),h2=v.proj(120,0,-60);const hy=(h1[2]>0&&h2[2]>0)?Math.min(h1[1],h2[1]):v.H*.25;g.fillRect(0,Math.max(0,hy),v.W,v.H);
+  (w.pads||[]).forEach(pd=>{for(let x=pd.x-pd.w/2;x<pd.x+pd.w/2-.01;x+=10){const ww=Math.min(10,pd.x+pd.w/2-x);v.box(new V(x+ww/2,.0,pd.z),[ww,.02,pd.d],pd.col||COL.concrete,{})}});
+  w.zones.forEach(z=>drawZone(v,z));w.buildings.forEach(b=>drawBuilding(v,b));drawCraneFar(v,w);w.tracks.forEach(t=>drawTrack(v,w,t));
+  const items=[];w.wagons.forEach(o=>items.push({p:new V(o.x,.8,o.z),f:()=>drawWagon(v,w,o),k:'w'}));w.locos.forEach(o=>items.push({p:new V(o.x,2,o.z),f:()=>drawLoco(v,w,o)}));
+  w.props.forEach(p=>items.push({p:p.p||new V(p.x,1,p.z),f:()=>drawProp(v,w,p)}));
+  w.cages.filter(k=>!k.in&&k.p&&!k.carried&&!k.ghost).forEach(k=>items.push({p:k.p,f:()=>drawCage(v,k,k.p,{})}));
+  w.ot.roofs.forEach(r=>{if(r.p&&!r.carried)items.push({p:r.p,f:()=>v.box(r.p,[CT.L/2-.04,.1,CT.W],'#4f7f9d',{edge:COL.edge})})});
+  if(w.stackBows.length)items.push({p:new V(-9,.3,RECV_Z),f:()=>w.stackBows.forEach((b,i)=>v.box(new V(-9,.06+i*.08,RECV_Z+1.2),[.12,.06,2.4],'#9aa5b1',{}))});
+  if(w.ot.mount!=='crane')items.push({p:new V(otPos(w).x,1.5,otPos(w).z),f:()=>drawOT(v,w,opt)});
+  items.filter(i=>i.k==='w').forEach(i=>i.f());items.filter(i=>i.k!=='w').sort((a,b)=>v.d2(b.p)-v.d2(a.p)).forEach(i=>i.f());
+  if(w.ot.mount==='crane')drawOT(v,w,opt);
+  const cc=w.crane.carry;if(cc&&cc.kind==='cage')drawCage(v,cc.k,new V(w.crane.x,w.crane.sy-.12-CG.H/2-.05,w.crane.tz),{});
+  if(cc&&cc.kind==='roof')v.box(new V(w.crane.x,w.crane.sy-.14,w.crane.tz),[CT.L/2-.04,.1,CT.W],'#4f7f9d',{edge:COL.edge});
+  drawCrane2(v,w);
+  w.labels.forEach(l=>v.text(l.x,l.y,l.z,l.t,{size:l.size||11,col:l.col||'#E6ECF3',bg:'rgba(11,17,26,.8)'}))}
+
+/* ---------- operations ---------- */
+const CH=.17;// spreader/frame offset above load top
+const CAGE_SY=3.3+CG.H+CH+.3;// carried cage bottom ≈3.3 m, clear of 2.9 m container walls
+async function setAttach(g,w,kind,X){const c=w.crane;const s0=c.spr.slice();const s1=kind==='container'?[12.2,.28,2.4]:kind==='roof'?[6.0,.2,2.4]:[CG.L,.2,CG.W];
+  c.attach=kind==='container'?'CONTAINER SPREADER':kind==='roof'?'ROOF-PANEL LIFTING BEAM':'CAGE LIFTING FRAME (PROPOSED)';X&&X.say(`Crane attachment: ${c.attach.toLowerCase()}`);
+  await tw(g,1100,t=>{c.spr=[lerp(s0[0],s1[0],t),lerp(s0[1],s1[1],t),lerp(s0[2],s1[2],t)]})}
+async function liftOT(g,w,to,X){const c=w.ot;const cr=w.crane;const p=otPos(w);if(cr.sy<CARRY_SY)await hoistTo(g,w,CARRY_SY+.4);
+  await craneTo(g,w,p.x,p.z);await hoistTo(g,w,p.y+CT.H/2+.16);const src=c.mount.startsWith('wagon:')?w.wagons.find(x=>x.id===c.mount.slice(6)):null;if(src){X&&X.say('Wagon securing fittings released');src.locked=false;await wait(g,500)}
+  cr.locked=true;await wait(g,500);c.mount='crane';X&&X.say('Whole container lifted by its four top corner fittings');await hoistTo(g,w,CARRY_SY+.4);
+  const wg=to==='pad'?null:w.wagons.find(x=>x.id===to.slice(6));const tx=wg?wg.x:0,tz=wg?wg.z:PAD_Z,ty=wg?DECK[wg.gauge]:0;
+  await craneTo(g,w,tx,tz);await hoistTo(g,w,ty+CT.H+.16+.35);await hoistTo(g,w,ty+CT.H+.16);
+  if(!wg){c.p=new V(0,CT.H/2,PAD_Z);c.mount='ground'}else{c.mount=to;wg.locked=true}cr.locked=false;await wait(g,400);await hoistTo(g,w,CARRY_SY+.4)}
+async function cageUp(g,w,k,X){const cr=w.crane;const p=cageWorldPos(w,k);if(cr.sy<CAGE_SY)await hoistTo(g,w,CAGE_SY);await craneTo(g,w,p.x,p.z);
+  X&&X.say(`Lifting frame lowered onto ${k.plan.id}’s four top lifting lugs`);await hoistTo(g,w,p.y+CG.H/2+CH+.3);await hoistTo(g,w,p.y+CG.H/2+CH);cr.locked=true;await wait(g,600);
+  k.in=null;k.hold=false;k.carried=true;cr.carry={kind:'cage',k};X&&X.say(`${k.plan.id} lifted vertically until clear of the container walls`);await hoistTo(g,w,CAGE_SY)}
+async function cageDown(g,w,x,z,X){const cr=w.crane;const k=cr.carry.k;await craneTo(g,w,x,z);await hoistTo(g,w,CG.H+CH+.3);await hoistTo(g,w,CG.H+CH);cr.locked=false;cr.carry=null;k.carried=false;k.p=new V(x,CG.H/2,z);await wait(g,350);await hoistTo(g,w,CAGE_SY)}
+async function cagePick(g,w,k,X){const cr=w.crane;if(cr.sy<CAGE_SY)await hoistTo(g,w,CAGE_SY);await craneTo(g,w,k.p.x,k.p.z);await hoistTo(g,w,CG.H+CH);cr.locked=true;await wait(g,500);cr.carry={kind:'cage',k};k.carried=true;k.p=null;await hoistTo(g,w,CAGE_SY)}
+async function cageInto(g,w,pos,X){const cr=w.crane;const k=cr.carry.k;const row=Math.ceil(pos/2),side=pos%2?'left':'right';Object.assign(k.plan,{row,side,pos,n:pos});
+  const t=cageWorldPos(w,k);X&&X.say(`Moving ${k.plan.id} above the vacated position P${pos}`);await craneTo(g,w,t.x,t.z);
+  X&&X.say('Lowered slowly and vertically into the position — guided, no contact with adjacent cages');await hoistTo(g,w,t.y+CG.H/2+CH+.5);await tw(g,1600,(()=>{const y0=cr.sy;return u=>cr.sy=lerp(y0,t.y+CG.H/2+CH,u)})());
+  cr.locked=false;cr.carry=null;k.carried=false;k.in='OT';await wait(g,400);await hoistTo(g,w,CAGE_SY)}
+function framesFor(w,pos){const row=Math.ceil(pos/2),side=pos%2?'left':'right';return w.ot.frames.filter(f=>f.side===side&&(f.r===row||f.r===row-1))}
+function neighbours(w,pos){const row=Math.ceil(pos/2),side=pos%2?'left':'right';return w.cages.filter(k=>k.in==='OT'&&k.plan.side===side&&Math.abs(k.plan.row-row)===1)}
+function rowLoads(w){const r=[];for(let i=1;i<=8;i++)r.push(w.cages.filter(k=>k.in==='OT'&&k.plan.row===i).reduce((a,k)=>a+k.plan.kg+CAGE_TARE,0));return r}
+const CAGE_TARE=95;// assumed cage tare kg (unconfirmed)
+
+
+/* ================= HUB CONFIG + STEP SEQUENCES ================= */
+const LABELS={E:{t:'Existing technology',c:'#2B7BD8'},X:{t:'Established logistics practice',c:'#18905A'},P:{t:'Proposed RealWay innovation',c:'#D97706'}};
+const HUBCFG={
+  LA:{key:'LA',country:'Laos',name:'VIENTIANE SOUTH — AUTHORISED HUB (ILLUSTRATIVE)',short:'Vientiane South hub',gauge:'SG',track2:'MG',depart:'W2',
+    out:['RW-CAGE-C01'],ins:[{id:'L01',pos:5,org:'LA',dest:'TH',sme:'Vientiane Handicrafts (Lao SME)',kg:340}],
+    sealIn:'RWS-0451207',sealOut:'RWS-LA-0812',authority:'Lao customs (transit control)',
+    next:'Container moves to a metre-gauge wagon for the Thanaleng–Nong Khai crossing into Thailand',importNote:'Lao import declaration for RW-CAGE-C01 (China → Laos)'},
+  TH:{key:'TH',country:'Thailand',name:'BANGKOK-AREA ICD — AUTHORISED HUB (ILLUSTRATIVE)',short:'Bangkok-area hub',gauge:'MG',depart:'W1',
+    out:['RW-CAGE-L01','RW-CAGE-C02'],ins:[{id:'T01',pos:5,org:'TH',dest:'MY',sme:'Bangkok Auto Parts (Thai SME)',kg:520},{id:'T02',pos:9,org:'TH',dest:'MY',sme:'Chiang Mai Furniture (Thai SME)',kg:410}],
+    sealIn:'RWS-LA-0812',sealOut:'RWS-TH-2290',authority:'Thai customs (transit control)',
+    next:'Metre-gauge service south to Malaysia via Padang Besar',importNote:'Thai import declarations for RW-CAGE-L01 (Laos → Thailand) and RW-CAGE-C02 (China → Thailand)'}};
+const C=(theta,phi,R,x,y,z)=>({theta,phi,R,target:new V(x,y,z)});
+const CAM={wide:C(.5,1.04,36,0,2,3),pad:C(.42,.98,20,0,1.6,PAD_Z),top:C(.3,.62,17,0,1.4,PAD_Z),recv:C(.95,.92,22,-1,1.4,8)};
+const camAt=x=>C(.45,.9,12,x,1.4,PAD_Z);
+let COVER='tarp';
+
+function hubWorld(key){const cfg=HUBCFG[key];const w=msWorld({gauge:cfg.gauge,track2:cfg.track2,hub:cfg.name,cover:COVER});w.cfg=cfg;
+  if(key==='TH'){w.cages=w.cages.filter(k=>k.plan.id!=='RW-CAGE-C01');const l=msCage('L01',5,'LA','TH','Vientiane Handicrafts (Lao SME)',340);l.in='OT';w.cages.push(l);w.ot.seal='SEAL '+cfg.sealIn}
+  cfg.ins.forEach((c,i)=>{const k=msCage(c.id,c.pos,c.org,c.dest,c.sme,c.kg);k.in=null;k.hold=false;k.ghost=true;k.p=new V(4.2+i*1.6,CG.H/2,RECV_Z);w.cages.push(k)});
+  w.wagons[0].x=-34;w.locos[0].x=-34+15.2;w.recvN=0;return w}
+function introWorld(){const w=msWorld({gauge:'SG',hub:'CONCEPT VIEW — CONTAINER ON HANDLING PAD',cover:COVER});w.ot.mount='ground';w.wagons[0].locked=false;w.cfg=null;return w}
+async function moveTrain(g,w,wid,lid,x0,x1,dur){const wg=w.wagons.find(x=>x.id===wid),lo=w.locos.find(x=>x.id===lid);await tw(g,dur,t=>{const e=easeIO(t);wg.x=lerp(x0,x1,e);lo.x=wg.x+15.2})}
+const byId=(w,id)=>w.cages.find(k=>k.plan.id===id);
+const outC=w=>w.cfg.out.map(id=>byId(w,id));const inC=w=>w.cfg.ins.map(c=>byId(w,'RW-CAGE-'+c.id));
+const chk=(a)=>`<div class="checks">${a.map(([t,ok])=>`<span class="${ok?'':'no'}">${t}</span>`).join('')}</div>`;
+function loadBars(rows,cmp){const mx=Math.max(1400,...rows,...(cmp||[]));return `<div class="wd">${rows.map((v,i)=>`<div><i style="height:${clamp(v/mx*100,2,100)}%"></i>${cmp?`<s style="height:${clamp(cmp[i]/mx*100,2,100)}%"></s>`:''}<span>R${i+1}</span></div>`).join('')}</div>`}
+function cogOffset(rows){const tot=rows.reduce((a,b)=>a+b,0)||1;let m=0;rows.forEach((v,i)=>m+=v*cageLocal({row:i+1,side:'left'}).x);return m/tot}
+
+async function openCover(g,w,X){const c=w.ot;
+  if(c.cover==='tarp'){X.say('Customs officer removes the TIR-type cover cord seal; number recorded');c.sealed=false;await wait(g,700);
+    X.say('Tarpaulin rolled back by trained staff from a work platform');const t0=c.tarp;await tw(g,2200,t=>c.tarp=lerp(t0,0,t));
+    X.say('Removable roof bows lifted out and stacked — top opening now clear');for(const b of c.bows){if(!b.on)continue;b.on=false;w.stackBows.push(1);await wait(g,180)}}
+  else{c.sealed=false;await setAttach(g,w,'roof',X);for(let i=0;i<c.roofs.length;i++){const r=c.roofs[i];const p=otPos(w);if(w.crane.sy<CARRY_SY)await hoistTo(g,w,CARRY_SY);await craneTo(g,w,p.x+r.x,p.z);await hoistTo(g,w,p.y+CT.H/2+.25);w.crane.locked=true;await wait(g,400);
+    r.on=false;w.crane.carry={kind:'roof'};X.say(`Hardtop roof section ${i+1} of 2 lifted off`);await hoistTo(g,w,CARRY_SY);await craneTo(g,w,12.5,RECV_Z);await hoistTo(g,w,.3+i*.12);w.crane.carry=null;w.crane.locked=false;r.p=new V(12.5,.1+i*.12,RECV_Z);await hoistTo(g,w,CARRY_SY)}}}
+async function closeCover(g,w,X){const c=w.ot;
+  if(c.cover==='tarp'){X.say('Roof bows refitted into their sockets');for(const b of c.bows){b.on=true;w.stackBows.pop();await wait(g,160)}
+    X.say('Tarpaulin pulled over, tensioned and tied through every eyelet');const t0=c.tarp;await tw(g,2200,t=>c.tarp=lerp(t0,1,t))}
+  else{await setAttach(g,w,'roof',X);for(let i=c.roofs.length-1;i>=0;i--){const r=c.roofs[i];await craneTo(g,w,12.5,RECV_Z);await hoistTo(g,w,r.p.y+.15);w.crane.locked=true;r.p=null;w.crane.carry={kind:'roof'};await hoistTo(g,w,CARRY_SY);
+    const p=otPos(w);await craneTo(g,w,p.x+r.x,p.z);await hoistTo(g,w,p.y+CT.H/2+.25);w.crane.carry=null;w.crane.locked=false;r.on=true;X.say(`Roof section ${2-i} seated and locked`);await hoistTo(g,w,CARRY_SY)}}}
+
+function exchangeSteps(key){const cfg=HUBCFG[key];const nOut=cfg.out.length,nIn=cfg.ins.length;const outList=cfg.out.join(' and '),inList=cfg.ins.map(c=>'RW-CAGE-'+c.id).join(' and ');const posList=cfg.ins.map(c=>'P'+c.pos).join(' and ');
+  const S=[
+  {t:'Arrival and transfer to an approved handling position',l:['X'],cam:CAM.wide,
+    narr:`The train arrives at the ${cfg.short}. Only a hub that is equipped (suitable crane, hardstanding, staging space) and authorised by ${cfg.authority} can do this work — not every station on the line. The terminal crane lifts the whole container off the wagon onto a marked handling position.`,
+    who:'Terminal operator (crane), with customs aware of the arrival',docs:'Transit declaration, train list, seal number '+cfg.sealIn,
+    play:async(w,X,g)=>{X.say('Train arriving at the authorised hub');await moveTrain(g,w,'W1','L1',-34,0,3200);await setAttach(g,w,'container',X);await liftOT(g,w,'pad',X);X.say('Container placed on the approved handling position','ok')}},
+  {t:'Confirm customs authorisation and handling instructions',l:['X'],cam:CAM.pad,
+    narr:'Nothing is opened until the operator has written authorisation for a partial unload under customs control, and a handling instruction that names exactly which cages come out and which go in. If authorisation is missing, the container stays sealed and continues — no exchange.',
+    who:'Hub operator + customs officer',docs:'Transit document, partial-unload authorisation, handling instruction, seal check',
+    play:async(w,X,g)=>{const items=[['Seal number matches transit document: '+cfg.sealIn,0],['Authorisation for partial unloading under customs supervision',0],[`Handling instruction: remove ${outList}`,0],[`Handling instruction: load ${inList} into ${posList}`,0],['Crane, lifting frame and operator certified for this lift',0]];
+      for(let i=0;i<=items.length;i++){X.ov(`<h4>Go / no-go check <span class="sim">simulated</span></h4>${chk(items)}<p class="small">${i===items.length?'<b>All confirmed — operator may open the cover.</b>':'Checking…'}</p>`);if(i<items.length){await wait(g,650);items[i][1]=1}}X.say('Authorisation confirmed; work may begin','ok')}},
+  {t:'Open the roof or cover',l:['E'],cam:CAM.pad,
+    narr:'Open-top containers use a removable tarpaulin over roof bows; hardtop containers use rigid roof sections lifted by crane. Both are existing equipment. The doors stay closed — access is from the top only, so no other cage has to move.',
+    who:'Trained hub staff, under customs supervision',docs:'Seal removal recorded by customs',
+    play:async(w,X,g)=>{await openCover(g,w,X);X.say('Top opening clear — doors remain closed','ok')}},
+  {t:'Remove the restraints for the selected cage'+(nOut>1?'s':''),l:['E','P'],cam:camAt(cageLocal({row:3,side:'left'}).x+(nOut>1?1.4:0)),
+    narr:'Only the restraints holding the selected cage are released: its hold-down bar and the engineered blocking frames on either end. Neighbouring cages lose restraint on one face, so the container must not be moved until restraints are reinstated (step 10).',
+    who:'Hub staff following the approved restraint plan',docs:'Restraint plan, temporary-restraint checklist',
+    play:async(w,X,g)=>{for(const k of outC(w)){k.hi=true;X.say(`${k.plan.id}: hold-down bar released`);await wait(g,700);k.hold=false;
+      const fs=framesFor(w,k.plan.pos);fs.forEach(f=>f.locked=false);X.say('Frame locking pins withdrawn (grey)');await wait(g,800);
+      for(const f of fs){await tw(g,700,t=>f.lift=t*.4);f.out=true;f.lift=0}
+      neighbours(w,k.plan.pos).forEach(n=>{n.temp=true});}
+      X.say('Adjacent cages flagged: one face temporarily unrestrained','warn')}},
+  {t:'Crane lifts the '+(key==='LA'?'Laos':'Thailand')+'-bound cage vertically out',l:['E','P'],cam:camAt(cageLocal({row:3,side:'left'}).x),
+    narr:'A suitable crane fitted with a cage lifting frame engages four lifting lugs on top of the cage and lifts it straight up. Cranes and lifting frames exist; using them to exchange individual cages mid-route is the RealWay concept that has not been tested. The cage’s rated lifting points, frame and crane capacity would need engineering approval.',
+    who:'Certified crane operator + banksman',docs:'Lift plan (cage gross mass, lifting points)',
+    play:async(w,X,g)=>{await setAttach(g,w,'cage',X);const k=outC(w)[0];await cageUp(g,w,k,X);X.say(`${k.plan.id} clear of the container`,'ok')}},
+  {t:'Scan and move to the authorised receiving area',l:['X'],cam:CAM.recv,
+    narr:`Each cage leaving the container is scanned against the manifest and set down in an authorised receiving area, where import clearance and local delivery begin. ${nOut>1?'The second cage follows the same lift.':''}`,
+    who:'Hub staff + customs; then local courier partner',docs:cfg.importNote,
+    play:async(w,X,g)=>{const ks=outC(w);for(let i=0;i<ks.length;i++){const k=ks[i];if(i>0){await cageUp(g,w,k,X)}await cageDown(g,w,-3-i*1.6,RECV_Z,X);k.scan=true;k.status='Unloaded at '+cfg.short;X.say(`${k.plan.id} scanned — matches manifest`,'ok');await wait(g,700);k.scan=false;k.hi=false}
+      X.ov(`<h4>Unloaded <span class="sim">simulated</span></h4>${ks.map(k=>`<dl class="kv"><dt>Cage</dt><dd>${k.plan.id}</dd><dt>Customer</dt><dd>${k.plan.sme}</dd><dt>Route</dt><dd>${k.plan.org} → ${k.plan.dest}</dd><dt>Next</dt><dd>Import clearance, then local courier</dd></dl>`).join('<hr>')}`)}},
+  {t:'Prepare the new '+cfg.country+'-origin cage'+(nIn>1?'s':''),l:['X','P'],cam:CAM.recv,
+    narr:`New cage${nIn>1?'s':''} from ${cfg.country}-based SMEs have already been consolidated in the hub warehouse: every carton screened for prohibited items, weighed, declared and packed into a tagged cage before the train arrives.`,
+    who:'RealWay hub team + the SME (shipper)',docs:'Commercial invoice, packing list, export/transit declaration, screening record',
+    play:async(w,X,g)=>{for(const k of inC(w)){k.ghost=false;k.scan=true;k.hi=true;await wait(g,600);k.scan=false;k.status='Ready for loading'}
+      X.ov(`<h4>Outbound cage${nIn>1?'s':''} ready</h4>${inC(w).map(k=>`<dl class="kv"><dt>Cage</dt><dd>${k.plan.id}</dd><dt>Customer</dt><dd>${k.plan.sme}</dd><dt>Route</dt><dd>${k.plan.org} → ${k.plan.dest}</dd><dt>Gross cargo</dt><dd>${fmtKg(k.plan.kg)}</dd></dl>`).join('<hr>')}${chk([['Screened — no prohibited items',1],['Weighed and declared',1],['Cage tag and seal applied',1]])}`)}},
+  {t:'Lower the new cage into the vacated position',l:['P'],cam:camAt(cageLocal({row:3,side:'left'}).x+(nIn>1?1.4:0)),
+    narr:'The crane picks the new cage and lowers it vertically into the empty position. Clearances are tight (a few centimetres), so guides and slow lowering are needed; the cage must not contact neighbours or the restraint frames.',
+    who:'Crane operator + banksman',docs:'Updated loading plan',
+    play:async(w,X,g)=>{await setAttach(g,w,'cage',X);for(const k of inC(w)){const c=cfg.ins.find(x=>'RW-CAGE-'+x.id===k.plan.id);await cagePick(g,w,k,X);await cageInto(g,w,c.pos,X);k.status='Loaded';X.say(`${k.plan.id} seated in P${c.pos}`,'ok')}}},
+  {t:'Re-check the loading plan and weight distribution',l:['X'],cam:CAM.top,
+    narr:'The cargo mix has changed, so the hub re-checks total mass against the container’s rated payload and the wagon limit, and the balance along the container. A heavier cage at one end can make the load uneven.',
+    who:'Hub planner',docs:'Revised loading plan and verified gross mass',
+    play:async(w,X,g)=>{const after=rowLoads(w);const before=w.loadsBefore||after;const tot=after.reduce((a,b)=>a+b,0);const off=cogOffset(after);
+      X.ov(`<h4>Load check <span class="sim">illustrative</span></h4>${loadBars(after,before)}<p class="small">Bars: now · outline: on arrival · R1 = front wall</p><dl class="kv"><dt>Cargo + cages</dt><dd>${fmtKg(tot)}</dd><dt>Centre of mass</dt><dd>${off>=0?'+':''}${f2(off)} m from centre</dd></dl>${chk([['Within container rated payload (check CSC plate)',1],['Within wagon load limit',1],['Longitudinal balance within assumed tolerance',Math.abs(off)<1.2?1:0]])}`);await wait(g,1800)}},
+  {t:'Install or adjust approved restraints',l:['E'],cam:camAt(cageLocal({row:3,side:'left'}).x+(nIn>1?1.4:0)),
+    narr:'The blocking frames go back in and their pins are locked; the new cage gets its hold-down bar. Every remaining cage is checked, not just the new one, because removing a cage disturbed its neighbours’ restraint.',
+    who:'Hub staff; supervisor signs off',docs:'Restraint checklist (all 14 positions)',
+    play:async(w,X,g)=>{for(const k of inC(w)){const fs=framesFor(w,k.plan.pos);for(const f of fs){f.out=false;f.lift=.4;await tw(g,600,t=>f.lift=.4*(1-t))}await wait(g,300);fs.forEach(f=>f.locked=true);X.say('Frames seated, pins locked (green)');await wait(g,500);k.hold=true;k.hi=false}
+      w.cages.forEach(k=>k.temp=false);X.say('All positions re-checked and restrained','ok')}},
+  {t:'Close and secure the roof',l:['E'],cam:CAM.pad,
+    narr:'The cover is refitted exactly as designed: roof bows seated and the tarpaulin tied through every eyelet, or the hardtop sections lowered and locked. Customs cord or seal can only be applied to a correctly closed cover.',
+    who:'Trained hub staff',docs:'Cover inspection',
+    play:async(w,X,g)=>{await closeCover(g,w,X);X.say('Cover closed and secured','ok')}},
+  {t:'Update records, apply seal and release',l:['X'],cam:CAM.pad,
+    narr:'The manifest and transit document are amended (cages out, cages in), customs applies a new seal and records its number, and the container is released for the next leg. Each SME sees the event in tracking.',
+    who:'Customs + RealWay operations',docs:'Amended manifest & transit declaration; new seal '+cfg.sealOut,
+    play:async(w,X,g)=>{w.ot.sealed=true;w.ot.seal='SEAL '+cfg.sealOut;
+      X.ov(`<h4>Records updated <span class="sim">simulated</span></h4><dl class="kv"><dt>Removed</dt><dd>${outList.replaceAll('RW-CAGE-','')}</dd><dt>Added</dt><dd>${inList.replaceAll('RW-CAGE-','')}</dd><dt>Old seal</dt><dd>${cfg.sealIn}</dd><dt>New seal</dt><dd>${cfg.sealOut}</dd><dt>Status</dt><dd>Released</dd></dl><p class="small">Seal numbers are illustrative.</p>`);await wait(g,1500)}},
+  {t:'Continue on the authorised onward service',l:['X'],cam:CAM.wide,
+    narr:cfg.next+'. The time spent at the hub (arrival to release) is the “terminal time” cost of the exchange.',
+    who:'Terminal operator + railway',docs:'Train list for the onward service',
+    play:async(w,X,g)=>{await setAttach(g,w,'container',X);if(key==='LA'){X.say('Standard-gauge train departs empty of this container');await moveTrain(g,w,'W1','L1',0,40,2600)}
+      await liftOT(g,w,'wagon:'+cfg.depart,X);X.say('Container secured on the wagon — departing');await moveTrain(g,w,cfg.depart,cfg.depart==='W2'?'L2':'L1',0,40,3600)}}];
+  return S.map((s,i)=>Object.assign(s,{hub:key,n:i+1}))}
+
+const INTRO={hub:'INTRO',n:0,t:'Meet the container: open-top or hardtop',l:['E','P'],cam:CAM.pad,
+  narr:'A 40 ft open-top container has steel walls and doors but no fixed roof: a tarpaulin over removable roof bows closes it. A hardtop version has rigid steel roof sections that can be lifted off. Both exist and are used for tall or crane-loaded cargo. Inside, RealWay’s proposal is 16 positions for tagged cargo cages, held by engineered blocking frames and hold-down bars.',
+  who:'—',docs:'—',
+  play:async(w,X,g)=>{X.say('The cover rolls back to show the 16 cage positions');await wait(g,600);const c=w.ot;if(c.cover==='tarp'){await tw(g,1800,t=>c.tarp=1-t*.75)}else{c.roofs[1].on=false}X.say('Colour = destination of each cage','ok')}};
+const STEPS=[INTRO,...exchangeSteps('LA'),...exchangeSteps('TH')];
+
+
+/* ================= UI ================= */
+const mob=v=>v.W&&v.W<640?1.45:1;
+let V3,W=null;const P={i:0,tok:0,playing:false,cam:'step',solid:false,sel:null};
+const QUIET={say(){},ov(){},ovHide(){}};
+function ctx(){let mt;return {say:(m,k)=>{const e=$('#msg');e.textContent=m;e.className='msg '+(k||'');e.hidden=false;clearTimeout(mt);mt=setTimeout(()=>e.hidden=true,k==='ok'?3000:4400)},
+  ov:h=>{const o=$('#ov');o.innerHTML=h;o.hidden=false},ovHide:()=>{$('#ov').hidden=true}}}
+const labChips=l=>l.map(k=>`<span class="lab ${k}">${LABELS[k].t}</span>`).join(' ');
+function setCam(){const s=STEPS[P.i];const m=mob(V3);let c=P.cam==='wide'?CAM.wide:P.cam==='top'?CAM.top:s.cam;V3.goal={theta:c.theta,phi:c.phi,R:c.R*m,target:c.target.clone()}}
+function hubSteps(h){return STEPS.map((s,i)=>({s,i})).filter(x=>x.s.hub===h)}
+function renderPanel(){const s=STEPS[P.i];const hubName=s.hub==='INTRO'?'Concept':HUBCFG[s.hub].short;
+  $('#pill').textContent=s.hub==='INTRO'?'Container concept':`${HUBCFG[s.hub].country} exchange · step ${s.n} / 13`;$('#pill2').textContent=hubName;
+  $('#sSt').textContent=s.hub==='INTRO'?'Concept view':`${HUBCFG[s.hub].country} · step ${s.n} of 13`;$('#sTitle').textContent=s.t;$('#sLabs').innerHTML=labChips(s.l);$('#sNarr').textContent=s.narr;$('#sWho').textContent=s.who;$('#sDocs').textContent=s.docs;
+  $$('[data-hub]').forEach(b=>b.setAttribute('aria-selected',b.dataset.hub===s.hub));
+  const L=hubSteps(s.hub);$('#listH').textContent=s.hub==='INTRO'?'Container parts':`${HUBCFG[s.hub].country} exchange steps`;
+  $('#sList').innerHTML=s.hub==='INTRO'?`<li style="font-size:13px;color:var(--muted);display:grid;gap:6px">${[['Removable tarpaulin or rigid roof sections','E'],['Removable roof bows (tarpaulin version)','E'],['Overhead gantry crane + lifting attachments','E'],['16 tagged cargo cages with lifting lugs','P'],['Engineered blocking frames + hold-down bars','E'],['Cage ID plate, QR and live status','P']].map(([t,k])=>`<span><span class="lab ${k}" style="font-size:9px">${k==='E'?'Existing':'Proposed'}</span> ${t}</span>`).join('')}</li>`
+    :L.map(({s:x,i})=>`<li><button data-i="${i}" class="${i<P.i?'done':i===P.i?'now':''}"><span class="no">${x.n}.</span><span>${x.t} ${x.l.map(k=>`<span class="lab ${k}" style="font-size:8.5px;padding:1px 4px">${k==='E'?'Exist':k==='X'?'Estab':'Prop'}</span>`).join(' ')}</span></button></li>`).join('')}
+async function loadStep(i,auto){i=clamp(i,0,STEPS.length-1);cancelGrp('A');const my=++P.tok;P.i=i;const s=STEPS[i];CLK.boost=1;
+  const w=s.hub==='INTRO'?introWorld():hubWorld(s.hub);w.loadsBefore=rowLoads(w);
+  FF=true;try{for(const x of STEPS)if(x.hub===s.hub&&x.n<s.n)await x.play(w,QUIET,'A')}catch(e){console.error(e)}FF=false;
+  W=w;W.crane.sy=Math.max(W.crane.sy,CAGE_SY);$('#ov').hidden=true;$('#msg').hidden=true;setCam();renderPanel();refreshTrk(true);
+  try{await s.play(w,ctx(),'A')}catch(e){if(e.message!=='cancel')console.error(e);return}
+  if(my!==P.tok)return;refreshTrk(true);
+  if(P.playing&&auto!==false){await new Promise(r=>setTimeout(r,1500));const nx=STEPS[P.i+1];if(my===P.tok&&P.playing&&!CLK.paused&&nx&&(nx.hub===s.hub||s.hub==='INTRO'||true))loadStep(P.i+1,true);else P.playing=false}}
+let tSig='';
+function refreshTrk(force){if(!W)return;const ks=W.cages.filter(k=>!k.ghost);const sig=ks.map(k=>k.plan.id+(k.in||'')+k.status+(k.temp?1:0)).join()+P.sel;if(!force&&sig===tSig)return;tSig=sig;
+  const st=k=>k.temp?'<span class="temp">Restraint temporarily reduced</span>':k.in==='OT'?(k.status||'In container'):k.carried?'On crane':(k.status||'At hub');
+  $('#trk tbody').innerHTML=ks.sort((a,b)=>(a.plan.pos||99)-(b.plan.pos||99)).map(k=>`<tr data-cage="${k.plan.id}" class="${k.plan.id===P.sel?'sel':''}" style="cursor:pointer"><td><i style="background:${SME[k.plan.dest].col}"></i>${k.plan.id.slice(8)}</td><td>${k.plan.org}→${k.plan.dest}</td><td>${k.in==='OT'?'P'+k.plan.pos:'—'}</td><td>${st(k)}</td></tr>`).join('');
+  const k=ks.find(x=>x.plan.id===P.sel);$('#cageRec').innerHTML=k?`<b>${k.plan.id}</b> · ${k.plan.sme} · ${HUBS[k.plan.org].split(',')[0]} → ${HUBS[k.plan.dest].split(',')[0]} · ${fmtKg(k.plan.kg)} cargo · ${k.in==='OT'?'position P'+k.plan.pos:'outside container'}`:''}
+$('#trk').addEventListener('click',e=>{const r=e.target.closest('[data-cage]');if(r)selCage(r.dataset.cage)});
+function selCage(id){P.sel=id;if(W)W.cages.forEach(k=>k.hi=k.plan.id===id);refreshTrk(true)}
+$('#sList').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b){P.playing=false;loadStep(+b.dataset.i,false)}});
+$$('[data-hub]').forEach(b=>b.onclick=()=>{P.playing=false;loadStep(STEPS.findIndex(s=>s.hub===b.dataset.hub),false)});
+$('#bPlay').onclick=()=>{CLK.paused=false;$('#bPause').textContent='Pause';if(!P.playing){P.playing=true;loadStep(P.i,true)}};
+$('#bPause').onclick=()=>{CLK.paused=!CLK.paused;$('#bPause').textContent=CLK.paused?'Resume':'Pause'};
+$('#bPrev').onclick=()=>loadStep(P.i-1,P.playing);$('#bNext').onclick=()=>loadStep(P.i+1,P.playing);$('#bReplay').onclick=()=>loadStep(P.i,false);
+$('#bSpeed').onchange=e=>CLK.speed=+e.target.value;
+$$('[data-cover]').forEach(b=>b.onclick=()=>{COVER=b.dataset.cover;$$('[data-cover]').forEach(x=>x.setAttribute('aria-pressed',x===b));loadStep(P.i,false)});
+$$('[data-cam]').forEach(b=>b.onclick=()=>{P.cam=b.dataset.cam;$$('[data-cam]').forEach(x=>x.setAttribute('aria-pressed',x===b));setCam()});
+$('#wallBtn').onclick=e=>{P.solid=!P.solid;e.currentTarget.setAttribute('aria-pressed',P.solid)};
+$('#zIn').onclick=()=>V3.zoom=clamp(V3.zoom*1.2,.6,2.6);$('#zOut').onclick=()=>V3.zoom=clamp(V3.zoom/1.2,.6,2.6);
+function tap(x,y){const h=V3.hitTest(x,y);if(!h)return;if(h.type==='cage'){selCage(h.id);const k=W.cages.find(c=>c.plan.id===h.id);ctx().say(`${h.id} · ${k.plan.org} → ${k.plan.dest} · ${k.plan.sme}`)}else if(h.type==='crane')ctx().say('Overhead gantry crane: container spreader, roof beam or the proposed cage lifting frame');else if(h.type==='ot')ctx().say('40 ft open-top / hardtop container: existing ISO equipment');else if(h.type==='pin')ctx().say('Wagon securing fitting: green when locked')}
+
+/* ---------- network & booking ---------- */
+const HUBK=['CN','LA','TH','MY'];const HN={CN:'Kunming (CN)',LA:'Vientiane (LA)',TH:'Bangkok (TH)',MY:'Klang Valley (MY)'};const CTRY={CN:'China',LA:'Laos',TH:'Thailand',MY:'Malaysia'};
+const SAMPLE=[['RW-BK-101','Yunnan Tea Co.','CN','CN','LA',1],['RW-BK-102','Vientiane Handicrafts','LA','LA','TH',1],['RW-BK-103','Bangkok Auto Parts','TH','TH','MY',1],['RW-BK-104','Kunming Lighting','CN','CN','MY',3],['RW-BK-105','Penang Electronics','MY','MY','TH',2],['RW-BK-106','Kunming Hardware','CN','CN','TH',1],['RW-BK-107','Chiang Mai Furniture','TH','TH','MY',1]];
+const SEGCOL={CN:'#2B7BD8',LA:'#1F9D63',TH:'#C2410C',MY:'#8B5CF6'};
+let OCC,NEWBK=[];
+function initOcc(){OCC={S:[...Array(16)].map(()=>[null,null,null]),N:[...Array(16)].map(()=>[null,null,null])};
+  [1,2,3,4,6,7,8,10,11,12,13,14].forEach(p=>OCC.S[p-1]=[0,1,2].map(()=>({who:'China SMEs → MY',org:'CN'})));
+  OCC.S[4]=[{who:'Yunnan Tea Co.',org:'CN'},{who:'Vientiane Handicrafts',org:'LA'},{who:'Bangkok Auto Parts',org:'TH'}];
+  OCC.S[8]=[{who:'Kunming Hardware',org:'CN'},{who:'Kunming Hardware',org:'CN'},{who:'Chiang Mai Furniture',org:'TH'}];
+  OCC.N[0]=[{who:'Penang Electronics',org:'MY'},null,null];OCC.N[1]=[{who:'Penang Electronics',org:'MY'},null,null];OCC.N[2]=[{who:'Thai SME → CN',org:'TH'},{who:'Thai SME → CN',org:'TH'},null];NEWBK=[]}
+let LANE='S';
+function segsFor(o,d){const a=HUBK.indexOf(o),b=HUBK.indexOf(d);if(a===b)return null;if(a<b)return {lane:'S',segs:[...Array(b-a)].map((_,i)=>a+i)};return {lane:'N',segs:[...Array(a-b)].map((_,i)=>3-a+i)}}
+const segName=(lane,i)=>lane==='S'?`${HUBK[i]}→${HUBK[i+1]}`:`${HUBK[3-i]}→${HUBK[2-i]}`;
+function renderOcc(){const L=OCC[LANE];let h='<span></span>'+[0,1,2].map(i=>`<b>${segName(LANE,i)}</b>`).join('');
+  L.forEach((r,p)=>{h+=`<span>P${p+1}</span>`+r.map(c=>c?`<i class="${c.isNew?'new':''}" style="background:${SEGCOL[c.org]}" title="${c.who}">${c.who}</i>`:'<i></i>').join('')});$('#occ').innerHTML=h}
+function renderNet(){const y={CN:30,LA:100,TH:170,MY:240};let s=`<svg viewBox="0 0 340 256" role="img" aria-label="Corridor with southbound and northbound bookings">`;
+  s+=`<line x1="70" y1="30" x2="70" y2="240" stroke="#1F5BD8" stroke-width="5"/><line x1="96" y1="30" x2="96" y2="240" stroke="#B45309" stroke-width="3" stroke-dasharray="5 4"/>`;
+  s+=`<text x="66" y="14" class="mut" text-anchor="end">south ▼</text><text x="100" y="14" class="mut">▲ north</text>`;
+  HUBK.forEach(k=>{s+=`<circle cx="70" cy="${y[k]}" r="8" fill="var(--surface)" stroke="#1F5BD8" stroke-width="3"/><circle cx="96" cy="${y[k]}" r="5" fill="var(--surface)" stroke="#B45309" stroke-width="2"/><text x="10" y="${y[k]+4}" style="font-weight:600">${k}</text><text x="10" y="${y[k]+17}" class="mut">${HN[k].split(' (')[0]}</text>`});
+  const all=SAMPLE.concat(NEWBK);all.forEach((b,i)=>{const o=b[3],d=b[4];const sg=segsFor(o,d);const x=120+i*(200/Math.max(all.length,8));const col=SEGCOL[b[2]];s+=`<line x1="${x}" y1="${y[o]}" x2="${x}" y2="${y[d]}" stroke="${col}" stroke-width="5" ${sg.lane==='N'?'stroke-dasharray="5 3"':''} stroke-linecap="round"/><circle cx="${x}" cy="${y[o]}" r="4" fill="${col}"/><path d="M${x-5} ${y[d]+(sg.lane==='S'?-6:6)} L${x} ${y[d]} L${x+5} ${y[d]+(sg.lane==='S'?-6:6)}" stroke="${col}" stroke-width="2" fill="none"/>`});
+  s+='</svg>';$('#netSvg').innerHTML=s;
+  $('#bkTable tbody').innerHTML=all.map(b=>{const sg=segsFor(b[3],b[4]);return `<tr><td class="flag">${b[0]}</td><td>${b[1]} <span class="small">(${CTRY[b[2]]})</span></td><td>${CTRY[b[3]]} → ${CTRY[b[4]]}</td><td><span class="dir ${sg.lane==='S'?'s':'n'}">${sg.lane==='S'?'▼ South':'▲ North'}</span></td><td>${b[5]} cage${b[5]>1?'s':''}</td></tr>`}).join('')}
+function setLane(l){LANE=l;$$('[data-lane]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lane===l));renderOcc()}
+$$('[data-lane]').forEach(b=>b.onclick=()=>setLane(b.dataset.lane));
+function fillSel(){$('#fOrg').innerHTML=HUBK.map(k=>`<option value="${k}">${HN[k]}</option>`).join('');$('#fDst').innerHTML=HUBK.map(k=>`<option value="${k}" ${k==='TH'?'selected':''}>${HN[k]}</option>`).join('');$('#fOrg').value='LA'}
+$('#bkForm').onsubmit=e=>{e.preventDefault();const r=$('#bkRes');r.hidden=false;r.className='res';const o=$('#fOrg').value,d=$('#fDst').value,n=+$('#fN').value,kg=+$('#fKg').value;const nm=($('#fName').value||'').trim()||'New SME';
+  if(o===d){r.className='res bad';r.textContent='Origin and destination must be different hubs.';return}
+  if(!(kg>=50&&kg<=800)){r.className='res bad';r.textContent='Gross weight per cage must be between 50 and 800 kg (illustrative cage limit).';return}
+  const sg=segsFor(o,d);const L=OCC[sg.lane];const got=[];for(let p=0;p<16&&got.length<n;p++)if(sg.segs.every(s=>!L[p][s]))got.push(p);
+  setLane(sg.lane);if(got.length<n){r.className='res bad';r.innerHTML=`Not enough continuous space on <b>${sg.segs.map(s=>segName(sg.lane,s)).join(', ')}</b> (found ${got.length} of ${n}). In a live system this would offer the next departure or a waitlist.`;return}
+  got.forEach(p=>sg.segs.forEach(s=>L[p][s]={who:nm,org:o,isNew:true}));NEWBK.push(['RW-BK-'+(108+NEWBK.length),nm,o,o,d,n]);renderNet();renderOcc();
+  const freed=got.map(p=>{const after=[0,1,2].filter(s=>s>Math.max(...sg.segs));return after.length&&after.every(s=>!L[p][s])?`P${p+1}`:null}).filter(Boolean);
+  r.innerHTML=`<b>Space held (simulated):</b> ${nm}, ${n} cage${n>1?'s':''}, ${CTRY[o]} → ${CTRY[d]} on the <b>${sg.lane==='S'?'southbound':'northbound'}</b> service, position${n>1?'s':''} ${got.map(p=>'P'+(p+1)).join(', ')}.${sg.segs[0]>0?` Uses space freed at ${HN[o].split(' (')[0]}.`:''}${freed.length?` After delivery, ${freed.join(', ')} becomes available for resale at ${HN[d].split(' (')[0]}.`:''} Subject to hub authorisation and customs approval.`};
+$('#fReset').onclick=()=>{initOcc();renderNet();setLane('S');$('#bkRes').hidden=true};
+
+/* ---------- business model ---------- */
+const EX={s1:210,s2:190,s3:210,thr:400,sold:80,nx:4,cover:150,hrs:5,hr:60,cus:120,eq:60,clift:90,lift:30,rep:25};
+const money=v=>(v<0?'−':'')+'$'+Math.abs(Math.round(v)).toLocaleString('en-US');
+function calc(){const v={};let missing=false;$$('#inputs input').forEach(i=>{const x=i.value.trim();if(x===''||isNaN(+x))missing=true;v[i.dataset.k]=+x});const out=$('#out');
+  if(missing){out.innerHTML='<h3>Result for position P5</h3><p class="small">Enter all fields (or load the example) to see the comparison. Nothing is assumed.</p>';return}
+  const p=clamp(v.sold,0,100)/100,nx=Math.max(1,v.nx);
+  const revMS=v.s1+p*v.s2+p*v.s3;const shared=v.cover+v.hrs*v.hr+v.cus+v.eq+v.clift;const perStop=shared/nx+v.lift+v.rep;const costMS=2*perStop;
+  const inc=revMS-costMS-v.thr;const be=(revMS-v.thr-2*(v.lift+v.rep))>0?shared*2/(revMS-v.thr-2*(v.lift+v.rep)):Infinity;
+  out.innerHTML=`<h3>Result for position P5</h3><p class="small">Multi-stop (3 segments, 2 hub exchanges) minus through booking (1 cage China → Malaysia)</p>
+  <p class="big ${inc<0?'neg':'pos'}" style="margin:8px 0">${money(inc)} <span style="font-size:15px;font-family:var(--f-body)">per trip</span></p>
+  <table class="tbl"><tr><th>Item</th><th>USD</th></tr>
+  <tr><td>Expected multi-stop revenue (resale chance ${Math.round(p*100)}%)</td><td>${money(revMS)}</td></tr>
+  <tr><td>Through booking revenue</td><td>${money(v.thr)}</td></tr>
+  <tr><td>Shared cost per hub stop (cover, ${v.hrs} h terminal time, customs, equipment, container lifts)</td><td>${money(shared)}</td></tr>
+  <tr><td>Share for this cage (÷ ${nx} cages)</td><td>${money(shared/nx)}</td></tr>
+  <tr><td>Crane lifts + repositioning per exchange</td><td>${money(v.lift+v.rep)}</td></tr>
+  <tr><td>Total exchange cost (2 stops)</td><td>${money(costMS)}</td></tr></table>
+  <p class="small" style="margin-top:8px">${inc<0?'With these inputs the exchange <b>loses money</b> compared with a single through booking.':'With these inputs the exchange earns more than a through booking — but only if every cost above is real and complete.'} ${isFinite(be)?`Break-even needs about <b>${Math.ceil(be)}</b> cages exchanged per hub stop to share the fixed cost${be>14?' — more positions than one container holds, so these costs would have to fall':''}.`:'No number of cages per stop breaks even, because the extra segment revenue does not cover per-cage lift and repositioning costs.'}</p>
+  <p class="small">Not included: delay cost to the other cages in the container, damage risk, insurance, cage and frame certification, train-slot charges. Example figures are placeholders, not quotes.</p>`}
+$('#inputs').addEventListener('input',calc);
+$('#exBtn').onclick=()=>{$$('#inputs input').forEach(i=>i.value=EX[i.dataset.k]);calc()};$('#clrBtn').onclick=()=>{$$('#inputs input').forEach(i=>i.value='');calc()};
+
+/* ---------- boot ---------- */
+function boot(){initOcc();fillSel();renderNet();renderOcc();calc();
+  V3=makeView($('#v3'),{ignore:'button,.ov',theta:.42,phi:.98,R:22,target:new V(0,1.5,PAD_Z),onTap:tap,limits:{t:[-1.3,1.3],p:[.2,1.5]},onResize:v=>{if(v.goal)setCam()}});
+  CLK.speed=1.5;loadStep(0,false);requestAnimationFrame(frame)}
+function frame(now){const dt=Math.min(64,now-CLK.last);CLK.last=now;if(!CLK.paused)CLK.t+=dt*CLK.speed*(CLK.boost||1);
+  try{stepTweens();if(W){V3.smooth();renderMS(V3,W,{ext:P.solid});refreshTrk(false)}}catch(e){console.error(e)}requestAnimationFrame(frame)}
+boot();
+
+
+})();
+</script>
+
+</body>
+</html>
