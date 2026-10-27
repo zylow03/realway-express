@@ -1,0 +1,1093 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RealWay Freight Journey</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: freight operations console — shared tracking strip, then Demo A (journey) / Demo B (inside container) each with a 3D stage + explanation rail */
+:root{
+  --bg:#F3F5F8;--surface:#FFFFFF;--sunk:#E8ECF2;--ink:#0F1B2D;--muted:#5B6879;--line:#D5DCE5;--navy:#0F2340;--cobalt:#1F5BD8;--green:#18905A;--warn:#B45309;--brand:#F2B705;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;--f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;--r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0D131B;--surface:#141C27;--sunk:#0A0F15;--ink:#E6ECF3;--muted:#95A3B5;--line:#253244;--navy:#C9D6EA;--cobalt:#5B8CFF;--green:#3CC284;--warn:#F2A35F;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0D131B;--surface:#141C27;--sunk:#0A0F15;--ink:#E6ECF3;--muted:#95A3B5;--line:#253244;--navy:#C9D6EA;--cobalt:#5B8CFF;--green:#3CC284;--warn:#F2A35F;color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:1360px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3,h4{font-family:var(--f-display);font-weight:700;line-height:1.05;text-wrap:balance;margin:0}
+h2{font-size:clamp(26px,3.6vw,38px);text-transform:uppercase}h3{font-size:17px;text-transform:uppercase;letter-spacing:.03em}
+p{margin:0}button,select{font:inherit;color:inherit}:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
+.small{font-size:12.5px;color:var(--muted)}.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.sim{display:inline-block;font-family:var(--f-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:3px;background:rgba(127,140,160,.18);color:inherit;opacity:.85;vertical-align:middle}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);padding:7px 12px;border-radius:var(--r);font-weight:600;font-size:13.5px;cursor:pointer;white-space:nowrap;text-decoration:none;color:inherit}
+.btn:hover{border-color:var(--muted)}.btn.primary{background:var(--cobalt);border-color:var(--cobalt);color:#fff}.btn.navy{background:var(--navy);border-color:var(--navy);color:var(--bg)}.btn.sm{padding:5px 9px;font-size:12.5px}
+.btn[aria-pressed="true"]{background:var(--navy);color:var(--bg);border-color:var(--navy)}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:25;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;min-height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex-shrink:0}.brand-mark{width:30px;height:30px;border-radius:4px;background:var(--brand);display:grid;place-items:center}.brand-name{font-family:var(--f-display);font-weight:700;font-size:24px}
+.top nav{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none;min-width:0}.top nav a{text-decoration:none;color:var(--muted);font-size:14px;padding:8px 10px;border-radius:4px;white-space:nowrap}.top nav a:hover{background:var(--sunk);color:var(--ink)}.top nav a[aria-current]{color:var(--ink);font-weight:600}
+@media (max-width:640px){.top nav a.hide-sm{display:none}}
+.notice{margin-top:16px;border:1px solid #c99a1a;background:color-mix(in srgb,#F2B705 12%,var(--surface));border-radius:8px;padding:10px 14px;font-size:13.5px;display:flex;gap:10px;align-items:flex-start}
+.notice b{white-space:nowrap}
+.intro{display:grid;gap:8px;padding-block:18px 10px}
+.track{background:var(--navy);color:var(--bg);border-radius:10px;padding:12px 16px;display:grid;gap:10px;margin-top:6px}
+.track .tid{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;font-size:13px}
+.track .tid b{font-family:var(--f-display);font-size:20px;letter-spacing:.02em}
+.tf{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+@media (max-width:980px){.tf{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:520px){.tf{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tf div{min-width:0}.tf span{display:block;font-family:var(--f-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;opacity:.7}.tf b{font-size:13px;font-weight:600;display:block;overflow-wrap:anywhere}
+.evt{font-family:var(--f-mono);font-size:10.5px;padding:2px 7px;border-radius:3px;border:1px dashed currentColor;opacity:.85}
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface);margin-block:16px 12px}
+.tabs button{border:0;background:transparent;padding:10px 16px;font-weight:600;cursor:pointer}.tabs button[aria-selected="true"]{background:var(--navy);color:var(--bg)}
+.demo{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;align-items:start;padding-bottom:30px}
+@media (max-width:1060px){.demo{grid-template-columns:minmax(0,1fr)}}
+.stagecol{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;min-width:0}
+.view{position:relative;height:540px;background:#0E1621;border:1px solid #243244;border-radius:8px;overflow:hidden;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;color:#E6ECF3}
+.view.dragging{cursor:grabbing}.view canvas{position:absolute;left:0;top:0;display:block}
+@media (max-width:760px){.view{height:min(66vh,440px);min-height:330px}}
+.hud{position:absolute;left:10px;top:10px;right:10px;display:flex;gap:8px;justify-content:space-between;pointer-events:none;flex-wrap:wrap}
+.pill{background:rgba(11,17,26,.88);border:1px solid #243244;border-radius:4px;padding:6px 10px;font-family:var(--f-mono);font-size:12px;max-width:100%}
+.msg{position:absolute;left:50%;bottom:54px;transform:translateX(-50%);background:rgba(11,17,26,.93);border:1px solid #3a5b8f;padding:8px 14px;border-radius:6px;font-size:13.5px;font-weight:600;text-align:center;max-width:calc(100% - 24px);pointer-events:none}
+.msg.ok{border-color:#2f8f5f}
+@media (max-width:640px){.msg{bottom:100px;font-size:12.5px}}.msg.warn{border-color:#a8742a}
+.ov{position:absolute;right:10px;top:50px;width:min(300px,calc(100% - 20px));max-height:calc(100% - 120px);overflow:auto;background:rgba(240,244,248,.97);color:#0F1B2D;border-radius:8px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.4);font-size:13px}
+.ov h4{font-size:17px;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;gap:6px;align-items:baseline}
+.ov .small{color:#4b5768;margin-top:6px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:0}.kv dt{color:#5b6879}.kv dd{margin:0;text-align:right;font-weight:600}
+.checks{display:grid;gap:3px}.checks span::before{content:"✓ ";color:#18905A;font-weight:700}.checks span.no{color:#8a95a3}.checks span.no::before{content:"○ ";color:#8a95a3}
+.bar2{display:grid;grid-template-columns:1fr;gap:3px;margin-bottom:8px;font-size:12px;position:relative}.bar2 i{display:block;height:8px;background:#1F5BD8;border-radius:3px}.bar2 b{font-family:var(--f-mono);font-size:11px}
+.smes{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px}.smes i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+.outc{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.outc .btn{background:#fff;color:#0F1B2D}
+.camrow{position:absolute;left:10px;bottom:10px;display:flex;gap:4px;flex-wrap:wrap;max-width:calc(100% - 100px)}
+.camrow button,.zoom button{background:rgba(18,27,39,.92);border:1px solid #243244;color:#E6ECF3;border-radius:4px;padding:5px 9px;font-size:12px;font-weight:600;cursor:pointer}
+.camrow button[aria-pressed="true"]{background:#E6ECF3;color:#0B111A}
+.zoom{position:absolute;right:10px;bottom:10px;display:flex;gap:4px}.zoom button{width:32px}
+.ctl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ctl select{padding:6px 8px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);max-width:100%;min-width:0;flex:1 1 150px}
+.segs{display:grid;gap:2px;min-width:0}.segs button{min-width:0;height:10px;border:0;border-radius:2px;background:var(--sunk);cursor:pointer;padding:0}.segs button.done{background:color-mix(in srgb,var(--cobalt) 45%,var(--sunk))}.segs button.now{background:var(--cobalt)}
+.narr{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:grid;gap:6px}
+.narr .st{font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.narr h3{font-size:22px}.narr p{font-size:15px;max-width:80ch}
+.side{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-width:0}
+.card h3{margin-bottom:8px}
+.q{display:grid;gap:7px;margin:0}.q dt{font-weight:600;font-size:13px}.q dd{margin:0 0 0 0;font-size:13px;color:var(--muted)}
+.terms{display:flex;flex-wrap:wrap;gap:6px}.terms button{border:1px dashed var(--line);background:none;border-radius:4px;padding:2px 8px;font-size:12px;cursor:pointer}
+.termdef{font-size:13px;margin-top:6px;color:var(--muted)}
+.risk{border-left:3px solid var(--warn);padding-left:10px;font-size:13px}
+.map svg{width:100%;height:auto;display:block}
+.map text{font-family:var(--f-mono);font-size:10.5px;fill:var(--muted)}
+.map .on text{fill:var(--ink);font-weight:600}
+.dash{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.dash div span{display:block;font-family:var(--f-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.dash div b{font-family:var(--f-display);font-size:24px;line-height:1.1}
+.wd{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;align-items:end;height:70px;margin-top:6px}.wd i{display:block;background:var(--cobalt);border-radius:2px 2px 0 0;min-height:2px}
+.wdl{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;font-family:var(--f-mono);font-size:10px;color:var(--muted);text-align:center}
+.cl{width:100%;border-collapse:collapse;font-size:12px}.cl td,.cl th{padding:4px 5px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.cl th{font-family:var(--f-mono);font-size:10px;text-transform:uppercase;color:var(--muted);font-weight:500}
+.cl tr.sel td{background:color-mix(in srgb,var(--cobalt) 12%,transparent)}.cl i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px}
+.cagecard{border:2px solid var(--cobalt)}
+details.val{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-top:12px}
+details.val summary{cursor:pointer;font-weight:700}
+.valgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:10px;font-size:13px}
+.valgrid ul{margin:4px 0 0;padding-left:18px;color:var(--muted)}
+.phases{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+@media (max-width:820px){.phases{grid-template-columns:1fr}}
+.phases div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px}
+.phases b{font-family:var(--f-display);font-size:20px;text-transform:uppercase;display:block}
+.refs{font-size:13px;display:grid;gap:4px;margin-top:8px}.refs a{color:var(--cobalt)}
+footer{padding-block:26px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);margin-top:20px}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;top:calc(74px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:40;background:var(--navy);color:var(--bg);padding:9px 16px;border-radius:var(--r);font-size:14px;font-weight:600;max-width:calc(100% - 32px);text-align:center}
+</style>
+
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="https://zylow03.github.io/realway-express/" aria-label="RealWay Express home"><span class="brand-mark"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="9" rx="1" stroke="#1A1400" stroke-width="2"/><circle cx="5.5" cy="14.5" r="1.5" fill="#1A1400"/><circle cx="12.5" cy="14.5" r="1.5" fill="#1A1400"/><path d="M6 3v9M10 3v9" stroke="#1A1400" stroke-width="1.5"/></svg></span><span class="brand-name">RealWay Express</span></a>
+  <nav aria-label="Pages"><a class="hide-sm" href="https://zylow03.github.io/realway-express/">Website</a><a class="hide-sm" href="https://zylow03.github.io/realway-express/pooling.html">Pooling</a><a class="hide-sm" href="https://zylow03.github.io/realway-express/cargo.html">Book space</a><a aria-current="page" href="#demoA">Freight journey</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="notice" role="note"><b>⚠ Notice</b><span>Proposed RealWay Express operational workflow based on existing railway infrastructure. Commercial service availability and specific handling arrangements are subject to confirmation. All quantities, IDs, schedules and statuses shown are illustrative.</span></div>
+  <div class="intro">
+    <p class="eyebrow">Interactive freight demonstration · China → Laos → Thailand → Malaysia</p>
+    <h2>One container. Multiple businesses. Shared freight capacity.</h2>
+    <p class="small" style="max-width:80ch;font-size:14px">Demo A follows one SME shipment from booking to delivery. Demo B opens the shared 40 ft high-cube container to show the removable cargo cages. Both use the same example shipment and tracking record.</p>
+  </div>
+
+  <div class="track" aria-live="polite">
+    <div class="tid"><b>RW-BKG-024</b><span>SME A · 2.4 CBM · 450 kg</span><span>Kunming, China → Klang Valley, Malaysia</span><span>Cage RW-CAGE-003 (Row 2, left) · Container RW-CONT-001</span><span class="evt" id="tEvt">Illustrative event · not a scanned record</span></div>
+    <div class="tf"><div><span>Country</span><b id="tCountry">—</b></div><div><span>Facility</span><b id="tPlace">—</b></div><div><span>Transport mode</span><b id="tMode">—</b></div><div><span>Customs / transit</span><b id="tCustoms">—</b></div><div><span>Last milestone</span><b id="tStatus">—</b></div><div><span>Next stage</span><b id="tNext">—</b></div></div>
+  </div>
+
+  <div class="tabs" role="tablist"><button role="tab" id="tabA" aria-selected="true">Demo A · Complete cargo journey</button><button role="tab" id="tabB" aria-selected="false">Demo B · Inside the shared container</button></div>
+
+  <!-- DEMO A -->
+  <section id="demoA" class="demo">
+    <div class="stagecol">
+      <div class="view" id="vA">
+        <div class="hud"><span class="pill" id="aPill">Scene 1</span><span class="pill" id="aPart">Part</span></div>
+        <div class="ov" id="ovA" hidden></div><div class="msg" id="msgA" hidden></div>
+        <div class="camrow" role="group" aria-label="Camera"><button data-ca="scene" aria-pressed="true">Scene view</button><button data-ca="cut" aria-pressed="false">Transparent cutaway</button><button data-ca="top" aria-pressed="false">Overhead</button><button data-ca="close" aria-pressed="false">Close-up</button></div>
+        <div class="zoom"><button id="aZin" aria-label="Zoom in">+</button><button id="aZout" aria-label="Zoom out">−</button></div>
+      </div>
+      <div class="ctl">
+        <button class="btn primary sm" id="aPlay">Play</button><button class="btn sm" id="aPause">Pause</button><button class="btn sm" id="aPrev">◀ Previous</button><button class="btn sm" id="aNext">Next ▶</button><button class="btn sm" id="aReplay">Replay scene</button><button class="btn sm" id="aReset">Reset</button>
+        <label class="small">Speed <select id="aSpeed"><option value="1">1×</option><option value="1.5" selected>1.5×</option><option value="2">2×</option><option value="3">3×</option></select></label>
+        <select id="aSel" aria-label="Scene selection"></select>
+        <span id="pathBox" hidden><label class="small">Transfer pathway <select id="aPath"><option value="truck">Rail–truck–rail</option><option value="direct">Direct rail-to-rail</option></select></label></span>
+        <button class="btn navy sm" id="toB">View inside container →</button>
+      </div>
+      <div class="segs" id="aSegs" style="grid-template-columns:repeat(36,minmax(0,1fr))"></div>
+      <div class="narr"><span class="st" id="aSt"></span><h3 id="aTitle"></h3><p id="aNarr"></p></div>
+    </div>
+    <aside class="side">
+      <div class="card map"><h3>Route</h3><div id="aMap"></div><p class="small">Proposed shipment workflow, not a guaranteed itinerary. Solid red = standard gauge, solid blue = metre gauge, dashed = road.</p></div>
+      <div class="card"><h3>Five questions</h3><dl class="q" id="aQ"></dl></div>
+      <div class="card"><h3>Technical terms</h3><div class="terms" id="aTerms"></div><p class="termdef" id="aDef">Tap a term for a plain-English explanation.</p></div>
+      <div class="card"><h3>Operational risk</h3><p class="risk" id="aRisk"></p></div>
+    </aside>
+  </section>
+
+  <!-- DEMO B -->
+  <section id="demoB" class="demo" hidden>
+    <div class="stagecol">
+      <div class="view" id="vB">
+        <div class="hud"><span class="pill" id="bPill">Scene 1</span><span class="pill">40 ft high-cube · 16 cage slots · proposed layout</span></div>
+        <div class="msg" id="msgB" hidden></div>
+        <div class="camrow" role="group" aria-label="Views"><button data-vb="exterior" aria-pressed="true">Exterior</button><button data-vb="cutaway" aria-pressed="false">3D cutaway</button><button data-vb="top" aria-pressed="false">Top-down layout</button><button data-vb="cage" aria-pressed="false">Cage inspection</button><button data-vb="warehouse" aria-pressed="false">Warehouse view</button></div>
+        <div class="zoom"><button id="bZin" aria-label="Zoom in">+</button><button id="bZout" aria-label="Zoom out">−</button></div>
+      </div>
+      <div class="ctl">
+        <button class="btn primary sm" id="bPlay">Play</button><button class="btn sm" id="bPause">Pause</button><button class="btn sm" id="bPrev">◀ Previous</button><button class="btn sm" id="bNext">Next ▶</button><button class="btn sm" id="bReplay">Replay scene</button><button class="btn sm" id="bReset">Reset</button>
+        <label class="small">Speed <select id="bSpeed"><option value="1">1×</option><option value="1.5" selected>1.5×</option><option value="2">2×</option><option value="3">3×</option></select></label>
+        <select id="bSel" aria-label="Scene selection"></select>
+        <button class="btn sm" id="tRoof">Remove roof</button><button class="btn sm" id="tSide">Transparent side wall</button><button class="btn sm" id="tDoors">Open rear doors</button>
+        <button class="btn navy sm" id="toA" hidden>← Return to journey</button>
+      </div>
+      <div class="segs" id="bSegs" style="grid-template-columns:repeat(12,minmax(0,1fr))"></div>
+      <div class="narr"><span class="st" id="bSt"></span><h3 id="bTitle"></h3><p id="bNarr"></p></div>
+    </div>
+    <aside class="side">
+      <div class="card"><h3>Container dashboard <span class="sim">Illustrative</span></h3>
+        <div class="dash"><div><span>Total cage slots</span><b>16</b></div><div><span>Booked slots</span><b id="dBooked">13</b></div><div><span>Available slots</span><b id="dAvail">3</b></div><div><span>Customers</span><b>4 SMEs</b></div><div><span>Cages loaded</span><b id="dLoaded">0</b></div><div><span>Shipment status</span><b id="dStatus" style="font-size:16px">—</b></div></div>
+        <p class="small" style="margin-top:8px">Container RW-CONT-001 · Seal <span id="dSeal">not yet applied</span> · Cargo weight <span id="dKg">—</span></p>
+        <p class="small" style="margin-top:8px;font-weight:600">Weight by row (loaded cages)</p><div class="wd" id="dWd"></div><div class="wdl"><span>R1</span><span>R2</span><span>R3</span><span>R4</span><span>R5</span><span>R6</span><span>R7</span><span>R8</span></div>
+      </div>
+      <div class="card cagecard" id="cageCard"></div>
+      <div class="card" style="overflow-x:auto"><h3>Cage register</h3><table class="cl"><thead><tr><th>Cage</th><th>Customer</th><th>Position</th><th>Status</th></tr></thead><tbody id="cageList"></tbody></table></div>
+    </aside>
+  </section>
+
+  <details class="val"><summary>Real-world validation required before operation</summary>
+    <div class="valgrid">
+      <div><b>Railway service</b><ul><li>Carrier quotations and written confirmation of China–Thailand–Malaysia arrangements</li><li>Origin & destination terminals, frequency, transit times</li><li>Gauge-transfer arrangements, terminal charges, liability & insurance</li></ul></div>
+      <div><b>Laos transfer operations</b><ul><li>Direct rail-to-rail or road transfer</li><li>Handling terminal and onward metre-gauge capacity</li><li>Transfer & storage charges; customs transit</li></ul></div>
+      <div><b>Thailand & Malaysia rail</b><ul><li>Actual service connections and handovers</li><li>Padang Besar procedures; service availability to PIP</li><li>Terminal booking and receiving requirements</li></ul></div>
+      <div><b>Customs</b><ul><li>Chinese export, Lao and Thai transit, Malaysian import</li><li>Classification, permits, duties, bonds or guarantees</li><li>Rules for consolidated cargo and inspections</li></ul></div>
+      <div><b>Cargo cages</b><ul><li>Dimensions, tare weight, rated payload, strength</li><li>Forklift compatibility, foldability, maintenance</li><li>Purchase, return and repositioning cost</li><li>The 16-cage layout is not an approved loading plan</li></ul></div>
+    </div>
+    <div class="phases">
+      <div><b>Phase 1</b><span class="small">Standard shared-container service with pallets, existing partners and the RealWay platform. Prove SME demand and coordination economics.</span></div>
+      <div><b>Phase 2</b><span class="small">Small cage pilot in a controlled warehouse. Measure loading time, protection, traceability, utilisation and return cost against pallets.</span></div>
+      <div><b>Phase 3</b><span class="small">Detachable 10 ft module concept stays long-term R&amp;D. Launch does not depend on custom railway hardware.</span></div>
+    </div>
+    <div class="refs"><b>Starting points for verification (not evidence of secured services)</b>
+      <a href="https://www.imo.org/en/ourwork/safety/pages/ctu-code.aspx">IMO/ILO/UNECE CTU Code</a><a href="https://www.mot.gov.my/">Malaysia Ministry of Transport (Perlis Inland Port)</a><a href="https://www.laotradeportal.gov.la/">Lao Trade Portal</a><a href="https://www.customs.gov.my/">Royal Malaysian Customs Department</a><a href="https://www.ttf.com.my/">TTF Malaysia (pallet-cage references)</a>
+      <span class="small">The ASEAN Express ran rail freight between Malaysia, Thailand, Laos and China in 2024, but the full commercial service later faced operational and customs challenges. Its current availability must be confirmed independently.</span></div>
+  </details>
+</main>
+<footer><div class="wrap"><span>RealWay Express · Freight journey &amp; shared-container demonstration</span><span>Illustrative prototype. No carrier agreements, schedules, prices, customs approvals or equipment certification are claimed.</span></div></footer>
+<div class="toast" id="toast" hidden></div>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const f1=v=>(Math.round(v*10)/10).toFixed(1);
+const f2=v=>(Math.round(v*100)/100).toFixed(2);
+const fmtKg=v=>Math.round(v).toLocaleString('en-MY')+' kg';
+let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,3200)}
+
+
+/* ================= SCREEN B: RENDERER ================= */
+class V{constructor(x=0,y=0,z=0){this.x=x;this.y=y;this.z=z}set(x,y,z){this.x=x;this.y=y;this.z=z;return this}copy(v){return this.set(v.x,v.y,v.z)}clone(){return new V(this.x,this.y,this.z)}}
+const lerp=(a,b,t)=>a+(b-a)*t;
+const easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const easeOut=t=>1-Math.pow(1-t,3);
+const easeIn=t=>t*t*t;
+const FACES=[[[1,0,0],[1,3,7,5],.82],[[-1,0,0],[0,2,6,4],.74],[[0,1,0],[2,3,7,6],1.0],[[0,-1,0],[0,1,5,4],.45],[[0,0,1],[4,5,7,6],.66],[[0,0,-1],[0,1,3,2],.58]];
+const shadeCache={};
+function hexRgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return [n>>16&255,n>>8&255,n&255]}
+function shade(col,f){const k=col+'|'+f;if(shadeCache[k])return shadeCache[k];const c=hexRgb(col);return shadeCache[k]=`rgb(${c.map(v=>clamp(Math.round(v*f),0,255)).join(',')})`}
+
+function makeView(host,o){
+  const cv=document.createElement('canvas');host.prepend(cv);const g=cv.getContext('2d');
+  const v={host,cv,g,theta:o.theta,phi:o.phi,R:o.R,zoom:1,target:o.target.clone(),fov:o.fov||40,W:0,H:0,dpr:1,hits:[],
+    cam:{p:new V(),r:[0,0,0],u:[0,0,0],f:[0,0,0],F:1},goal:null,limits:o.limits||{t:[-1.25,1.25],p:[.25,1.52]},dragging:false};
+  const pts=new Array(8);
+  v.resize=()=>{const W=host.clientWidth,H=host.clientHeight;if(!W||!H)return;v.W=W;v.H=H;v.dpr=Math.min(window.devicePixelRatio||1,2);
+    cv.width=Math.round(W*v.dpr);cv.height=Math.round(H*v.dpr);cv.style.width=W+'px';cv.style.height=H+'px';o.onResize&&o.onResize(v)};
+  if(window.ResizeObserver)new ResizeObserver(v.resize).observe(host);window.addEventListener('resize',v.resize);v.resize();
+  v.updCam=()=>{const R=v.R/v.zoom,c=v.cam,t=v.target;
+    c.p.set(t.x+R*Math.sin(v.phi)*Math.sin(v.theta),t.y+R*Math.cos(v.phi),t.z+R*Math.sin(v.phi)*Math.cos(v.theta));
+    let f=[t.x-c.p.x,t.y-c.p.y,t.z-c.p.z];let l=Math.hypot(...f);f=f.map(x=>x/l);let r=[-f[2],0,f[0]];l=Math.hypot(...r)||1;r=r.map(x=>x/l);
+    c.f=f;c.r=r;c.u=[r[1]*f[2]-r[2]*f[1],r[2]*f[0]-r[0]*f[2],r[0]*f[1]-r[1]*f[0]];c.F=(v.H/2)/Math.tan(v.fov*Math.PI/360)};
+  v.proj=(x,y,z)=>{const c=v.cam;const dx=x-c.p.x,dy=y-c.p.y,dz=z-c.p.z;const cz=dx*c.f[0]+dy*c.f[1]+dz*c.f[2];
+    return [v.W/2+c.F*(dx*c.r[0]+dy*c.r[1]+dz*c.r[2])/cz,v.H/2-c.F*(dx*c.u[0]+dy*c.u[1]+dz*c.u[2])/cz,cz]};
+  v.d2=(p)=>{const c=v.cam.p;return (p.x-c.x)**2+(p.y-c.y)**2+(p.z-c.z)**2};
+  v.begin=(top,bot)=>{if(!v.W){v.resize();if(!v.W)return false}v.updCam();g.setTransform(v.dpr,0,0,v.dpr,0,0);v.hits=[];
+    const gr=g.createLinearGradient(0,0,0,v.H);gr.addColorStop(0,top);gr.addColorStop(1,bot);g.fillStyle=gr;g.fillRect(0,0,v.W,v.H);g.lineJoin='round';return true};
+  v.faceVis=(p,n,h)=>{const c=v.cam.p;return n[0]*(c.x-(p.x+n[0]*h[0]))+n[1]*(c.y-(p.y+n[1]*h[1]))+n[2]*(c.z-(p.z+n[2]*h[2]))>0};
+  v.corners=(p,s)=>{const hx=s[0]/2,hy=s[1]/2,hz=s[2]/2;for(let i=0;i<8;i++){const q=v.proj(p.x+(i&1?hx:-hx),p.y+(i&2?hy:-hy),p.z+(i&4?hz:-hz));if(q[2]<.15)return null;pts[i]=q}return [hx,hy,hz]};
+  v.box=(p,s,col,op)=>{op=op||{};const h=v.corners(p,s);if(!h)return null;const polys=[];
+    for(const [n,idx,lf] of FACES){if(op.skip&&op.skip.includes(n.join('')))continue;const fv=v.faceVis(p,n,h);if(op.back?fv:!fv)continue;
+      g.beginPath();g.moveTo(pts[idx[0]][0],pts[idx[0]][1]);for(let k=1;k<4;k++)g.lineTo(pts[idx[k]][0],pts[idx[k]][1]);g.closePath();
+      g.globalAlpha=op.alpha==null?1:op.alpha;g.fillStyle=shade(col,lf*(op.light||1));g.fill();
+      if(op.edge){g.strokeStyle=op.edge;g.lineWidth=op.lw||1;g.stroke()}
+      polys.push(idx.map(k=>[pts[k][0],pts[k][1]]))}
+    g.globalAlpha=1;if(op.hit&&polys.length)v.hits.push({polys,info:op.hit});return h};
+  v.line=(a,b,col,w,al)=>{const p=v.proj(a.x,a.y,a.z),q=v.proj(b.x,b.y,b.z);if(p[2]<.15||q[2]<.15)return;g.globalAlpha=al==null?1:al;g.strokeStyle=col;g.lineWidth=w||1;g.beginPath();g.moveTo(p[0],p[1]);g.lineTo(q[0],q[1]);g.stroke();g.globalAlpha=1};
+  v.poly=(P,col,al,stroke,lw)=>{const q=P.map(p=>v.proj(p.x,p.y,p.z));if(q.some(x=>x[2]<.15))return;g.beginPath();g.moveTo(q[0][0],q[0][1]);q.slice(1).forEach(x=>g.lineTo(x[0],x[1]));g.closePath();g.globalAlpha=al==null?1:al;if(col){g.fillStyle=col;g.fill()}if(stroke){g.strokeStyle=stroke;g.lineWidth=lw||1;g.stroke()}g.globalAlpha=1;return q};
+  v.disc=(cx,cy,cz,r,col,edge)=>{const P=[];for(let i=0;i<14;i++){const a=i/14*Math.PI*2;P.push(new V(cx+Math.cos(a)*r,cy+Math.sin(a)*r,cz))}v.poly(P,col,1,edge,1)};
+  v.text=(x,y,z,s,op)=>{op=op||{};const q=v.proj(x,y,z);if(q[2]<.15)return null;const size=op.size||12;g.font=`${op.weight||600} ${size}px "IBM Plex Mono",ui-monospace,monospace`;g.textAlign=op.align||'center';g.textBaseline='middle';
+    const w=g.measureText(s).width;const px=op.align==='left'?q[0]:q[0]-w/2;
+    if(op.bg){g.fillStyle=op.bg;g.fillRect(px-6,q[1]-size*.75,w+12,size*1.5)}g.fillStyle=op.col||'#fff';g.fillText(s,q[0],q[1]);return q};
+  v.hitTest=(x,y)=>{for(let i=v.hits.length-1;i>=0;i--)for(const poly of v.hits[i].polys)if(pip(x,y,poly))return v.hits[i].info;return null};
+  // input
+  let drag=null,moved=false;
+  host.addEventListener('pointerdown',e=>{if(e.target.closest(o.ignore||'button'))return;drag={x:e.clientX,y:e.clientY,t:v.theta,p:v.phi};moved=false;try{host.setPointerCapture(e.pointerId)}catch(_){}});
+  host.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>5){moved=true;host.classList.add('dragging')}if(!moved||o.noRotate&&o.noRotate())return;
+    v.theta=clamp(drag.t-dx*.008,v.limits.t[0],v.limits.t[1]);v.phi=clamp(drag.p-dy*.006,v.limits.p[0],v.limits.p[1]);v.dragging=true;if(v.goal){v.goal.theta=v.theta;v.goal.phi=v.phi}});
+  const end=e=>{if(drag&&!moved&&o.onTap){const r=host.getBoundingClientRect();o.onTap(e.clientX-r.left,e.clientY-r.top)}drag=null;v.dragging=false;host.classList.remove('dragging')};
+  host.addEventListener('pointerup',end);host.addEventListener('pointercancel',()=>{drag=null;v.dragging=false;host.classList.remove('dragging')});
+  host.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();v.zoom=clamp(v.zoom*(e.deltaY<0?1.1:.9),.6,2.4)},{passive:false});
+  v.smooth=()=>{if(!v.goal||v.dragging)return;const k=.07;v.theta=lerp(v.theta,v.goal.theta,k);v.phi=lerp(v.phi,v.goal.phi,k);v.R=lerp(v.R,v.goal.R,k);
+    v.target.set(lerp(v.target.x,v.goal.target.x,k),lerp(v.target.y,v.goal.target.y,k),lerp(v.target.z,v.goal.target.z,k))};
+  return v}
+function pip(x,y,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const [xi,yi]=poly[i],[xj,yj]=poly[j];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c}return c}
+
+
+
+/* ================= WORLD MODEL & DRAWING ================= */
+const CT={L:12.19,H:2.896,W:2.438,iL:12.03,iW:2.35,iH:2.70,doorW:2.34,doorH:2.58};
+const CG={L:1.35,W:1.10,H:2.04};
+const GAUGE={SG:1.435,MG:1.0};
+const DECK={SG:1.18,MG:1.12};
+const TRAILER_DECK=1.32;
+const COL={ground:'#151D27',ground2:'#1A2430',concrete:'#2C3540',concrete2:'#353F4B',line:'#F5C02A',ballast:'#2c3036',sleeper:'#5b4c3e',rail:'#A9B4C0',frame:'#2C3440',deck:'#4A5562',bogie:'#1D232B',wheel:'#101419',
+  crane:'#D9A22B',craneD:'#8f6a17',spreader:'#E8B23A',contRed:'#9B3B2E',contBlue:'#2E5C8A',floor:'#6b5843',steel:'#48525e',steelD:'#2f363f',mesh:'#b8c2cc',fork:'#E8892B',forkD:'#2a2f36',
+  tractor:'#C9D1DA',tractorD:'#334155',shed:'#26313d',shedRoof:'#1d2630',pinOff:'#8a95a3',pinOn:'#2FD27E',locoSG:'#1f5a46',locoMG:'#1F3B66',stripe:'#F2B705',sig:'#3a4552',
+  A:'#3B7DD8',B:'#22A06B',C:'#8B5CF6',D:'#E07A2F',none:'#5b6676',edge:'rgba(0,0,0,.45)'};
+const SME={A:{name:'SME A',full:'SME A · Klang Valley importer',col:COL.A},B:{name:'SME B',full:'SME B · Penang retailer',col:COL.B},C:{name:'SME C',full:'SME C · Johor distributor',col:COL.C},D:{name:'SME D',full:'SME D · Ipoh trader',col:COL.D}};
+/* 16 cages: Row 1 at the front wall, Row 8 nearest the doors. Left = +z (viewer's left facing forward from the doors). */
+const CAGE_PLAN=(()=>{const own={1:['B'],2:['B'],3:['A'],4:['C','D'],5:['B'],6:['B'],7:['C'],8:['C'],9:['C'],10:['C'],11:['D'],12:['D'],13:['D']};
+  const kg={1:520,2:480,3:450,4:390,5:610,6:560,7:430,8:470,9:500,10:440,11:380,12:350,13:300};
+  const out=[];for(let i=1;i<=16;i++){const row=Math.ceil(i/2),left=i%2===1;out.push({id:'RW-CAGE-'+String(i).padStart(3,'0'),n:i,row,side:left?'left':'right',own:own[i]||[],kg:kg[i]||0})}return out})();
+const BOOKED=CAGE_PLAN.filter(c=>c.own.length);
+function cageLocal(c){// centre of cage relative to container centre (floor-level based)
+  const x0=-CT.iL/2+.08;const x=x0+(c.row-1)*(CG.L+.02)+CG.L/2;const z=(c.side==='left'?1:-1)*(CG.W/2+.04);return {x,z}}
+
+function newWorld(){return {tracks:[],wagons:[],locos:[],trucks:[],containers:[],cages:[],forklift:null,crane:null,buildings:[],zones:[],labels:[],props:[],cartons:[],scroll:0,speed:0,scenery:false,people:[],signals:[]}}
+
+/* ---------- primitives ---------- */
+function drawTrack(v,w,t){
+  const g=t.gauge==='SG'?GAUGE.SG:GAUGE.MG;const x0=t.x0??-40,x1=t.x1??40;const sc=t.scroll?w.scroll:0;
+  for(let x=x0;x<x1;x+=8)v.box(new V(x+4,-.06,t.z),[8,.12,3.2],COL.ballast,{});
+  const sl=[];const off=((sc%0.65)+0.65)%0.65;for(let x=x0+.3;x<x1;x+=.65)sl.push(new V(x-off,.06,t.z));
+  sl.sort((a,b)=>v.d2(b)-v.d2(a)).forEach(p=>v.box(p,[.24,.12,g+.9],COL.sleeper,{}));
+  for(const s of [-1,1])for(let x=x0;x<x1;x+=4)v.box(new V(x+2,.19,t.z+s*g/2),[4,.14,.07],COL.rail,{});
+  if(t.label)v.text(t.labelX??(x0+4),.1,t.z+(g/2+1.1),t.label,{size:11,col:t.gauge==='SG'?'#ffb4a3':'#a8c6ff',bg:'rgba(11,17,26,.8)',align:'left'})}
+function drawWagon(v,w,wg){
+  const g=GAUGE[wg.gauge],d=DECK[wg.gauge];const X=wg.x,Z=wg.z;if(Math.abs(X)>70)return;
+  [-5.3,5.3].forEach(bx=>{[-.9,.9].forEach(ax=>v.disc(X+bx+ax,.5,Z-g/2-.06,.42,COL.wheel,'#3a4552'));
+    v.box(new V(X+bx,.62,Z),[2.5,.36,g+.5],COL.bogie,{edge:COL.edge});
+    [-.9,.9].forEach(ax=>{v.disc(X+bx+ax,.5,Z+g/2+.06,.42,COL.wheel,'#3a4552');v.disc(X+bx+ax,.5,Z+g/2+.07,.1,'#6b7684')})});
+  v.box(new V(X,d-.3,Z),[13.4,.3,.5],COL.frame,{});
+  [-1,1].forEach(s=>v.box(new V(X,d-.22,Z+s*1.1),[13.4,.34,.2],COL.frame,{edge:COL.edge}));
+  v.box(new V(X,d-.06,Z),[13.4,.08,2.5],COL.deck,{edge:COL.edge});
+  [-6.8,6.8].forEach(x=>v.box(new V(X+x,d-.35,Z),[.4,.25,.35],'#6b7684',{}));
+  for(const a of [-1,1])for(const b of [-1,1])v.box(new V(X+a*(CT.L/2-.1),d+.03,Z+b*(CT.W/2-.08)),[.22,.08,.22],wg.locked?COL.pinOn:COL.pinOff,{hit:{type:'pin'}});
+  if(wg.label)v.text(X,d-.2,Z+1.6,wg.label,{size:10,col:'#C2CDDB',bg:'rgba(11,17,26,.75)'})}
+function drawLoco(v,w,l){const g=GAUGE[l.gauge];const X=l.x,Z=l.z;if(Math.abs(X)>80)return;const col=l.gauge==='SG'?COL.locoSG:COL.locoMG;
+  [-5,5].forEach(bx=>{[-1.1,1.1].forEach(ax=>v.disc(X+bx+ax,.55,Z-g/2-.06,.48,COL.wheel));v.box(new V(X+bx,.78,Z),[3.3,.5,g+.5],COL.bogie,{});[-1.1,1.1].forEach(ax=>v.disc(X+bx+ax,.55,Z+g/2+.06,.48,COL.wheel,'#3a4552'))});
+  v.box(new V(X,1.25,Z),[15,.4,2.9],COL.frame,{});v.box(new V(X,2.55,Z),[14.2,2.4,2.9],col,{edge:COL.edge});
+  [1,-1].forEach(s=>v.line(new V(X-7.1,1.75,Z+s*1.46),new V(X+7.1,1.75,Z+s*1.46),COL.stripe,3));
+  v.box(new V(X+(l.dir||1)*6.2,2.95,Z),[1.6,1.2,2.6],'#0E1D33',{});
+  v.text(X,2.6,Z+1.47,(l.label||(l.gauge==='SG'?'STANDARD-GAUGE LOCOMOTIVE':'METRE-GAUGE LOCOMOTIVE'))+' · ILLUSTRATIVE',{size:9,col:'#C2CDDB',weight:500})}
+function drawTruck(v,w,t){const X=t.x,Z=t.z;if(Math.abs(X)>80)return;
+  [-4.6,-3.4,-2.2].forEach(ax=>v.disc(X+ax,.5,Z-1.15,.5,COL.wheel));[4.6,6.6,7.6].forEach(ax=>v.disc(X+ax,.5,Z-1.15,.5,COL.wheel));
+  v.box(new V(X,1.08,Z),[12.4,.28,2.4],COL.frame,{edge:COL.edge});
+  v.box(new V(X+7.6,1.75,Z),[2.6,2.5,2.45],t.col||COL.tractor,{edge:COL.edge});v.box(new V(X+8.45,2.35,Z),[.9,.95,2.2],COL.tractorD,{});
+  for(const a of [-1,1])for(const b of [-1,1])v.box(new V(X+a*(CT.L/2-.1),TRAILER_DECK-.08,Z+b*(CT.W/2-.08)),[.2,.08,.2],t.locked?COL.pinOn:COL.pinOff,{});
+  [-4.6,-3.4,-2.2].forEach(ax=>v.disc(X+ax,.5,Z+1.15,.5,COL.wheel,'#3a4552'));[4.6,6.6,7.6].forEach(ax=>v.disc(X+ax,.5,Z+1.15,.5,COL.wheel,'#3a4552'));
+  if(t.label)v.text(X+7.6,3.4,Z,t.label,{size:10,col:'#E6ECF3',bg:'rgba(11,17,26,.8)'})}
+
+/* ---------- container ---------- */
+function contPos(w,c){
+  if(c.mount&&c.mount.startsWith('wagon:')){const wg=w.wagons.find(x=>x.id===c.mount.slice(6));return new V(wg.x,DECK[wg.gauge]+CT.H/2,wg.z)}
+  if(c.mount&&c.mount.startsWith('truck:')){const t=w.trucks.find(x=>x.id===c.mount.slice(6));return new V(t.x,TRAILER_DECK+CT.H/2,t.z)}
+  if(c.mount==='crane'){const cr=w.crane;return new V(cr.x,cr.sy-.16-CT.H/2,cr.tz)}
+  return c.p}
+function drawContainer(v,w,c,opt){
+  opt=opt||{};const p=contPos(w,c);const hL=CT.L/2,hH=CT.H/2,hW=CT.W/2;const g=v.g;
+  const base=c.col||COL.contRed;const cut=opt.ext?0:Math.max(opt.cutaway||0,c.cut||0);const roofA=1-Math.max(cut,c.roofOff||0),nearA=1-Math.max(cut*0.88,c.sideClear||0)*1;
+  const bottom=p.y-hH;
+  const panel=(pp,s,col,al,o)=>v.box(pp,s,col,Object.assign({alpha:al,edge:al>.5?COL.edge:null},o||{}));
+  // floor
+  panel(new V(p.x,bottom+.08,p.z),[CT.L,.16,CT.W],COL.floor,1,{hit:{type:'container',id:c.id}});
+  // far side wall & front wall (interior visible faces first)
+  panel(new V(p.x,p.y,p.z-hW+.03),[CT.L,CT.H,.06],base,1,{light:.78});
+  panel(new V(p.x-hL+.04,p.y,p.z),[.08,CT.H,CT.W],base,1,{light:.78});
+  corrugate(v,p,-1,base,1);
+  // cages inside
+  const inside=w.cages.filter(k=>k.in===c.id).map(k=>{const l=cageLocal(k.plan);return {k,pp:new V(p.x+l.x+(k.dx||0),bottom+.16+CG.H/2,p.z+l.z)}});
+  inside.sort((a,b)=>v.d2(b.pp)-v.d2(a.pp)).forEach(o=>drawCage(v,o.k,o.pp,{dim:opt.dimOthers&&!o.k.hi}));
+  (c.restraints||[]).forEach(r=>drawRestraint(v,p,r));
+  // forklift inside container must be drawn before near wall
+  if(opt.inner)opt.inner();
+  // near side wall
+  if(nearA>.02){panel(new V(p.x,p.y,p.z+hW-.03),[CT.L,CT.H,.06],base,nearA,{hit:{type:'container',id:c.id}});if(nearA>.5)corrugate(v,p,1,base,nearA)}
+  else v.line(new V(p.x-hL,bottom+.16,p.z+hW),new V(p.x+hL,bottom+.16,p.z+hW),'#9aa5b1',1.2,.8);
+  // roof
+  const ry=p.y+hH-.04+(c.roofOff||0)*2.2;if(roofA>.02)panel(new V(p.x,ry,p.z),[CT.L,.08,CT.W],base,roofA,{light:1.05});
+  // frame edges (always visible as outline)
+  g.globalAlpha=.9;v.line(new V(p.x-hL,p.y+hH,p.z+hW),new V(p.x+hL,p.y+hH,p.z+hW),'#c9d1da',1.1,.6);v.line(new V(p.x-hL,p.y+hH,p.z-hW),new V(p.x+hL,p.y+hH,p.z-hW),'#c9d1da',1.1,.5);
+  v.line(new V(p.x-hL,bottom,p.z+hW),new V(p.x-hL,p.y+hH,p.z+hW),'#c9d1da',1.1,.6);g.globalAlpha=1;
+  // corner castings
+  for(const sx of [-1,1])for(const sy of [-1,1])for(const sz of [-1,1])if(sz>0||sx>0||sy>0)v.box(new V(p.x+sx*(hL-.09),p.y+sy*(hH-.06),p.z+sz*(hW-.08)),[.18,.12,.16],'#22272e',{});
+  // doors at +x
+  drawDoors(v,p,c,base);
+  // marking
+  if(nearA>.5&&!opt.noLabel){v.text(p.x-3.6,p.y+.7,p.z+hW+.02,c.code||'RWCU 001001 4 · 45G1',{size:11,col:'#fff',weight:600});v.text(p.x-3.6,p.y+.3,p.z+hW+.02,(c.id||'RW-CONT-001')+' (illustrative)',{size:10,col:'#E6ECF3',weight:500})}
+  if(c.hi){const q=v.proj(p.x,p.y+hH+.8+(c.roofOff||0)*2.2,p.z);if(q[2]>.15){g.fillStyle='#F5C02A';g.beginPath();g.moveTo(q[0],q[1]+8);g.lineTo(q[0]-7,q[1]-4);g.lineTo(q[0]+7,q[1]-4);g.closePath();g.fill()}}
+}
+function shadeFar(c){return shade(c,.72)}function shadeRoof(c){return shade(c,1.05)}
+function corrugate(v,p,side,col,al){const z=p.z+side*(CT.W/2+.005);const g=v.g;if(!v.faceVis(p,[0,0,side],[CT.L/2,CT.H/2,CT.W/2])&&side>0)return;
+  g.globalAlpha=.25*al;g.strokeStyle='#000';g.lineWidth=1;g.beginPath();for(let x=-CT.L/2+.2;x<CT.L/2-.15;x+=.28){const a=v.proj(p.x+x,p.y-CT.H/2+.15,z),b=v.proj(p.x+x,p.y+CT.H/2-.12,z);if(a[2]>.15&&b[2]>.15){g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1])}}g.stroke();g.globalAlpha=1}
+function drawDoors(v,p,c,base){const a=(c.doors||0)*Math.PI*.82;const x=p.x+CT.L/2,y0=p.y-CT.H/2+.05,y1=p.y+CT.H/2-.05;
+  [-1,1].forEach(s=>{const hz=p.z+s*CT.W/2;const dx=Math.sin(a)*CT.W/2,dz=-s*Math.cos(a)*CT.W/2;
+    const P=[new V(x,y0,hz),new V(x+dx,y0,hz+dz),new V(x+dx,y1,hz+dz),new V(x,y1,hz)];v.poly(P,shade(base,.85),1,'rgba(0,0,0,.6)',1.2);
+    // locking bars
+    [.3,.7].forEach(f=>v.line(new V(x+dx*f+.01,y0+.1,hz+dz*f),new V(x+dx*f+.01,y1-.1,hz+dz*f),'#c9d1da',1.6,.85));
+    if(s>0&&c.sealed&&a<.05){v.box(new V(x+.05,p.y-.1,hz+dz*.7),[.06,.16,.06],'#F5C02A',{});v.text(x+.3,p.y-.45,hz+dz*.7,c.seal||'SEAL RWS-0451207',{size:9,col:'#F5C02A',bg:'rgba(11,17,26,.8)'})}})}
+function drawRestraint(v,p,r){const b=p.y-CT.H/2+.16;
+  if(r.type==='block'){v.box(new V(p.x+r.x,b+.6,p.z),[.18,1.2,CT.iW-.1],'#B8834A',{edge:COL.edge});v.box(new V(p.x+r.x+.25,b+.6,p.z+.9),[.5,.12,.12],'#B8834A',{});v.box(new V(p.x+r.x+.25,b+.6,p.z-.9),[.5,.12,.12],'#B8834A',{})}
+  if(r.type==='lash'){[-1,1].forEach(s=>v.line(new V(p.x+r.x-.6,b+1.4,p.z+s*(CT.iW/2)),new V(p.x+r.x+.6,b+1.6,p.z),'#F2B705',2.2,.95))}
+  if(r.type==='bag'){v.box(new V(p.x+r.x,b+1.0,p.z),[1.2,1.8,.07],'#d7dde4',{alpha:.85})}}
+
+/* ---------- cage ---------- */
+function drawCage(v,k,p,o){o=o||{};const g=v.g;const hL=CG.L/2,hW=CG.W/2,hH=CG.H/2;const dim=o.dim?.4:1;const sc=o.scale||1;
+  const own=k.plan?k.plan.own:[];const col=own.length?SME[own[0]].col:COL.none;
+  g.globalAlpha=dim;
+  v.box(new V(p.x,p.y-hH+.075,p.z),[CG.L,.15,CG.W],COL.steelD,{edge:COL.edge,hit:{type:'cage',id:k.plan.id}});
+  // fork pockets on +x / -x
+  [1,-1].forEach(s=>{if(!v.faceVis(new V(p.x,p.y-hH+.075,p.z),[s,0,0],[hL,.075,hW]))return;[-.3,.3].forEach(dz=>{const P=[new V(p.x+s*(hL+.003),p.y-hH+.03,p.z+dz-.11),new V(p.x+s*(hL+.003),p.y-hH+.03,p.z+dz+.11),new V(p.x+s*(hL+.003),p.y-hH+.12,p.z+dz+.11),new V(p.x+s*(hL+.003),p.y-hH+.12,p.z+dz-.11)];v.poly(P,'#0b0e12',dim)})});
+  // cartons
+  if(k.cartons!==0&&own.length){const n=k.cartons??12;const cs=[];let i=0;
+    for(let ly=0;ly<3;ly++)for(let ix=0;ix<2;ix++)for(let iz=0;iz<2;iz++){if(i>=n)break;const o2=own[own.length>1&&i>=n/2?1:0];cs.push({p:new V(p.x-.3+ix*.6,p.y-hH+.15+.3+ly*.6,p.z-.25+iz*.5),c:SME[o2].col});i++}
+    cs.sort((a,b)=>v.d2(b.p)-v.d2(a.p)).forEach(c=>v.box(c.p,[.56,.56,.46],c.c,{edge:'rgba(0,0,0,.35)',alpha:dim,light:.95}));
+    if(k.strap)[-.2,.3].forEach(dy=>v.line(new V(p.x+hL-.02,p.y+dy,p.z+hW-.02),new V(p.x+hL-.02,p.y+dy,p.z-hW+.02),'#F2B705',1.5,dim))}
+  // posts + rails
+  for(const a of [-1,1])for(const b of [-1,1])v.box(new V(p.x+a*(hL-.03),p.y+.075,p.z+b*(hW-.03)),[.06,CG.H-.15,.06],COL.steel,{});
+  [[0,1],[0,-1]].forEach(([_,b])=>v.box(new V(p.x,p.y+hH-.03,p.z+b*(hW-.03)),[CG.L,.05,.05],COL.steel,{}));
+  [1,-1].forEach(a=>v.box(new V(p.x+a*(hL-.03),p.y+hH-.03,p.z),[.05,.05,CG.W],COL.steel,{}));
+  // mesh on visible faces
+  const h=[hL,hH,hW];
+  [[1,0,0],[-1,0,0],[0,0,1],[0,0,-1],[0,1,0]].forEach(n=>{if(!v.faceVis(p,n,h))return;mesh(v,p,n,dim)});
+  // gate (+x face) frame, latch, ID plate & colour label
+  if(v.faceVis(p,[1,0,0],h)){const x=p.x+hL+.005;const gx=k.gate?Math.sin(k.gate*1.4)*.9:0,gz=k.gate?(1-Math.cos(k.gate*1.4))*.9:0;
+    const G=[new V(x,p.y-hH+.2,p.z+hW-.06),new V(x+gx,p.y-hH+.2,p.z-hW+.06+gz*0),new V(x+gx,p.y+hH-.08,p.z-hW+.06),new V(x,p.y+hH-.08,p.z+hW-.06)];
+    if(!k.gate){v.poly(G,null,dim,'#d5dce4',2);v.box(new V(x+.02,p.y,p.z-hW+.14),[.05,.12,.05],'#F2B705',{})}
+    const pl=[new V(x+.01,p.y+.55,p.z+.12),new V(x+.01,p.y+.55,p.z+.5),new V(x+.01,p.y+.85,p.z+.5),new V(x+.01,p.y+.85,p.z+.12)];const q=v.poly(pl,'#F1F4F7',dim,col,2);
+    const band=[new V(x+.01,p.y+.9,p.z-hW+.08),new V(x+.01,p.y+.9,p.z+hW-.08),new V(x+.01,p.y+.98,p.z+hW-.08),new V(x+.01,p.y+.98,p.z-hW+.08)];v.poly(band,col,dim);
+    if(q){const wpx=Math.abs(q[1][0]-q[0][0])+Math.abs(q[1][1]-q[0][1]);if(wpx>26){const c=v.proj(x+.01,p.y+.7,p.z+.31);g.fillStyle='#0B111A';g.font=`700 ${clamp(wpx*.14,7,12)}px "IBM Plex Mono",monospace`;g.textAlign='center';g.textBaseline='middle';g.fillText(k.plan.id.slice(3),c[0],c[1]-wpx*.08);
+      // QR
+      const qs=clamp(wpx*.11,3,9);const qx=c[0]-qs*1.5,qy=c[1]+wpx*.02;const bits=qrBits(k.plan.n);for(let i=0;i<9;i++)if(bits[i]){g.fillRect(qx+(i%3)*qs,qy+Math.floor(i/3)*qs,qs,qs)}}}}
+  if(k.hi){const q=v.proj(p.x,p.y+hH+.45,p.z);if(q[2]>.15){g.fillStyle='#F5C02A';g.beginPath();g.moveTo(q[0],q[1]+8);g.lineTo(q[0]-7,q[1]-4);g.lineTo(q[0]+7,q[1]-4);g.closePath();g.fill()}}
+  if(k.scan){const a=v.proj(p.x+hL,p.y+.7,p.z+.3);if(a[2]>.15){g.strokeStyle='rgba(47,210,126,.9)';g.lineWidth=2;g.strokeRect(a[0]-14,a[1]-14,28,28)}}
+  g.globalAlpha=1}
+function qrBits(n){return [1,(n>>1)&1,1,(n>>2)&1,1,n&1,1,(n>>3)&1,1]}
+function mesh(v,p,n,dim){const g=v.g;const hL=CG.L/2,hH=CG.H/2,hW=CG.W/2;
+  const pts=[];const st=.17;
+  if(n[0]){const x=p.x+n[0]*hL;for(let z=-hW+.06;z<hW;z+=st)pts.push([[x,p.y-hH+.15,p.z+z],[x,p.y+hH-.05,p.z+z]]);for(let y=-hH+.15;y<hH;y+=st)pts.push([[x,p.y+y,p.z-hW],[x,p.y+y,p.z+hW]])}
+  else if(n[2]){const z=p.z+n[2]*hW;for(let x=-hL+.06;x<hL;x+=st)pts.push([[p.x+x,p.y-hH+.15,z],[p.x+x,p.y+hH-.05,z]]);for(let y=-hH+.15;y<hH;y+=st)pts.push([[p.x-hL,p.y+y,z],[p.x+hL,p.y+y,z]])}
+  else{const y=p.y+hH-.02;for(let x=-hL+.06;x<hL;x+=st*1.4)pts.push([[p.x+x,y,p.z-hW],[p.x+x,y,p.z+hW]])}
+  g.globalAlpha=.42*dim;g.strokeStyle=COL.mesh;g.lineWidth=.7;g.beginPath();
+  for(const [a,b] of pts){const q=v.proj(...a),r=v.proj(...b);if(q[2]<.15||r[2]<.15)continue;g.moveTo(q[0],q[1]);g.lineTo(r[0],r[1])}g.stroke();g.globalAlpha=1}
+
+/* ---------- forklift ---------- */
+function drawForklift(v,w,f){const h=f.dir||1,X=f.x,Z=f.z;const g=v.g;
+  const parts=[];
+  const push=(x,y,z,s,c,o)=>parts.push({p:new V(x,y,z),s,c,o});
+  [-1,1].forEach(s=>{v.disc(X-h*.25,.32,Z+s*.62,.32,COL.wheel,'#3a4552');v.disc(X-h*2.0,.28,Z+s*.58,.28,COL.wheel,'#3a4552')});
+  push(X-h*1.15,.62,Z,[2.0,.8,1.15],COL.fork);push(X-h*2.25,.85,Z,[.4,1.1,1.1],'#a3601f');
+  push(X-h*1.3,1.2,Z,[.5,.35,.5],COL.forkD);
+  [-.5,.5].forEach(dz=>{push(X-h*.55,1.45,Z+dz,[.06,1.5,.06],COL.forkD);push(X-h*1.9,1.45,Z+dz,[.06,1.5,.06],COL.forkD)});
+  push(X-h*1.22,2.15,Z,[1.45,.06,1.1],COL.forkD);
+  [-.36,.36].forEach(dz=>push(X+h*.08,1.15,Z+dz,[.1,2.2,.1],'#3a4048'));
+  push(X+h*.16,f.fy+.25,Z,[.08,.55,.95],'#3a4048');
+  [-.3,.3].forEach(dz=>push(X+h*.78,f.fy,Z+dz,[1.2,.05,.12],'#9aa5b1'));
+  parts.sort((a,b)=>v.d2(b.p)-v.d2(a.p)).forEach(q=>v.box(q.p,q.s,q.c,{edge:COL.edge,hit:{type:'forklift'}}));
+  if(f.carry){const cp=new V(X+h*(.2+CG.L/2),f.fy+.05+CG.H/2,Z);drawCage(v,f.carry,cp,{})}}
+
+/* ---------- crane ---------- */
+function drawCraneFar(v,w){const c=w.crane;if(!c)return;[-2.6,2.6].forEach(dx=>v.box(new V(c.x+dx,6.2,c.z1),[.55,12.4,.6],COL.crane,{hit:{type:'crane'}}));v.box(new V(c.x,.45,c.z1),[5.8,.5,.8],COL.craneD,{})}
+function drawCraneTop(v,w){const c=w.crane;if(!c)return;const sp=new V(c.x,c.sy,c.tz);const TY=13.3;
+  [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([a,b])=>v.line(new V(c.x+a*.8,TY-.4,c.tz+b*.7),new V(c.x+a*5.6,c.sy+.12,c.tz+b*1.0),'#c9d1da',1.2,.85));
+  v.box(sp,[12.2,.28,2.4],COL.spreader,{edge:COL.edge,hit:{type:'crane'}});
+  [-1,1].forEach(a=>[-1,1].forEach(b=>v.box(new V(c.x+a*(CT.L/2-.1),c.sy-.18,c.tz+b*(CT.W/2-.08)),[.14,.1,.14],c.locked?COL.pinOn:COL.pinOff,{})));
+  [-1.4,1.4].forEach(dx=>v.box(new V(c.x+dx,12.7,(c.z1+c.z2)/2),[.6,1,c.z2-c.z1+1.4],COL.crane,{edge:COL.edge,hit:{type:'crane'}}));
+  v.box(new V(c.x,TY,c.tz),[2.6,.8,2.4],COL.craneD,{edge:COL.edge});
+  [-2.6,2.6].forEach(dx=>v.box(new V(c.x+dx,6.2,c.z2),[.55,12.4,.6],COL.crane,{edge:COL.edge,hit:{type:'crane'}}));v.box(new V(c.x,.45,c.z2),[5.8,.5,.8],COL.craneD,{});
+  v.box(new V(c.x,12.1,c.z1),[5.8,.7,.7],COL.crane,{});v.box(new V(c.x,12.1,c.z2),[5.8,.7,.7],COL.crane,{});
+  if(c.label)v.text(c.x,13.9,c.z2,c.label,{size:10,col:'#E6ECF3',bg:'rgba(11,17,26,.8)'})}
+
+/* ---------- buildings, zones, props ---------- */
+function drawBuilding(v,b){v.box(new V(b.x,b.h/2,b.z),[b.w,b.h,b.d],b.col||COL.shed,{edge:'rgba(255,255,255,.06)'});
+  if(b.doors)b.doors.forEach(dx=>{const P=[new V(b.x+dx-1.4,.05,b.z+b.d/2+.01),new V(b.x+dx+1.4,.05,b.z+b.d/2+.01),new V(b.x+dx+1.4,3.4,b.z+b.d/2+.01),new V(b.x+dx-1.4,3.4,b.z+b.d/2+.01)];v.poly(P,'#0f151d',1,'#4b5d75',1)});
+  if(b.label)v.text(b.x,b.h+.6,b.z,b.label,{size:10,col:'#9FB0C4'})}
+function drawZone(v,z){const P=[new V(z.x-z.w/2,.02,z.z-z.d/2),new V(z.x+z.w/2,.02,z.z-z.d/2),new V(z.x+z.w/2,.02,z.z+z.d/2),new V(z.x-z.w/2,.02,z.z+z.d/2)];
+  v.poly(P,z.fill||null,z.alpha??.35,z.col||COL.line,1.5);if(z.label)v.text(z.x,.05,z.z+z.d/2+.5,z.label,{size:10,col:z.tcol||'#C2CDDB',bg:'rgba(11,17,26,.7)'})}
+function drawProp(v,w,p){
+  if(p.type==='signal'){const x=p.x-(p.scroll?w.scroll:0)%(p.wrap||80);const X=((x+40)%80+80)%80-40;v.box(new V(X,2.2,p.z),[.15,4.4,.15],COL.sig,{});v.box(new V(X,4.4,p.z),[.4,.9,.3],'#151b22',{});v.disc(X,4.6,p.z+.16,.1,p.state==='red'?'#ff5a4f':'#2FD27E')}
+  else if(p.type==='tunnel'){const X=((p.x-w.scroll%120+60)%120+120)%120-60;v.box(new V(X,3.2,p.z-2.6),[6,6.4,1.4],'#3a3530',{});v.box(new V(X,5.6,p.z),[6,1.6,6.6],'#3a3530',{});v.box(new V(X,3.2,p.z+2.6),[6,6.4,1.4],'#3a3530',{})}
+  else if(p.type==='pier'){const X=((p.x-w.scroll%60+30)%60+60)%60-30;v.box(new V(X,-1.6,p.z),[1.6,3,2.6],'#4b4f55',{})}
+  else if(p.type==='booth'){v.box(new V(p.x,1.4,p.z),[3,2.8,2.4],p.col||'#2b4a6e',{edge:COL.edge});v.box(new V(p.x,2.95,p.z),[3.6,.3,3],'#1b2633',{});if(p.label)v.text(p.x,3.6,p.z,p.label,{size:10,col:'#E6ECF3',bg:'rgba(11,17,26,.8)'})}
+  else if(p.type==='gate'){[-1,1].forEach(s=>v.box(new V(p.x,1.6,p.z+s*4.2),[.4,3.2,.4],'#3a4552',{}));v.box(new V(p.x,3.3,p.z),[.4,.4,8.8],'#3a4552',{});v.box(new V(p.x,1.1,p.z+(p.open?2.6:0)),[.12,.12,p.open?3.4:8],'#F5C02A',{});if(p.label)v.text(p.x,4.1,p.z,p.label,{size:10,col:'#E6ECF3',bg:'rgba(11,17,26,.8)'})}
+  else if(p.type==='rack'){for(let i=0;i<p.n;i++){const x=p.x+i*2.8;[-1,1].forEach(s=>v.box(new V(x+s*1.3,2.2,p.z),[.1,4.4,1.1],'#3b6ea5',{}));[1.4,2.8,4.2].forEach(y=>v.box(new V(x,y,p.z),[2.7,.08,1.1],'#E07A2F',{}));v.box(new V(x,2.0,p.z),[2.2,.9,.9],'#8c6b4f',{})}}
+  else if(p.type==='scale'){v.box(new V(p.x,.05,p.z),[1.6,.1,1.6],'#5b6676',{});v.box(new V(p.x+.95,.7,p.z),[.1,1.4,.1],'#3a4552',{});v.text(p.x+.95,1.6,p.z,p.text||'WEIGHT',{size:9,col:'#2FD27E',bg:'#0b0e12'})}
+  else if(p.type==='person'){v.box(new V(p.x,.9,p.z),[.4,1.8,.32],p.col||'#F28C28',{});v.box(new V(p.x,1.95,p.z),[.28,.28,.28],'#e3c6a6',{});v.box(new V(p.x,2.12,p.z),[.32,.1,.32],'#F5C02A',{})}
+  else if(p.type==='carton'){v.box(p.p||new V(p.x,p.y||.3,p.z),p.s||[.56,.56,.46],p.col,{edge:'rgba(0,0,0,.35)'})}
+  else if(p.type==='pallet'){v.box(new V(p.x,.08,p.z),[1.2,.15,1.0],'#9b7b56',{})}
+  else if(p.type==='stack'){for(let i=0;i<(p.n||3);i++)v.box(new V(p.x,CT.H/2+i*CT.H,p.z),[CT.L,CT.H,CT.W],p.cols[i%p.cols.length],{edge:COL.edge})}
+}
+
+/* ---------- full scene ---------- */
+function renderWorld(v,w,opt){opt=opt||{};if(!v.begin('#0E1621','#101923'))return;const g=v.g;
+  g.fillStyle=COL.ground;const h1=v.proj(-120,0,-60),h2=v.proj(120,0,-60);const hy=(h1[2]>0&&h2[2]>0)?Math.min(h1[1],h2[1]):v.H*.25;g.fillRect(0,Math.max(0,hy),v.W,v.H);
+  (w.pads||[]).forEach(pd=>{for(let x=pd.x-pd.w/2;x<pd.x+pd.w/2-.01;x+=Math.min(10,pd.w)){const ww=Math.min(10,pd.x+pd.w/2-x);v.box(new V(x+ww/2,.0,pd.z),[ww,.02,pd.d],pd.col||COL.concrete,{})}});
+  w.zones.forEach(z=>drawZone(v,z));
+  w.buildings.filter(b=>b.z<0).forEach(b=>drawBuilding(v,b));
+  w.props.filter(p=>p.type==='pier').forEach(p=>drawProp(v,w,p));
+  drawCraneFar(v,w);
+  w.tracks.forEach(t=>drawTrack(v,w,t));
+  w.props.filter(p=>p.type==='signal'&&p.z<0).forEach(p=>drawProp(v,w,p));
+  // sortable objects
+  const items=[];
+  w.wagons.forEach(o=>items.push({p:new V(o.x,.8,o.z),f:()=>drawWagon(v,w,o),k:'w'}));
+  w.locos.forEach(o=>items.push({p:new V(o.x,2,o.z),f:()=>drawLoco(v,w,o)}));
+  w.trucks.forEach(o=>items.push({p:new V(o.x,1,o.z),f:()=>drawTruck(v,w,o)}));
+  w.buildings.filter(b=>b.z>=0).forEach(b=>items.push({p:new V(b.x,b.h/2,b.z),f:()=>drawBuilding(v,b)}));
+  w.props.filter(p=>!['pier','tunnel'].includes(p.type)&&!(p.type==='signal'&&p.z<0)).forEach(p=>items.push({p:p.p||new V(p.x,1,p.z),f:()=>drawProp(v,w,p)}));
+  w.cages.filter(k=>!k.in&&!k.onFork&&k.p).forEach(k=>items.push({p:k.p,f:()=>drawCage(v,k,k.p,{dim:opt.dimOthers&&!k.hi})}));
+  const fl=w.forklift;const flInside=fl&&w.containers.some(c=>c.mount!=='crane'&&insideCont(w,c,fl));
+  if(fl&&!flInside)items.push({p:new V(fl.x,1,fl.z),f:()=>drawForklift(v,w,fl)});
+  w.containers.filter(c=>c.mount!=='crane').forEach(c=>items.push({p:contPos(w,c).clone().set(contPos(w,c).x,1.6,contPos(w,c).z),f:()=>drawContainer(v,w,c,Object.assign({},opt,{inner:flInside&&insideCont(w,c,fl)?()=>drawForklift(v,w,fl):null}))}));
+  // wagons first, then others by depth (wagon decks lie under their containers)
+  items.filter(i=>i.k==='w').sort((a,b)=>v.d2(b.p)-v.d2(a.p)).forEach(i=>i.f());
+  items.filter(i=>i.k!=='w').sort((a,b)=>v.d2(b.p)-v.d2(a.p)).forEach(i=>i.f());
+  w.props.filter(p=>p.type==='tunnel').forEach(p=>drawProp(v,w,p));
+  const cc=w.containers.find(c=>c.mount==='crane');if(cc)drawContainer(v,w,cc,opt);
+  drawCraneTop(v,w);
+  w.labels.forEach(l=>v.text(l.x,l.y,l.z,l.t,{size:l.size||11,col:l.col||'#E6ECF3',bg:l.bg??'rgba(11,17,26,.8)',align:l.align}))}
+function insideCont(w,c,f){const p=contPos(w,c);return Math.abs(f.x-p.x)<CT.L/2+.3&&Math.abs(f.z-p.z)<CT.W/2}
+
+/* ---------- top-down plan of container ---------- */
+function renderPlan(v,w,opt){opt=opt||{};if(!v.W){v.resize();if(!v.W)return}const g=v.g;g.setTransform(v.dpr,0,0,v.dpr,0,0);v.hits=[];
+  g.fillStyle='#0E1621';g.fillRect(0,0,v.W,v.H);
+  const c=w.containers[0];const s=Math.min((v.W-60)/(CT.L+2.4),(v.H-110)/(CT.W+1.2))*v.zoom;const cx=v.W/2,cy=v.H/2-6;
+  const P=(x,z)=>[cx+x*s,cy-z*s];
+  const a=P(-CT.iL/2,CT.iW/2);g.fillStyle='#3b3128';g.fillRect(a[0],a[1],CT.iL*s,CT.iW*s);g.strokeStyle='#c9d1da';g.lineWidth=2;g.strokeRect(a[0],a[1],CT.iL*s,CT.iW*s);
+  g.font='600 11px "IBM Plex Mono",monospace';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#9FB0C4';
+  const fw=P(-CT.iL/2-.5,0);g.save();g.translate(fw[0],fw[1]);g.rotate(-Math.PI/2);g.fillText('FRONT WALL',0,0);g.restore();
+  const dr=P(CT.iL/2+.55,0);g.save();g.translate(dr[0],dr[1]);g.rotate(Math.PI/2);g.fillStyle='#F5C02A';g.fillText('REAR DOORS',0,0);g.restore();
+  for(let r=1;r<=8;r++){const l=cageLocal({row:r,side:'left'});const q=P(l.x,CT.iW/2+.32);g.fillStyle='#9FB0C4';g.fillText('R'+r,q[0],q[1])}
+  const lq=P(-CT.iL/2-1.0,CT.iW/4),rq=P(-CT.iL/2-1.0,-CT.iW/4);g.fillStyle='#9FB0C4';g.font='500 10px "IBM Plex Mono",monospace';g.fillText('LEFT',lq[0],lq[1]);g.fillText('RIGHT',rq[0],rq[1]);
+  CAGE_PLAN.forEach(pl=>{const k=w.cages.find(x=>x.plan.id===pl.id);const l=cageLocal(pl);const q=P(l.x-CG.L/2,l.z+CG.W/2);const loaded=k&&k.in;const col=pl.own.length?SME[pl.own[0]].col:COL.none;
+    g.globalAlpha=loaded?1:.28;g.fillStyle=col;g.fillRect(q[0]+1,q[1]+1,CG.L*s-2,CG.W*s-2);
+    if(pl.own.length>1){g.fillStyle=SME[pl.own[1]].col;g.beginPath();g.moveTo(q[0]+CG.L*s-1,q[1]+1);g.lineTo(q[0]+CG.L*s-1,q[1]+CG.W*s-1);g.lineTo(q[0]+1,q[1]+CG.W*s-1);g.closePath();g.fill()}
+    g.globalAlpha=1;g.strokeStyle=k&&k.hi?'#F5C02A':'rgba(255,255,255,.35)';g.lineWidth=k&&k.hi?3:1;g.strokeRect(q[0]+1,q[1]+1,CG.L*s-2,CG.W*s-2);
+    g.fillStyle='#fff';g.font=`700 ${clamp(s*.2,8,12)}px "IBM Plex Mono",monospace`;g.fillText(pl.id.slice(8),q[0]+CG.L*s/2,q[1]+CG.W*s/2-6);g.font=`500 ${clamp(s*.14,7,10)}px "IBM Plex Mono",monospace`;g.fillText(pl.own.length?pl.own.map(o=>SME[o].name).join('+'):'available',q[0]+CG.L*s/2,q[1]+CG.W*s/2+8);
+    v.hits.push({polys:[[[q[0],q[1]],[q[0]+CG.L*s,q[1]],[q[0]+CG.L*s,q[1]+CG.W*s],[q[0],q[1]+CG.W*s]]],info:{type:'cage',id:pl.id}})});
+  (c&&c.restraints||[]).forEach(r=>{if(r.type!=='block')return;const q=P(r.x-.09,CT.iW/2-.05);g.fillStyle='#B8834A';g.fillRect(q[0],q[1],.18*s,(CT.iW-.1)*s)});
+  // dimension notes
+  g.fillStyle='#C2CDDB';g.font='500 11px "IBM Plex Sans",system-ui,sans-serif';g.textAlign='left';
+  const b=P(-CT.iL/2,-CT.iW/2-.45);g.fillText(`Internal ≈ ${CT.iL} m × ${CT.iW} m · 2 × ${CG.W} m = 2.20 m across (≈0.15 m lateral clearance) · 8 × ${CG.L} m = 10.80 m (≈1.23 m left for restraint & handling)`,Math.max(8,b[0]),b[1]+6);
+  g.fillStyle='#F5C02A';g.fillText('Geometric illustration only · not a certified loading plan',Math.max(8,b[0]),b[1]+24)}
+
+/* ---------- cage inspection mini-scene ---------- */
+function renderCageInspect(v,k,opt){opt=opt||{};if(!v.begin('#0E1621','#121c28'))return;const g=v.g;
+  v.box(new V(0,-.01,0),[4,.02,3.4],COL.concrete,{});
+  const p=new V(0,CG.H/2+.0,0);drawCage(v,k,p,{});
+  if(opt.callouts){const C=[[new V(CG.L/2,.95,-.5),'Steel corner post & frame'],[new V(0,.6,CG.W/2),'Mesh side panel: cargo visible'],[new V(CG.L/2,-.95,.3),'Reinforced base with fork pockets'],[new V(CG.L/2+.02,0,-CG.W/2+.14),'Front gate latch'],[new V(CG.L/2,.7,.31),'ID plate: cage ID, QR, destination, weight'],[new V(.2,.2,0),'Cartons stacked & strapped inside'],[new V(0,-1.02,0),'No permanently attached wheels']];
+    g.font='500 11.5px "IBM Plex Sans",system-ui,sans-serif';
+    C.forEach(([pt,s],i)=>{const q=v.proj(p.x+pt.x,p.y+pt.y,p.z+pt.z);if(q[2]<.1)return;const right=i%2===0;const lx=right?v.W-12:12;const ly=46+i*Math.min(44,(v.H-90)/7);const w=g.measureText(s).width;
+      g.strokeStyle='rgba(245,192,42,.75)';g.lineWidth=1;g.beginPath();g.moveTo(q[0],q[1]);g.lineTo(right?lx-w-10:lx+w+10,ly);g.stroke();g.fillStyle='#F5C02A';g.beginPath();g.arc(q[0],q[1],3,0,7);g.fill();
+      g.fillStyle='rgba(10,16,24,.9)';g.fillRect(right?lx-w-6:lx-4,ly-10,w+10,20);g.fillStyle='#E6ECF3';g.textAlign=right?'right':'left';g.textBaseline='middle';g.fillText(s,lx,ly)})}
+  g.textAlign='left';g.fillStyle='#F5C02A';g.font='500 11px "IBM Plex Mono",monospace';g.fillText(`${k.plan.id} · ${CG.L} × ${CG.W} × ${CG.H} m (reference size, not a RealWay specification)`,12,v.H-50)}
+
+
+/* ================= CLOCK, TWEENS, OPERATIONS ================= */
+const CLK={t:0,paused:false,speed:1,last:performance.now()};
+const TW=[];const GRP={A:0,B:0,X:0};const SKIP={A:false,B:false};
+function tw(grp,dur,fn,ease){const id=GRP[grp];return new Promise((res,rej)=>TW.push({grp,id,t0:CLK.t,dur:Math.max(1,reduce?Math.min(dur,120):dur),fn,res,rej,ease:ease||easeIO}))}
+const wait=(grp,ms)=>tw(grp,ms,null);
+function cancelGrp(g){GRP[g]++}
+function stepTweens(){for(let i=TW.length-1;i>=0;i--){const w=TW[i];if(w.id!==GRP[w.grp]){TW.splice(i,1);w.rej(new Error('cancel'));continue}
+  let t=clamp((CLK.t-w.t0)/w.dur,0,1);if(SKIP[w.grp])t=1;if(w.fn)w.fn(w.ease(t));if(t>=1){TW.splice(i,1);w.res()}}SKIP.A=false;SKIP.B=false}
+
+/* ---- builders ---- */
+function mkCages(w,inId){w.cages=CAGE_PLAN.map(pl=>({plan:pl,in:inId&&pl.own.length?inId:null,p:null,hi:false,gate:0,strap:true,status:pl.own.length?'In use':'Available'}));return w.cages}
+function mkContainer(w,o){const c=Object.assign({id:'RW-CONT-001',code:'RWCU 001001 4 · 45G1',mount:'ground',p:new V(0,CT.H/2,0),doors:0,roofOff:0,cut:0,sideClear:0,sealed:false,restraints:[]},o||{});w.containers.push(c);return c}
+function stdRestraints(){const r=[];for(let row=1;row<=8;row++){const l=cageLocal({row,side:'left'});r.push({type:'lash',x:l.x})}const last=cageLocal({row:7,side:'left'});r.push({type:'block',x:last.x+CG.L/2+.2});r.push({type:'block',x:-CT.iL/2+.03});return r}
+function mkCrane(w,o){w.crane=Object.assign({x:0,z1:-5,z2:9.5,tz:0,sy:10.5,locked:false},o||{});return w.crane}
+function railTerminal(w,o){o=o||{};w.pads=[{x:0,z:5,w:60,d:12}];w.tracks.push({z:0,gauge:o.gauge||'SG',x0:-45,x1:45});
+  w.buildings.push({x:-6,z:-14,w:26,h:7,d:8,label:o.office||'TERMINAL OPERATIONS & STORAGE',col:COL.shed});
+  w.props.push({type:'stack',x:-26,z:-6.5,n:2,cols:[COL.contBlue,'#5b6b3a','#7a4a6a']},{type:'stack',x:-26,z:-9.3,n:1,cols:['#6b6b6b']});
+  if(o.gate!==false)w.props.push({type:'gate',x:24,z:5,open:true,label:'TERMINAL GATE'})}
+function trainOn(w,gauge,x,withCont,o){o=o||{};const wg={id:'W1',x:x,z:o.z||0,gauge,locked:!!withCont,label:o.wlabel};w.wagons.push(wg);
+  w.locos.push({id:'L1',x:x+15.2,z:o.z||0,gauge,dir:1,label:o.llabel});
+  if(o.second!==false){w.wagons.push({id:'W2',x:x-14.2,z:o.z||0,gauge,locked:true});w.containers.push({id:'X2',code:'OTHR 552810 7',mount:'wagon:W2',col:COL.contBlue,doors:0,roofOff:0,cut:0,sideClear:0,sealed:true,restraints:[]})}
+  let c=null;if(withCont){c=mkContainer(w,{mount:'wagon:W1',sealed:true,restraints:stdRestraints()});mkCages(w,c.id)}else mkCages(w,null);
+  return {wg,c}}
+function trainShift(w,dx){w.wagons.forEach(o=>{if(o.train!==false)o.x+=dx});w.locos.forEach(o=>o.x+=dx)}
+async function trainMoveTo(g,w,target,dur,ease){const w1=w.wagons.find(x=>x.id==='W1');const start=w1.x;let last=0;w.speed=0;
+  await tw(g,dur,t=>{const nx=start+(target-start)*t;trainShift(w,nx-start-last);last=nx-start;w.speed=Math.abs(target-start)/dur*60},ease||easeIO);w.speed=0}
+
+/* crane */
+async function craneTo(g,w,x,z){const c=w.crane;const dx=Math.abs(x-c.x);if(dx>.02){const x0=c.x;await tw(g,dx/2.6*1000+400,t=>c.x=lerp(x0,x,t))}const dz=Math.abs(z-c.tz);if(dz>.02){const z0=c.tz;await tw(g,dz/1.8*1000+400,t=>c.tz=lerp(z0,z,t))}}
+async function hoistTo(g,w,y){const c=w.crane;const y0=c.sy;const d=Math.abs(y-y0);if(d<.02)return;await tw(g,d/1.3*1000+350,t=>c.sy=lerp(y0,y,t))}
+const CARRY_SY=5.6+CT.H+.16;
+function mountXZY(w,m){if(m.startsWith('wagon:')){const wg=w.wagons.find(x=>x.id===m.slice(6));return [wg.x,wg.z,DECK[wg.gauge],wg]}
+  if(m.startsWith('truck:')){const t=w.trucks.find(x=>x.id===m.slice(6));return [t.x,t.z,TRAILER_DECK,t]}
+  const p=m.split(':');return [+p[1],+p[2],0,null]}
+async function liftContainer(g,w,c,toMount,say){
+  const cr=w.crane;const p=contPos(w,c);
+  if(cr.sy<CARRY_SY)await hoistTo(g,w,CARRY_SY);
+  say&&say('Crane moves into position above the container');await craneTo(g,w,p.x,p.z);
+  say&&say('Spreader lowers and aligns with the four upper corner fittings');await hoistTo(g,w,p.y+CT.H/2+.16);
+  const src=c.mount.startsWith('wagon:')||c.mount.startsWith('truck:')?mountXZY(w,c.mount)[3]:null;
+  if(src){say&&say('Securing devices on the carrying equipment are released');await wait(g,700);src.locked=false;await wait(g,500)}
+  cr.locked=true;say&&say('Spreader twistlocks engage. Operator confirms the lift is ready.');await wait(g,900);
+  c.mount='crane';say&&say('The complete container is lifted vertically. The wagon stays still on the track.');await hoistTo(g,w,CARRY_SY);
+  const [tx,tz,ty,dst]=mountXZY(w,toMount);
+  say&&say('The suspended container moves to the receiving position');await craneTo(g,w,tx,tz);
+  await hoistTo(g,w,ty+CT.H+.16+.35);say&&say('Careful alignment with the receiving fittings');await hoistTo(g,w,ty+CT.H+.16);
+  if(toMount.startsWith('ground:')){c.p=new V(tx,CT.H/2,tz);c.mount='ground'}else c.mount=toMount;
+  cr.locked=false;await wait(g,500);if(dst){dst.locked=true;say&&say('Container secured to the receiving equipment')}
+  await hoistTo(g,w,CARRY_SY)}
+
+/* forklift with a pick point in front of the doors */
+function dockGeo(c){const p=contPos({wagons:[],trucks:[],crane:null},c);const rear=p.x+CT.L/2;return {rear,P:rear+3.2,F:rear+6.4,qZ:6.4}}
+async function flMove(g,w,x,z){const f=w.forklift;const dz=Math.abs(z-f.z);if(dz>.02){const z0=f.z;await tw(g,dz/1.6*1000+300,t=>f.z=lerp(z0,z,t))}const dx=Math.abs(x-f.x);if(dx>.02){const x0=f.x;await tw(g,dx/1.8*1000+300,t=>f.x=lerp(x0,x,t))}}
+async function flFork(g,w,y){const f=w.forklift;const y0=f.fy;await tw(g,500,t=>f.fy=lerp(y0,y,t))}
+function queuePositions(w,geo){const q=w.cages.filter(k=>k.queue!=null).sort((a,b)=>a.queue-b.queue);q.forEach((k,i)=>{k.p=new V(geo.P,CG.H/2,geo.qZ+i*1.35)})}
+async function loadCage(g,w,c,k,say){const geo=dockGeo(c);const l=cageLocal(k.plan);const zs=l.z;
+  // pallet jack brings cage from the queue to the pick point
+  say&&say(`${k.plan.id} brought to the pick point by pallet jack`);k.queue=null;const z0=k.p.z;const worker=w.props.find(p=>p.type==='person'&&p.jack);
+  await tw(g,1100,t=>{k.p.z=lerp(z0,zs,t);if(worker){worker.x=geo.P+1;worker.z=k.p.z+.9}});queuePositions(w,geo);
+  await flMove(g,w,geo.F,zs);await flFork(g,w,.05);await flMove(g,w,k.p.x+.2+CG.L/2,zs);await flFork(g,w,.15);
+  w.forklift.carry=k;k.onFork=true;k.p=null;
+  say&&say(`Forklift carries ${k.plan.id} through the rear doors to Row ${k.plan.row}, ${k.plan.side}`);
+  await flMove(g,w,contPos(w,c).x+l.x+.2+CG.L/2,zs);await flFork(g,w,.02);
+  w.forklift.carry=null;k.onFork=false;k.in=c.id;await flMove(g,w,geo.F,zs)}
+async function unloadCage(g,w,c,k,say){const geo=dockGeo(c);const l=cageLocal(k.plan);const zs=l.z;
+  await flMove(g,w,geo.F,zs);await flFork(g,w,.02);say&&say(`Forklift reaches ${k.plan.id}, the cage nearest the doors`);
+  await flMove(g,w,contPos(w,c).x+l.x+.2+CG.L/2,zs);await flFork(g,w,.15);k.in=null;w.forklift.carry=k;k.onFork=true;
+  await flMove(g,w,geo.P+.2+CG.L/2,zs);await flFork(g,w,.02);w.forklift.carry=null;k.onFork=false;k.p=new V(geo.P,CG.H/2,zs);
+  k.scan=true;say&&say(`${k.plan.id} scanned against the manifest`);await wait(g,700);k.scan=false;
+  await flMove(g,w,geo.F,zs);
+  const z0=k.p.z;const target=geo.qZ+(w.outQ=(w.outQ||0)+1)*0;// move to outbound lane
+  const lane=w.outbound||(w.outbound=[]);lane.unshift(k);
+  await tw(g,900,t=>k.p.z=lerp(z0,geo.qZ+1.2,t));lane.forEach((q,i)=>{q.p=new V(geo.P+2.2+Math.floor(i/6)*1.6,CG.H/2,geo.qZ+1.2+(i%6)*1.3)})}
+async function doorsTo(g,c,v){const d0=c.doors;await tw(g,1400,t=>c.doors=lerp(d0,v,t))}
+function dockWorld(o){o=o||{};const w=newWorld();w.pads=[{x:4,z:3,w:44,d:22,col:COL.concrete}];
+  w.buildings.push({x:12,z:-9,w:24,h:8,d:9,label:o.building||'CONSOLIDATION WAREHOUSE',doors:[-6,0,6]});
+  const c=mkContainer(w,{mount:'ground',p:new V(0,CT.H/2,0),doors:o.doors??0,sealed:!!o.sealed,restraints:o.restraints||[]});
+  mkCages(w,o.loaded?c.id:null);const geo=dockGeo(c);
+  w.zones.push({x:geo.P,z:0,w:1.8,d:3.2,label:'PICK POINT',col:'#F5C02A'});
+  w.forklift={x:geo.F,z:.6,dir:-1,fy:.02,carry:null};
+  w.props.push({type:'person',x:geo.P+1,z:4.2,jack:true,col:'#F28C28'},{type:'person',x:geo.rear+1,z:-2.2,col:'#2FD27E'});
+  return {w,c,geo}}
+
+
+/* ================= DEMO A: COMPLETE CARGO JOURNEY ================= */
+const GLOSS={
+ CBM:'Cubic metres: the amount of physical space cargo occupies.',FCL:'Full Container Load: one shipper uses the whole container.',LCL:'Less-than-Container Load: a shipment shares a container with others.',
+ Consolidation:'Combining multiple shipments into one planned transport load.','Freight forwarder':'A company that arranges transport and related logistics services.',
+ 'Customs broker':'An authorised party that prepares customs declarations and handles procedures.','Railway gauge':'The distance between the two rails of a track.',
+ 'Break of gauge':'A place where two track gauges meet, so cargo or containers must be transferred.','Transloading':'Moving cargo or a container from one transport unit to another.',
+ 'Inland port':'An inland terminal that handles containers, customs and storage like a seaport, but away from the sea.','Proof of delivery':'Confirmation that the receiver got the goods.',
+ Spreader:'The lifting frame on a crane that locks onto a container’s four top corner fittings.',Twistlock:'A locking device that secures a container’s corner fitting to a wagon, truck or spreader.',
+ Seal:'A numbered, tamper-evident device fixed to the container doors after loading.',Transit:'Goods passing through a country under customs control without being imported there.',
+ 'Cargo cage':'A reusable steel mesh handling unit that sits inside the container. It is not a shipping container.','CTU Code':'IMO/ILO/UNECE Code of Practice for packing cargo transport units.'};
+const MAPN={SUP:{y:20,l:'Supplier · China'},HUB:{y:44,l:'Consolidation hub · Kunming area'},KMT:{y:68,l:'Rail terminal · Kunming area'},CNR:{y:96,l:'China–Laos Railway (SG)'},BDR1:{y:122,l:'Mohan (CN) / Boten (LA)'},LAR:{y:150,l:'Through Laos (SG)'},
+  VTE:{y:178,l:'Vientiane / Thanaleng · gauge transfer'},NKH:{y:206,l:'Thanaleng / Nong Khai border'},THR:{y:236,l:'Thailand rail network (MG)'},PBS:{y:266,l:'Padang Besar border'},PIP:{y:294,l:'Perlis Inland Port'},KLV:{y:322,l:'Destination warehouse · Klang Valley'}};
+const MAPORDER=['SUP','HUB','KMT','CNR','BDR1','LAR','VTE','NKH','THR','PBS','PIP','KLV'];
+
+function S(o){return o}
+const A_SCENES=[];
+function addA(o){o.n=A_SCENES.length+1;A_SCENES.push(o)}
+const camP=(theta,phi,R,x,y,z)=>({theta,phi,R,target:new V(x,y,z)});
+
+/* --- shared world builders for A --- */
+function planWorld(fillN){const w=newWorld();w.pads=[{x:0,z:0,w:20,d:10,col:COL.concrete}];const c=mkContainer(w,{cut:1,doors:.0});mkCages(w,null);
+  w.cages.filter(k=>k.plan.own.length).slice(0,fillN||0).forEach(k=>k.in=c.id);return {w,c}}
+function supplierWorld(){const w=newWorld();w.pads=[{x:0,z:3,w:60,d:16,col:COL.concrete}];
+  [[-16,'SUPPLIER 1 · YUNNAN'],[0,'SUPPLIER 2 · KUNMING'],[16,'SUPPLIER 3 · KUNMING']].forEach(([x,l],i)=>{w.buildings.push({x,z:-7,w:11,h:6,d:7,label:l,doors:[0]});
+    for(let k=0;k<6;k++)w.props.push({type:'carton',p:new V(x-1.2+(k%3)*.62,.3+Math.floor(k/3)*.58,-2.4),s:[.56,.56,.46],col:[COL.A,COL.B,COL.C][i]})});
+  w.props.push({type:'person',x:-14,z:-2,col:'#2FD27E'});w.trucks.push({id:'T1',x:-40,z:2.5,label:'COLLECTION TRUCK',col:'#C9D1DA'});return w}
+function hubWorld(){const w=newWorld();w.pads=[{x:0,z:3,w:50,d:20,col:COL.concrete2}];
+  w.buildings.push({x:2,z:-11,w:36,h:9,d:8,label:'CONSOLIDATION HUB · RECEIVING DOCKS',doors:[-10,-3,4,11]});
+  w.props.push({type:'gate',x:-22,z:4,open:true,label:'SECURITY GATE'},{type:'rack',x:6,z:-4.5,n:4},{type:'scale',x:-2,z:2,text:'450 kg'},{type:'booth',x:10,z:7,label:'INSPECTION ZONE',col:'#3a4552'},{type:'person',x:-1,z:3.6,col:'#2FD27E'},{type:'person',x:2,z:1.2,col:'#F28C28'});
+  w.zones.push({x:-2,z:2,w:3,d:3,label:'WEIGH & MEASURE',col:'#2FD27E'},{x:6,z:5,w:6,d:4,label:'PACKING AREA',col:'#F5C02A'});
+  w.forklift={x:-6,z:5.5,dir:1,fy:.02};return w}
+function cagePackWorld(){const w=newWorld();w.pads=[{x:0,z:0,w:30,d:16,col:COL.concrete2}];mkCages(w,null);
+  w.buildings.push({x:0,z:-10,w:30,h:8,d:4,label:'PACKING AREA',col:COL.shed});
+  w.cages.forEach((k,i)=>{k.p=new V(-7.5+(i%8)*2.1,CG.H/2,-2+Math.floor(i/8)*3.2);k.cartons=0});
+  ['A','B','C','D'].forEach((s,i)=>w.zones.push({x:-7.5+i*4.2,z:5.4,w:3.4,d:1.6,label:SME[s].name+' cartons',col:SME[s].col,fill:SME[s].col,alpha:.18}));return w}
+function railWorld(gauge,scenery){const w=newWorld();w.tracks.push({z:0,gauge,scroll:true,x0:-45,x1:45});const t=trainOn(w,gauge,-3,true);
+  for(let i=0;i<5;i++)w.props.push({type:'signal',x:-36+i*18,z:-2.6,scroll:true,state:'green'});
+  if(scenery==='tunnel')w.props.push({type:'tunnel',x:30,z:0});if(scenery==='bridge')for(let i=0;i<6;i++)w.props.push({type:'pier',x:-30+i*10,z:0});
+  w.scenery=true;return {w,...t}}
+function borderWorld(gauge,a,b){const w=newWorld();w.pads=[{x:0,z:6,w:60,d:10,col:COL.concrete}];w.tracks.push({z:0,gauge,x0:-45,x1:45});const t=trainOn(w,gauge,-2,true);
+  w.props.push({type:'booth',x:-8,z:6,label:a,col:'#5a2a2a'},{type:'booth',x:8,z:6,label:b,col:'#2a3f5a'},{type:'person',x:-4,z:3.2,col:'#2FD27E'},{type:'person',x:3,z:3.4,col:'#2FD27E'},{type:'signal',x:20,z:-2.6,state:'red'});
+  w.buildings.push({x:0,z:-12,w:30,h:6,d:6,label:'BORDER RAILWAY STATION'});return {w,...t}}
+function gaugeWorld(o){o=o||{};const w=newWorld();w.pads=[{x:0,z:5,w:70,d:18,col:COL.concrete}];
+  w.tracks.push({z:0,gauge:'SG',x0:-45,x1:45,label:'TRACK A · STANDARD GAUGE 1,435 mm',labelX:-34},{z:6.5,gauge:'MG',x0:-45,x1:45,label:'TRACK B · METRE GAUGE 1,000 mm',labelX:-34});
+  w.buildings.push({x:-4,z:-14,w:28,h:7,d:7,label:'VIENTIANE / THANALENG LOGISTICS AREA (ILLUSTRATIVE)'});
+  const mg={id:'M1',x:0,z:6.5,gauge:'MG',locked:false,train:false,label:'METRE-GAUGE WAGON'};w.wagons.push(mg);w.locos.push({id:'L2',x:15.2,z:6.5,gauge:'MG'});
+  w.locos[w.locos.length-1].trainGroup='MG';
+  const t=o.train===false?{wg:null,c:null}:trainOn(w,'SG',o.sgX??0,true,{second:false,wlabel:'STANDARD-GAUGE WAGON'});
+  mkCrane(w,{x:o.craneX??-14,z1:-4.5,z2:11,tz:3,sy:CARRY_SY});w.crane.label='TERMINAL CRANE';return {w,...t,mg}}
+function trainShiftSG(w,dx){w.wagons.filter(x=>x.gauge==='SG'&&x.train!==false).forEach(o=>o.x+=dx);w.locos.filter(x=>x.gauge==='SG').forEach(o=>o.x+=dx)}
+function trainShiftMG(w,dx){w.wagons.filter(x=>x.gauge==='MG').forEach(o=>o.x+=dx);w.locos.filter(x=>x.gauge==='MG').forEach(o=>o.x+=dx)}
+async function moveGroup(g,w,fn,dist,dur,ease){let last=0;await tw(g,dur,t=>{const d=dist*t;fn(w,d-last);last=d;w.speed=dist/dur*40},ease||easeIO);w.speed=0}
+function pipWorld(){const w=newWorld();w.pads=[{x:0,z:6,w:70,d:20,col:COL.concrete}];w.tracks.push({z:0,gauge:'MG',x0:-45,x1:45});
+  w.buildings.push({x:-12,z:-13,w:26,h:7,d:7,label:'PIP CUSTOMS & WAREHOUSE FACILITIES (ILLUSTRATIVE)'});
+  w.props.push({type:'stack',x:22,z:-7,n:2,cols:[COL.contBlue,'#5b6b3a']},{type:'stack',x:22,z:-9.8,n:1,cols:['#7a4a6a']},{type:'stack',x:-30,z:-7,n:2,cols:['#6b6b6b',COL.contBlue]},{type:'gate',x:30,z:9,open:true,label:'PIP TERMINAL GATE'});
+  w.zones.push({x:2,z:9.5,w:13.4,d:3.2,label:'CONTAINER YARD SLOT',col:'#F5C02A'});mkCrane(w,{x:-12,z1:-4.5,z2:14,tz:4,sy:CARRY_SY});w.crane.label='CONTAINER HANDLING EQUIPMENT';return w}
+
+/* --- scenes --- */
+addA({part:'Booking & consolidation',title:'Customer places an order',country:'Malaysia',place:'Malaysian SME office',mode:'Online platform',status:'Booking requested',map:'KLV',
+ cam:camP(.55,1.05,26,0,1.4,0),narr:'Meet a Malaysian business owner importing goods from China. The shipment is too small to justify a whole container. With RealWay Express, the customer requests only the space they need. The platform checks the cargo before arranging capacity through logistics partners.',
+ q:{where:'Still with the supplier in China. Only a request exists.',who:'The SME (shipper of record) and RealWay (booking platform).',what:'An online booking request: origin, destination, cargo, volume, weight, addresses.',docs:'Booking request. A quotation request is not a confirmed railway booking.',next:'RealWay combines this request with other compatible orders.'},
+ terms:['CBM','FCL','LCL'],risk:'Customers may misdeclare volume or weight. Final charges depend on measured cargo at the hub.',
+ setup:()=>planWorld(0).w,
+ play:async(w,X)=>{X.ov(`<h4>New booking request <span class="sim">Illustrative</span></h4><dl class="kv">
+   <dt>Booking</dt><dd>RW-BKG-024</dd><dt>Customer</dt><dd>SME A</dd><dt>Pickup origin</dt><dd>Kunming, China</dd><dt>Destination</dt><dd>Klang Valley, Malaysia</dd><dt>Cargo</dt><dd>General merchandise</dd><dt>Volume</dt><dd>2.4 CBM</dd><dt>Weight</dt><dd>450 kg</dd><dt>Collection</dt><dd>Supplier warehouse</dd><dt>Delivery</dt><dd>Customer warehouse</dd><dt>Shipment period</dt><dd>Preferred: next available</dd></dl>
+   <p class="small">Status: <b>Quotation requested</b>. Not yet a confirmed transport booking.</p>`);await wait('A',1500);X.say('Shared freight: you pay for the space your cargo uses, not a whole container.');await wait('A',3500)}});
+addA({part:'Booking & consolidation',title:'RealWay combines customer orders',country:'Malaysia',place:'RealWay platform',mode:'Planning',status:'Consolidation planning',map:'KLV',
+ cam:camP(.3,.75,22,0,1.2,0),narr:'RealWay combines compatible shipments travelling the same route. Each customer keeps a separate booking record. The system checks size, weight, destination, packaging, compatibility and documents before allocating capacity.',
+ q:{where:'Still at suppliers. Capacity is being planned on screen.',who:'RealWay planning team.',what:'Assigning SME A–D bookings to planned cage positions in one 40 ft high-cube container.',docs:'Booking records, cargo descriptions, packaging details.',next:'Confirm real capacity with a logistics provider.'},
+ terms:['Consolidation','LCL'],risk:'Allocating by volume alone is wrong: heavy cargo can hit the weight limit before space runs out. Some goods cannot travel together.',
+ setup:()=>planWorld(0).w,
+ play:async(w,X)=>{const c=w.containers[0];const bars=(n)=>{const ks=BOOKED.slice(0,n);const vol=ks.length*2.4,kg=ks.reduce((a,k)=>a+k.kg,0);
+   return `<h4>Planned container load <span class="sim">Illustrative</span></h4><div class="bar2"><span>Space (cage slots)</span><i style="width:${n/16*100}%"></i><b>${n}/16 slots</b></div><div class="bar2"><span>Weight (assumed limit 26,000 kg)</span><i style="width:${kg/26000*100}%;background:var(--green)"></i><b>${fmtKg(kg)}</b></div>
+   <div class="smes">${['A','B','C','D'].map(s=>`<span><i style="background:${SME[s].col}"></i>${SME[s].name}: ${BOOKED.filter(k=>k.own.includes(s)).length} cage(s)</span>`).join('')}</div><p class="small">Volume and weight are checked separately. Container payload varies by model.</p>`};
+   X.ov(bars(0));const order=BOOKED.slice();for(let i=0;i<order.length;i++){const k=w.cages.find(x=>x.plan.id===order[i].id);k.in=c.id;X.ov(bars(i+1));await wait('A',380)}X.say('13 of 16 cage slots planned for four SMEs. 3 slots remain available.');await wait('A',3000)}});
+addA({part:'Booking & consolidation',title:'RealWay confirms transport capacity',country:'Malaysia / China',place:'RealWay operations & forwarder',mode:'Coordination',status:'Booking confirmation pending carrier',map:'HUB',
+ cam:camP(.6,1.0,26,0,1.4,0),narr:'Before confirming the booking, RealWay must arrange the actual transport service. The logistics provider checks whether the shipment can be accepted, whether capacity exists, and which charges and documents apply. Only then does the customer receive a confirmed booking.',
+ q:{where:'Still at suppliers.',who:'RealWay and a participating freight forwarder.',what:'Checking acceptance, capacity, cut-offs and charges with the provider.',docs:'Carrier booking reference, acceptance conditions, quotation approval.',next:'Collection from the Chinese suppliers once confirmed.'},
+ terms:['Freight forwarder'],risk:'Rail capacity and departures are not guaranteed until the carrier confirms them in writing.',
+ setup:()=>planWorld(13).w,
+ play:async(w,X)=>{const rows=[['Carrier booking ref','RW-FWD-REQ-0331 (illustrative)'],['Cargo acceptance','General merchandise accepted, subject to inspection'],['Collection cut-off','To be confirmed by forwarder'],['Origin warehouse','Consolidation hub, Kunming area'],['Planned route','Kunming → Vientiane → Thailand → Padang Besar → PIP'],['Departure','Subject to carrier confirmation · no confirmed train shown'],['Quotation','Approved by customer (simulated)'],['Booking','Confirmed by RealWay after carrier acceptance (simulated)']];
+   for(let i=1;i<=rows.length;i++){X.ov(`<h4>Capacity check with forwarder <span class="sim">Simulated</span></h4><dl class="kv">${rows.slice(0,i).map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}</dl>`);await wait('A',650)}await wait('A',2500)}});
+addA({part:'Origin operations',title:'Collection from Chinese suppliers',country:'China',place:'Supplier warehouses',mode:'Road',status:'Collected from supplier',map:'SUP',
+ cam:camP(.35,1.1,40,0,2,0),narr:'The suppliers prepare and label their cartons so each one links to the right customer. A local transport partner collects the goods and records the carton quantity and visible condition.',
+ q:{where:'At supplier warehouses, then on a collection truck.',who:'Suppliers, then the local road transport partner.',what:'Labelling cartons, verifying pickup reference and quantity, loading the truck.',docs:'Collection order, packing list, supplier invoice, pickup confirmation, shipment labels.',next:'Delivery to the consolidation hub.'},
+ terms:['CBM'],risk:'Labels missing or quantities wrong at pickup cause delays later. Damage at pickup must be recorded.',
+ setup:()=>supplierWorld(),
+ play:async(w,X)=>{const t=w.trucks[0];for(const [x,lbl] of [[-16,'Supplier 1'],[0,'Supplier 2'],[16,'Supplier 3']]){X.say(`Collection truck at ${lbl}: driver checks pickup reference, carton count and condition`);await tw('A',2600,e=>t.x=lerp(t.x,x-7.6,e));
+   const cs=w.props.filter(p=>p.type==='carton'&&Math.abs(p.p.x-x)<2);await tw('A',1200,e=>cs.forEach(c=>c.p.z=lerp(-2.4,1.2,e)));cs.forEach(c=>w.props.splice(w.props.indexOf(c),1));await wait('A',500)}
+   X.say('Collected. Heading to the consolidation warehouse.');await tw('A',2500,e=>t.x=lerp(t.x,45,e),easeIn)}});
+addA({part:'Origin operations',title:'Arrival at the China consolidation hub',country:'China',place:'Consolidation hub, Kunming area',mode:'Warehouse',status:'Received at origin hub',map:'HUB',
+ cam:camP(.45,1.05,36,0,2,0),narr:'Before goods are combined, the warehouse confirms what actually arrived. Workers count cartons, compare them with the packing list, measure, weigh and inspect for damage. Anything missing, damaged or inconsistent goes on hold.',
+ q:{where:'Consolidation hub receiving dock.',who:'Warehouse operator (custody of the goods).',what:'Gate check-in, unloading, counting, weighing, measuring, scanning, visual inspection.',docs:'Warehouse receipt, discrepancy report if needed.',next:'Sorting and consolidation into cages.'},
+ terms:['CBM'],risk:'Measured weight or volume may differ from the booking. Differences change charges and the load plan.',
+ setup:()=>{const w=hubWorld();w.trucks.push({id:'T1',x:-40,z:6.5,label:'COLLECTION TRUCK'});return w},
+ play:async(w,X)=>{const t=w.trucks[0];X.say('Truck checks in at the security gate');await tw('A',3600,e=>t.x=lerp(-40,-11,e),easeOut);
+   for(let i=0;i<4;i++)w.props.push({type:'carton',p:new V(-3.7+i*.6,.3,5.2),s:[.56,.56,.46],col:COL.A});
+   X.say('Cartons unloaded, counted, weighed and scanned');const wms=[['Booking ID','RW-BKG-024'],['Customer','SME A'],['Supplier','Supplier 2 · Kunming'],['Carton quantity','24 (matches packing list)'],['Gross weight','450 kg'],['Dimensions','Measured'],['Cargo volume','2.4 CBM'],['Commodity','General merchandise'],['Destination','Klang Valley, Malaysia'],['Receiving status','Received · no discrepancy']];
+   for(let i=1;i<=wms.length;i++){X.ov(`<h4>Warehouse system <span class="sim">Simulated</span></h4><dl class="kv">${wms.slice(0,i).map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}</dl>`);await wait('A',420)}
+   const cs=w.props.filter(p=>p.type==='carton');await tw('A',1600,e=>cs.forEach((c,i)=>{c.p.x=lerp(-3.7+i*.6,-2.6+(i%2)*.6,e);c.p.z=lerp(5.2,1.7+Math.floor(i/2)*.5,e)}));X.say('Weighed on the scale: 450 kg recorded');await wait('A',2400)}});
+addA({part:'Origin operations',title:'Sorting and consolidation',country:'China',place:'Consolidation hub · packing area',mode:'Warehouse',status:'Cargo allocated',map:'HUB',
+ cam:camP(.5,.95,24,0,1.6,1),narr:'The warehouse prepares the combined shipment. Goods are grouped by handling needs and destination into pallets or proposed reusable cargo cages. Every carton stays linked to its customer booking.',
+ q:{where:'Packing area of the consolidation hub.',who:'Warehouse operator under RealWay instructions.',what:'Packing cartons into cages: some cages hold one SME, some hold compatible goods from two.',docs:'Packing list per cage, cage manifest linking cartons to bookings.',next:'Container inspection and loading.'},
+ terms:['Cargo cage','Consolidation'],risk:'A cage ID does not replace individual shipment records. Mixed cages need careful compatibility checks.',
+ setup:()=>cagePackWorld(),
+ play:async(w,X)=>{X.say('Cartons are packed into their assigned cages and strapped');const ks=w.cages.filter(k=>k.plan.own.length);
+   for(const k of ks){await tw('A',260,e=>k.cartons=Math.round(12*e));if(k.plan.id==='RW-CAGE-003'){k.hi=true;X.say('SME A’s 24 cartons go into RW-CAGE-003 (Row 2, left in the plan)')}}
+   await wait('A',2600)}});
+addA({part:'Origin operations',title:'Container inspection and loading',country:'China',place:'Consolidation hub · loading dock',mode:'Warehouse',status:'Container loading',map:'HUB',
+ cam:camP(.7,1.0,34,4,1.5,3.5),narr:'Before loading, the warehouse checks that the container is suitable: number, floor, walls, roof, doors, damage, cleanliness and leaks. Workers follow a loading plan for weight, dimensions, compatibility and access. Loading starts at the front wall and works towards the doors.',
+ q:{where:'Loading dock beside a 40 ft high-cube container.',who:'Warehouse loading team.',what:'Container inspection, then forklift loading of cages front-to-rear.',docs:'Container inspection record, loading plan, weight plan.',next:'Securing and sealing.'},
+ terms:['CTU Code','Cargo cage'],risk:'Loose cages must never be left free to slide. Weight must be spread along the floor.',
+ setup:()=>{const {w,c,geo}=dockWorld({});w.cages.filter(k=>k.plan.own.length).forEach((k,i)=>{k.queue=i});queuePositions(w,geo);return w},
+ play:async(w,X)=>{const c=w.containers[0];const items=['Container number','Interior floor','Side walls','Roof','Door operation','Visible structural damage','Cleanliness','Signs of water leakage','Cargo suitability'];
+   for(let i=1;i<=items.length;i++){X.ov(`<h4>Container inspection <span class="sim">Simulated</span></h4><div class="checks">${items.map((t,j)=>`<span class="${j<i?'':'no'}">${t}</span>`).join('')}</div>`);await wait('A',350)}
+   X.say('Rear doors open. Roof shown transparent so you can see inside.');await doorsTo('A',c,1);c.cut=1;X.ovHide();
+   const ks=w.cages.filter(k=>k.plan.own.length);for(let i=0;i<ks.length;i++){if(i===3){X.say('Loading continues in the planned sequence (shown faster)');CLK.boost=4}await loadCage('A',w,c,ks[i],i<3?X.say:null)}
+   CLK.boost=1;X.say('13 cages loaded from the front wall towards the doors');await wait('A',2000)}});
+addA({part:'Origin operations',title:'Sealing the container',country:'China',place:'Consolidation hub · loading dock',mode:'Warehouse',status:'Container packed and sealed',map:'HUB',
+ cam:camP(1.15,1.0,22,4,1.6,0),narr:'Once loading and securing are complete, the doors are closed and a numbered security seal is applied. The seal number is recorded so anyone can check that the container stayed intact.',
+ q:{where:'Loading dock, container now closed.',who:'Warehouse operator; seal applied by authorised staff.',what:'Blocking and lashing, final check, doors closed, seal applied.',docs:'Container ID, seal ID, manifest, cargo weight, packing record, loading place and date.',next:'Export customs procedures.'},
+ terms:['Seal','CTU Code'],risk:'An unrecorded or broken seal triggers investigation at every later checkpoint.',
+ setup:()=>{const {w,c}=dockWorld({loaded:true,doors:1});c.cut=1;return w},
+ play:async(w,X)=>{const c=w.containers[0];X.say('Blocking and lashing applied between cages and container');for(const r of stdRestraints()){c.restraints.push(r);await wait('A',220)}
+   await wait('A',800);c.cut=0;X.say('Doors closing');await doorsTo('A',c,0);c.sealed=true;X.say('Numbered seal RWS-0451207 applied (illustrative)','ok');
+   X.ov(`<h4>Packing record <span class="sim">Illustrative</span></h4><dl class="kv"><dt>Container ID</dt><dd>RW-CONT-001</dd><dt>Seal ID</dt><dd>RWS-0451207</dd><dt>Manifest</dt><dd>13 cages · 4 SMEs</dd><dt>Cargo weight</dt><dd>${fmtKg(BOOKED.reduce((a,k)=>a+k.kg,0))} (cargo, excl. cages)</dd><dt>Packing</dt><dd>Complete</dd><dt>Loading place</dt><dd>Consolidation hub, Kunming area</dd><dt>Loading date</dt><dd>Recorded at sealing</dd></dl>`);await wait('A',4000)}});
+addA({part:'Origin operations',title:'Chinese export customs procedures',country:'China',place:'Forwarder customs team',mode:'Documentation',status:'Export customs processing',map:'HUB',
+ cam:camP(.6,1.05,24,0,1.5,0),narr:'Before goods leave China, the customs broker or forwarder arranges the export formalities. Authorities may review documents, and some shipments are selected for inspection. Cargo proceeds only when requirements are met.',
+ q:{where:'Sealed container at the hub.',who:'Customs broker / freight forwarder; Chinese customs authorities.',what:'Electronic export declaration and document review.',docs:'Commercial invoices, packing lists, export declaration, transport documents, commodity info, container & seal numbers, permits.',next:'Truck to the railway terminal once released.'},
+ terms:['Customs broker','Seal'],risk:'Customs approval is not automatic. A sealed container can still be opened for inspection.',
+ setup:()=>{const {w}=dockWorld({loaded:true,sealed:true,restraints:stdRestraints()});w.props.push({type:'booth',x:-8,z:6,label:'CUSTOMS',col:'#5a2a2a'});return w},
+ play:async(w,X)=>{const docs=['Commercial invoices','Packing lists','Export declaration','Transport documents','Commodity information','Container number RW-CONT-001','Seal number RWS-0451207','Applicable export permits'];
+   for(let i=1;i<=docs.length;i++){X.ov(`<h4>Export declaration pack <span class="sim">Simulated</span></h4><div class="checks">${docs.map((t,j)=>`<span class="${j<i?'':'no'}">${t}</span>`).join('')}</div>
+   <div class="outc"><button class="btn sm" data-out="rel">Outcome: Released</button><button class="btn sm" data-out="insp">Outcome: Selected for inspection</button></div><p class="small" id="outTxt">Two possible outcomes. Pick one to see what happens.</p>`);await wait('A',380)}
+   await wait('A',5000)}});
+addA({part:'Rail departure from China',title:'Transport to the railway terminal',country:'China',place:'Railway freight terminal, Kunming area',mode:'Road → terminal',status:'Arrived at railway terminal',map:'KMT',
+ cam:camP(.55,1.0,42,4,2,3),narr:'A container truck takes the sealed container to a rail freight terminal built to move containers between road and rail. At the gate, the terminal checks the booking, container number, seal and transport information.',
+ q:{where:'Container truck at the terminal gate.',who:'Road haulier, then terminal operator.',what:'Gate check-in and positioning under the crane.',docs:'Booking reference, container & seal check, terminal booking.',next:'Lift onto a rail wagon.'},
+ terms:['Seal'],risk:'Terminal slots and train capacity must be booked in advance; missed cut-offs mean waiting for the next service.',
+ setup:()=>{const w=newWorld();railTerminal(w,{gauge:'SG'});w.wagons.push({id:'W1',x:-4,z:0,gauge:'SG',locked:false,train:false,label:'EMPTY CONTAINER WAGON'});mkCrane(w,{x:-16,z1:-4.5,z2:9.5,tz:4.5,sy:CARRY_SY});
+   w.trucks.push({id:'T1',x:44,z:4.5,label:'CONTAINER TRUCK'});const c=mkContainer(w,{mount:'truck:T1',sealed:true,restraints:stdRestraints()});mkCages(w,c.id);w.trucks[0].locked=true;return w},
+ play:async(w,X)=>{const t=w.trucks[0];X.say('Gate check: booking, container number RW-CONT-001 and seal RWS-0451207');await tw('A',3000,e=>t.x=lerp(44,26,e),easeOut);await wait('A',1600);
+   X.say('Truck moves to the handling position');await tw('A',4200,e=>t.x=lerp(26,-4,e));X.say('Arrived at the railway terminal','ok');await wait('A',2000)}});
+addA({part:'Rail departure from China',title:'Loading onto the railway wagon',country:'China',place:'Railway freight terminal, Kunming area',mode:'Road → rail',status:'Loaded onto rail',map:'KMT',
+ cam:camP(.55,1.05,36,-4,4,2),narr:'The crane lifts the complete shipping container, not the cartons inside. It lowers it onto a wagon built for this load, where it is secured with the wagon fittings. The locomotive provides traction, the wagon supports the container, the container carries the cargo, and the cages stay inside.',
+ q:{where:'Moving from truck to rail wagon.',who:'Terminal operator; railway operator checks before departure.',what:'Crane lift by the four top corner fittings; securing to wagon fittings.',docs:'Loading list, wagon allocation, railway acceptance.',next:'Train departure from China.'},
+ terms:['Spreader','Twistlock'],risk:'Containers must be secured before any rail movement. The wagon must stay still during lifting.',
+ setup:()=>{const w=newWorld();railTerminal(w,{gauge:'SG'});w.wagons.push({id:'W1',x:-4,z:0,gauge:'SG',locked:false,train:false,label:'CONTAINER WAGON'});mkCrane(w,{x:-16,z1:-4.5,z2:9.5,tz:4.5,sy:CARRY_SY});
+   w.trucks.push({id:'T1',x:-4,z:4.5,label:'CONTAINER TRUCK',locked:true});const c=mkContainer(w,{mount:'truck:T1',sealed:true,restraints:stdRestraints()});mkCages(w,c.id);return w},
+ play:async(w,X)=>{const c=w.containers[0];await liftContainer('A',w,c,'wagon:W1',X.say);X.say('Container secured on the rail wagon. Cages remain inside.','ok');await wait('A',1500);
+   const t=w.trucks[0];await tw('A',3000,e=>t.x=lerp(-4,44,e),easeIn)}});
+addA({part:'Rail departure from China',title:'Train departure from China',country:'China',place:'China–Laos Railway',mode:'Rail · standard gauge',status:'In transit — China railway',map:'CNR',
+ cam:camP(.35,1.25,40,0,2,0),narr:'The freight train begins its journey towards Laos. The China–Laos Railway uses standard-gauge track, 1,435 mm between the rails. Freight follows the railway operator’s dispatching and safety procedures.',
+ q:{where:'On the China–Laos Railway, heading south.',who:'Railway operator (carrier).',what:'Freight train running through tunnels, over bridges, past signals.',docs:'Railway consignment / transport documents.',next:'Border processing at Mohan and Boten.'},
+ terms:['Railway gauge'],risk:'No journey times are claimed. Real timings depend on the carrier’s schedule and network capacity.',
+ setup:()=>railWorld('SG','tunnel').w,play:async(w,X)=>{X.say('Departure under railway dispatch control');await tw('A',2500,e=>w.speed=e*1.2,x=>x);await wait('A',6500);X.say('Passing tunnels and signals on standard-gauge track');await wait('A',3000)}});
+addA({part:'Rail departure from China',title:'China–Laos border: Mohan and Boten',country:'China → Laos',place:'Mohan (CN) / Boten (LA)',mode:'Rail · standard gauge',status:'China–Laos border processing',map:'BDR1',
+ cam:camP(.5,1.1,40,0,2,2),narr:'The shipment crosses from China into Laos. Authorities verify the cargo, transport records and customs status, and transit arrangements apply because the goods continue to another country. There is no gauge transfer here: standard gauge continues on both sides.',
+ q:{where:'Border stations at Mohan and Boten.',who:'Chinese and Lao customs; railway operators.',what:'Record checks, seal verification, possible inspection.',docs:'Export and transit documents, customs status, container & seal numbers, railway authorisation.',next:'Continue through Laos under transit control.'},
+ terms:['Transit','Seal'],risk:'Inspections or document gaps at the border can hold the train or the container.',
+ setup:()=>borderWorld('SG','MOHAN · CHINA','BOTEN · LAOS').w,
+ play:async(w,X)=>{const checks=['Export and transit documents','Customs status','Container number RW-CONT-001','Seal RWS-0451207 verified','Possible inspection (not selected in this example)','Railway operating authorisation'];
+   for(let i=1;i<=checks.length;i++){X.ov(`<h4>Border processing <span class="sim">Simulated</span></h4><div class="checks">${checks.map((t,j)=>`<span class="${j<i?'':'no'}">${t}</span>`).join('')}</div><p class="small"><b>No gauge change here.</b> Same 1,435 mm track both sides.</p>`);await wait('A',650)}
+   await wait('A',2500)}});
+addA({part:'Rail departure from China',title:'Railway journey through Laos',country:'Laos',place:'China–Laos Railway in Laos',mode:'Rail · standard gauge',status:'In transit — Laos railway',map:'LAR',
+ cam:camP(.4,1.3,40,0,1,0),narr:'The container continues through Laos. The goods are not for sale in Laos but are passing through Lao customs territory, so the provider must follow transit procedures until the transit movement is completed.',
+ q:{where:'On the railway through Laos.',who:'Railway operator; the forwarder responsible for transit.',what:'Rail movement under customs supervision.',docs:'Transit documents, guarantees where applicable, permitted route.',next:'Arrival at the Vientiane / Thanaleng area.'},
+ terms:['Transit'],risk:'Transit guarantees and permitted routes must be in place, or goods can be held.',
+ setup:()=>railWorld('SG','bridge').w,play:async(w,X)=>{await tw('A',1800,e=>w.speed=e*1.2,x=>x);X.say('Crossing a river bridge in northern Laos (illustrative)');await wait('A',8000)}});
+addA({part:'Gauge transfer',title:'Understanding the gauge difference',country:'Laos',place:'Vientiane / Thanaleng logistics area',mode:'Terminal',status:'At gauge transfer area',map:'VTE',
+ cam:camP(.15,1.12,18,-26,.6,3.2),narr:'This is one of the most important technical stages. The China–Laos Railway is 1,435 mm wide. The network to Thailand and Malaysia is 1,000 mm. The original wagon cannot continue onto the narrower track, so the container must move to compatible equipment.',
+ q:{where:'Vientiane / Thanaleng area.',who:'Terminal operator.',what:'Comparing standard-gauge and metre-gauge track and wagons.',docs:'—',next:'The standard-gauge train arrives at the terminal.'},
+ terms:['Railway gauge','Break of gauge'],risk:'Transfer capacity at the break of gauge can be a bottleneck.',
+ setup:()=>gaugeWorld({sgX:-24}).w,play:async(w,X)=>{X.ov(`<h4>Two gauges side by side</h4><dl class="kv"><dt>Track A</dt><dd>Standard gauge · 1,435 mm</dd><dt>Track B</dt><dd>Metre gauge · 1,000 mm</dd></dl><p class="small">The wheels of a standard-gauge wagon are too far apart for metre-gauge rails.</p>`);await wait('A',6000)}});
+addA({part:'Gauge transfer',title:'The standard-gauge train arrives',country:'Laos',place:'Vientiane-area freight terminal',mode:'Terminal',status:'Arrived for gauge transfer',map:'VTE',
+ cam:camP(.55,1.05,44,0,3,3),narr:'The arriving train is received by the freight terminal. Before handling, the terminal verifies the container’s identity, the transport instructions and the receiving equipment, and follows its approved procedures.',
+ q:{where:'Terminal arrival track.',who:'Terminal operator and railway operator.',what:'Train stops; staff check wagon and container information.',docs:'Arrival record, transfer authorisation, customs status, handling instructions.',next:'Prepare the container for lifting.'},
+ terms:['Transloading'],risk:'If the onward wagon is not ready, the container waits in the yard.',
+ setup:()=>{const r=gaugeWorld({sgX:-55});return r.w},
+ play:async(w,X)=>{X.say('Standard-gauge train arriving');await moveGroup('A',w,trainShiftSG,55,6500,easeOut);X.say('Train stopped. Terminal checks begin.','ok');
+   const f=[['Container ID','RW-CONT-001'],['Arrival record','Logged (illustrative)'],['Receiving equipment','Metre-gauge wagon M1'],['Customs status','Transit under control'],['Handling instructions','Lift by top corner fittings only'],['Transfer authorisation','Granted (simulated)']];
+   for(let i=1;i<=f.length;i++){X.ov(`<h4>Terminal dashboard <span class="sim">Simulated</span></h4><dl class="kv">${f.slice(0,i).map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}</dl>`);await wait('A',500)}await wait('A',2000)}});
+addA({part:'Gauge transfer',title:'Preparing the container for lifting',country:'Laos',place:'Vientiane-area freight terminal',mode:'Terminal',status:'Preparing transfer',map:'VTE',
+ cam:camP(.6,1.0,34,0,3,2),narr:'The handling team checks the lifting equipment and confirms the container is ready to be separated from the wagon. The wagon is secured in the handling area, and securing devices are released only under the terminal’s safety procedures.',
+ q:{where:'Container still on the standard-gauge wagon.',who:'Authorised terminal staff.',what:'Wagon secured, crane positioned, securing devices released.',docs:'Terminal safety checklist.',next:'Crane engages the container.'},
+ terms:['Twistlock'],risk:'Lifting must never start while the wagon could move.',
+ setup:()=>gaugeWorld({}).w,play:async(w,X)=>{const cr=w.crane;X.say('Crane travels into position');await craneTo('A',w,0,0);X.say('Securing devices on the wagon released by authorised staff','warn');await wait('A',1200);w.wagons.find(x=>x.id==='W1').locked=false;await wait('A',2500)}});
+addA({part:'Gauge transfer',title:'Crane engages the container',country:'Laos',place:'Vientiane-area freight terminal',mode:'Terminal',status:'Preparing transfer',map:'VTE',
+ cam:camP(.7,.95,22,0,4,0),narr:'The crane uses a lifting frame called a spreader. It aligns with the container’s four upper corner fittings and locks on, so the whole container can be lifted as one transport unit.',
+ q:{where:'Under the crane spreader.',who:'Crane operator.',what:'Spreader alignment and locking onto the corner fittings.',docs:'Lift confirmation.',next:'Lift the container off the wagon.'},
+ terms:['Spreader','Twistlock'],risk:'A spreader must only lock onto approved corner fittings.',
+ setup:()=>{const r=gaugeWorld({craneX:0});r.w.crane.tz=0;r.w.wagons.find(x=>x.id==='W1').locked=false;return r.w},
+ play:async(w,X)=>{const c=w.containers[0];X.say('Spreader lowers to the top corner fittings');await hoistTo('A',w,contPos(w,c).y+CT.H/2+.16);await wait('A',600);w.crane.locked=true;X.say('Spreader locks engaged. Operator confirms the lift is ready.','ok');await wait('A',2500)}});
+addA({part:'Gauge transfer',title:'Container lifted off the original wagon',country:'Laos',place:'Vientiane-area freight terminal',mode:'Terminal',status:'Transfer in progress',map:'VTE',
+ cam:camP(.55,1.05,30,0,4,2),narr:'The crane lifts the complete container away from the standard-gauge wagon. The cargo inside is not unloaded. The container stays sealed and the cages stay secured inside it.',
+ q:{where:'Suspended above the standard-gauge wagon.',who:'Crane operator / terminal operator.',what:'Vertical lift; transparent view shows cages remain inside.',docs:'—',next:'Move to the receiving position.'},
+ terms:['Transloading'],risk:'Swinging loads and wind limits apply to every lift.',
+ setup:()=>{const r=gaugeWorld({craneX:0});r.w.crane.tz=0;r.w.crane.sy=DECK.SG+CT.H+.16;r.w.crane.locked=true;r.w.wagons.find(x=>x.id==='W1').locked=false;return r.w},
+ play:async(w,X)=>{const c=w.containers[0];c.mount='crane';X.say('Lifting vertically. The standard-gauge wagon stays on the track.');await hoistTo('A',w,CARRY_SY);X.say('Transparent view: all cages and cartons remain inside the sealed container');await tw('A',900,e=>c.cut=e);await wait('A',3000);await tw('A',700,e=>c.cut=1-e)}});
+addA({part:'Gauge transfer',title:'Container moved to the receiving position',country:'Laos',place:'Vientiane-area freight terminal',mode:'Terminal',status:'Transfer in progress',map:'VTE',
+ cam:camP(.6,1.0,34,0,4,3),narr:'The container moves to the receiving position. If a suitable onward wagon is available, it is transferred directly. If not, it may be placed temporarily in the container yard.',
+ q:{where:'Moving between tracks under the crane.',who:'Crane operator.',what:'Trolley traverse to the metre-gauge wagon.',docs:'—',next:'Lower onto the metre-gauge wagon.'},
+ terms:['Transloading'],risk:'If the metre-gauge wagon is not ready, yard storage and extra charges may apply.',
+ setup:()=>{const r=gaugeWorld({craneX:0});const c=r.w.containers[0];c.mount='crane';r.w.crane.tz=0;r.w.crane.sy=CARRY_SY;r.w.crane.locked=true;r.w.wagons.find(x=>x.id==='W1').locked=false;return r.w},
+ play:async(w,X)=>{X.say('Trolley moves the container towards the metre-gauge track');await craneTo('A',w,0,6.5);X.say('Receiving wagon ready. Direct transfer possible in this example.','ok');await wait('A',2500)}});
+addA({part:'Gauge transfer',title:'Container lowered onto the metre-gauge wagon',country:'Laos',place:'Vientiane-area freight terminal',mode:'Terminal',status:'Transfer in progress',map:'VTE',
+ cam:camP(.6,1.0,26,0,2.5,6.5),narr:'The crane lowers the container onto a wagon designed for metre gauge, aligning it with the wagon supports and securing fittings. The container itself has not changed; only the equipment carrying it has.',
+ q:{where:'Above the metre-gauge wagon.',who:'Crane operator.',what:'Careful lowering and alignment with fittings.',docs:'—',next:'Securing and inspection.'},
+ terms:['Twistlock'],risk:'Misalignment can damage corner fittings or the wagon.',
+ setup:()=>{const r=gaugeWorld({craneX:0});const c=r.w.containers[0];c.mount='crane';r.w.crane.tz=6.5;r.w.crane.sy=CARRY_SY;r.w.crane.locked=true;r.w.wagons.find(x=>x.id==='W1').locked=false;return r.w},
+ play:async(w,X)=>{const c=w.containers[0];X.say('Lowering slowly onto the metre-gauge wagon');await hoistTo('A',w,DECK.MG+CT.H+.16+.35);await hoistTo('A',w,DECK.MG+CT.H+.16);c.mount='wagon:M1';w.crane.locked=false;X.say('Container resting on the metre-gauge wagon','ok');await hoistTo('A',w,CARRY_SY);await wait('A',1500)}});
+addA({part:'Gauge transfer',title:'Securing and inspection',country:'Laos',place:'Vientiane-area freight terminal',mode:'Terminal',status:'Transfer checks',map:'VTE',
+ cam:camP(.65,1.0,28,0,2.5,6.5),narr:'Before the shipment continues, the wagon and container are checked: position, wagon suitability, securing devices, permitted load, weight distribution, identification and documents. Railway and customs arrangements must also be complete.',
+ q:{where:'On the metre-gauge wagon.',who:'Terminal staff; railway operator.',what:'Securing devices engaged and checked.',docs:'Transfer record, wagon load check, transport documents.',next:'Choose and confirm the transfer pathway; depart on metre gauge.'},
+ terms:['Twistlock'],risk:'Axle-load limits on metre gauge may be lower than on standard gauge.',
+ setup:()=>{const r=gaugeWorld({});const c=r.w.containers[0];c.mount='wagon:M1';r.w.wagons.find(x=>x.id==='W1').locked=false;r.w.crane.x=-14;return r.w},
+ play:async(w,X)=>{const items=['Container position','Wagon suitability','Securing devices','Permitted load','Weight distribution','Container identification','Transport documents'];
+   for(let i=1;i<=items.length;i++){if(i===3)w.wagons.find(x=>x.id==='M1').locked=true;X.ov(`<h4>Transfer checks <span class="sim">Simulated</span></h4><div class="checks">${items.map((t,j)=>`<span class="${j<i?'':'no'}">${t}</span>`).join('')}</div>`);await wait('A',550)}X.say('Secured (simulated checks passed)','ok');await wait('A',2000)}});
+addA({part:'Gauge transfer',title:'Alternative pathway: rail–truck–rail',country:'Laos',place:'Vientiane-area terminals',mode:'Rail → road → rail',status:'Transfer pathway subject to operator',map:'VTE',
+ cam:camP(.55,1.05,46,4,3,4),narr:'Not every terminal has the same infrastructure. Sometimes the container travels a short distance by road between two rail terminals. It is still intermodal: the container moves between rail and road without unloading the cargo. Neither pathway is guaranteed until the operator confirms it.',
+ q:{where:'Between two terminal areas.',who:'Terminal operators and an authorised haulier.',what:'Crane to truck, short road move, crane to metre-gauge wagon.',docs:'Customs-authorised movement between terminals.',next:'Departure on metre gauge.'},
+ terms:['Transloading','Transit'],risk:'An extra road leg adds handling, cost and customs steps.',
+ setup:()=>{const r=gaugeWorld({craneX:-6});r.w.trucks.push({id:'T1',x:-6,z:3.2,label:'TRANSFER TRUCK'});r.w.crane.tz=0;return r.w},
+ play:async(w,X)=>{const c=w.containers[0];const path=X.path();
+   if(path==='direct'){X.say('Pathway A: direct rail-to-rail transfer');await liftContainer('A',w,c,'wagon:M1',null);X.say('Direct transfer complete','ok');await wait('A',2000);return}
+   X.say('Pathway B: crane lifts the container onto a truck');await liftContainer('A',w,c,'truck:T1',null);const t=w.trucks[0];
+   X.say('Truck drives between authorised terminal areas');await tw('A',3000,e=>t.x=lerp(-6,30,e),easeIn);await wait('A',600);await tw('A',3000,e=>t.x=lerp(-30,0,e),easeOut);
+   w.crane.x=-14;X.say('Crane lifts it from the truck onto the metre-gauge wagon');await liftContainer('A',w,c,'wagon:M1',null);X.say('Rail–truck–rail transfer complete','ok');await wait('A',1500)}});
+addA({part:'Gauge transfer',title:'Departure on metre-gauge railway',country:'Laos',place:'Vientiane / Thanaleng',mode:'Rail · metre gauge',status:'Gauge transfer completed',map:'VTE',
+ cam:camP(.5,1.1,40,6,2,6.5),narr:'The container is now on equipment compatible with the metre-gauge network. After railway and customs authorisations, the shipment continues towards Thailand.',
+ q:{where:'Metre-gauge wagon leaving the terminal.',who:'Railway operator.',what:'Departure procedures and train movement.',docs:'Railway departure authorisation, transit documents.',next:'Laos–Thailand border at Thanaleng / Nong Khai.'},
+ terms:['Railway gauge'],risk:'Onward metre-gauge capacity must be arranged in advance.',
+ setup:()=>{const r=gaugeWorld({});const c=r.w.containers[0];c.mount='wagon:M1';r.w.wagons.find(x=>x.id==='M1').locked=true;r.w.crane.x=-18;return r.w},
+ play:async(w,X)=>{X.say('Departure authorised. Metre-gauge train moves off.');await moveGroup('A',w,trainShiftMG,60,7000,easeIn);X.say('Gauge transfer completed','ok');await wait('A',1200)}});
+addA({part:'Thailand & Malaysia',title:'Laos–Thailand border',country:'Laos → Thailand',place:'Thanaleng / Nong Khai',mode:'Rail · metre gauge',status:'Laos–Thailand border processing',map:'NKH',
+ cam:camP(.5,1.1,40,0,2,2),narr:'The container moves from Laos into Thailand over the existing international rail link. Operators and border authorities complete the handover. Thailand uses metre gauge, so the container continues on compatible equipment, but customs and handovers are still required.',
+ q:{where:'Thanaleng / Nong Khai rail crossing.',who:'Lao and Thai customs; railway operators.',what:'Exit and entry procedures, railway handover, identity checks.',docs:'Transport records, transit or import arrangements.',next:'Rail journey across Thailand.'},
+ terms:['Transit'],risk:'Handover delays between operators are common at borders.',
+ setup:()=>borderWorld('MG','THANALENG · LAOS','NONG KHAI · THAILAND').w,
+ play:async(w,X)=>{const checks=['Exit procedures (Laos)','Entry procedures (Thailand)','Transport records','Customs transit arrangement','Railway handover','Container identity & seal check'];for(let i=1;i<=checks.length;i++){X.ov(`<h4>Border handover <span class="sim">Simulated</span></h4><div class="checks">${checks.map((t,j)=>`<span class="${j<i?'':'no'}">${t}</span>`).join('')}</div>`);await wait('A',650)}await wait('A',2500)}});
+addA({part:'Thailand & Malaysia',title:'Railway journey across Thailand',country:'Thailand',place:'Thai freight railway network',mode:'Rail · metre gauge',status:'In transit — Thailand railway',map:'THR',
+ cam:camP(.45,1.1,46,4,2,0),narr:'International rail freight does not always run on one train end to end. Wagons may be regrouped, transferred between services or held in yards. Here a locomotive is changed in a freight yard. No journey times or connections are claimed.',
+ q:{where:'Freight yard on the Thai network.',who:'Thai railway operator.',what:'Locomotive change and wagon regrouping.',docs:'Railway transfer records.',next:'Approach to Padang Besar.'},
+ terms:[],risk:'Yard dwell time and connections are uncertain until confirmed by the operator.',
+ setup:()=>{const w=newWorld();w.pads=[{x:0,z:6,w:70,d:10,col:COL.concrete}];w.tracks.push({z:0,gauge:'MG',x0:-45,x1:45},{z:-5,gauge:'MG',x0:-45,x1:45});trainOn(w,'MG',-3,true,{llabel:'LOCOMOTIVE 1'});w.locos.push({id:'L9',x:45,z:-5,gauge:'MG',label:'LOCOMOTIVE 2'});w.buildings.push({x:0,z:-14,w:30,h:6,d:6,label:'FREIGHT YARD (ILLUSTRATIVE)'});return w},
+ play:async(w,X)=>{const l1=w.locos.find(x=>x.id==='L1'),l2=w.locos.find(x=>x.id==='L9');X.say('Locomotive 1 uncouples and leaves');await tw('A',4200,e=>l1.x=lerp(12.2,60,e),easeIn);
+   X.say('Locomotive 2 moves across and couples to the wagons');await tw('A',3500,e=>l2.x=lerp(45,24,e));l2.z=0;l2.x=60;await tw('A',3500,e=>l2.x=lerp(60,12.2,e),easeOut);X.say('New locomotive coupled. Train continues south.','ok');await wait('A',1500)}});
+addA({part:'Thailand & Malaysia',title:'Approaching Padang Besar',country:'Thailand',place:'Approach to Padang Besar',mode:'Rail · metre gauge',status:'Approaching Malaysian border',map:'PBS',
+ cam:camP(.4,1.2,40,0,1.5,0),narr:'We are approaching the Malaysian border. Both Thailand and Malaysia use metre gauge on their conventional networks, so no gauge transfer is needed just because of the border. Border, customs and railway procedures still apply.',
+ q:{where:'Southern Thailand, near Padang Besar.',who:'Railway operators.',what:'Train slowing for border processing.',docs:'Prepared border documents.',next:'Thailand–Malaysia border processing.'},
+ terms:['Railway gauge'],risk:'Border processing time varies.',
+ setup:()=>railWorld('MG',null).w,play:async(w,X)=>{w.speed=1.1;X.ov(`<h4>No gauge change here</h4><dl class="kv"><dt>Thailand</dt><dd>Metre gauge · 1,000 mm</dd><dt>Malaysia</dt><dd>Metre gauge · 1,000 mm</dd></dl>`);await wait('A',3500);X.say('Slowing for the border');await tw('A',4000,e=>w.speed=1.1*(1-e),x=>x);await wait('A',1200)}});
+addA({part:'Thailand & Malaysia',title:'Thailand–Malaysia border processing',country:'Thailand → Malaysia',place:'Padang Besar',mode:'Rail · metre gauge',status:'Malaysia border processing',map:'PBS',
+ cam:camP(.5,1.1,40,0,2,2),narr:'Before goods enter Malaysia, customs and transport requirements must be completed. Authorities may review documents or select cargo for inspection. The shipment proceeds only when conditions are met.',
+ q:{where:'Padang Besar border.',who:'Thai and Malaysian customs; railway operators.',what:'Document review, seal status, possible inspection.',docs:'Container ID, transport documents, customs declaration, commodity info, permits, seal status.',next:'Arrival at Perlis Inland Port.'},
+ terms:['Customs broker','Seal'],risk:'Selection for inspection may mean opening the container under customs supervision.',
+ setup:()=>borderWorld('MG','PADANG BESAR · TH','PADANG BESAR · MY').w,
+ play:async(w,X)=>{const checks=['Container identification','Transport documents','Customs declaration','Commodity information','Applicable permits','Seal status: intact','Border processing status: cleared to proceed (simulated)'];for(let i=1;i<=checks.length;i++){X.ov(`<h4>Border processing <span class="sim">Simulated</span></h4><div class="checks">${checks.map((t,j)=>`<span class="${j<i?'':'no'}">${t}</span>`).join('')}</div>`);await wait('A',600)}await wait('A',2500)}});
+addA({part:'Thailand & Malaysia',title:'Arrival at Perlis Inland Port',country:'Malaysia',place:'Perlis Inland Port (PIP)',mode:'Rail → terminal',status:'Arrived at PIP',map:'PIP',
+ cam:camP(.55,1.05,48,4,3,4),narr:'The container reaches Perlis Inland Port, Malaysia’s northern inland logistics gateway. An inland port does many of a seaport’s container jobs, but inland. It connects rail freight with road transport, container storage, customs and onward logistics.',
+ q:{where:'PIP receiving track.',who:'PIP terminal operator.',what:'Freight train arrives at the designated siding.',docs:'Arrival notice, terminal booking.',next:'Container unloaded from the train.'},
+ terms:['Inland port'],risk:'Rail service to PIP and terminal arrangements must be confirmed for each shipment.',
+ setup:()=>{const w=pipWorld();trainOn(w,'MG',-60,true);return w},play:async(w,X)=>{X.say('Freight train arriving at the PIP receiving track');await moveGroup('A',w,(w2,d)=>trainShift(w2,d),60,7000,easeOut);X.say('Arrived at Perlis Inland Port','ok');await wait('A',2000)}});
+addA({part:'Thailand & Malaysia',title:'Container unloaded from the train',country:'Malaysia',place:'Perlis Inland Port (PIP)',mode:'Terminal',status:'Arrived at PIP',map:'PIP',
+ cam:camP(.55,1.05,40,0,3,5),narr:'The terminal records the container’s arrival, lifts it off the metre-gauge wagon and moves it to the right handling or storage area, then coordinates with logistics and customs parties before release.',
+ q:{where:'PIP container yard.',who:'PIP terminal operator.',what:'Lift from wagon to yard slot; terminal registration.',docs:'Terminal receipt.',next:'Malaysian customs procedures.'},
+ terms:['Inland port','Spreader'],risk:'Yard storage time may incur charges if clearance is slow.',
+ setup:()=>{const w=pipWorld();trainOn(w,'MG',0,true);return w},play:async(w,X)=>{const c=w.containers[0];await liftContainer('A',w,c,'ground:2:9.5',X.say);X.say('Container registered in the PIP yard','ok');await wait('A',1500)}});
+addA({part:'Destination',title:'Malaysian customs procedures',country:'Malaysia',place:'Perlis Inland Port (PIP)',mode:'Documentation',status:'Malaysian customs processing',map:'PIP',
+ cam:camP(.6,1.0,34,2,2,9),narr:'Arriving at the inland port does not mean goods can be delivered. The importer or broker completes the Malaysian requirements: declaration, document checks, duties or taxes, and any inspection. Once released, cargo moves to its next authorised destination.',
+ q:{where:'PIP container yard.',who:'Importer / customs broker; Royal Malaysian Customs.',what:'Import declaration and release.',docs:'Importer info, invoice, packing list, classification, customs value, origin, permits, duties/taxes.',next:'Container leaves PIP once released.'},
+ terms:['Customs broker'],risk:'Moving goods to another bonded place before clearance must itself be an authorised customs procedure.',
+ setup:()=>{const w=pipWorld();const c=mkContainer(w,{mount:'ground',p:new V(2,CT.H/2,9.5),sealed:true,restraints:stdRestraints()});mkCages(w,c.id);return w},
+ play:async(w,X)=>{const rows=[['Importer','SME A, B, C, D (per consolidated manifest)'],['Commercial invoices','Provided'],['Packing lists','Provided'],['Commodity classification','HS codes by broker'],['Customs value','Declared'],['Origin information','China'],['Applicable permits','Checked'],['Duties & taxes','Paid where applicable'],['Release status','Released (simulated)']];
+   for(let i=1;i<=rows.length;i++){X.ov(`<h4>Malaysian import declaration <span class="sim">Simulated</span></h4><dl class="kv">${rows.slice(0,i).map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}</dl>`);await wait('A',550)}await wait('A',2500)}});
+addA({part:'Destination',title:'Container leaves PIP',country:'Malaysia',place:'Perlis Inland Port (PIP)',mode:'Terminal → road',status:'Departed PIP',map:'PIP',
+ cam:camP(.55,1.05,44,6,3,7),narr:'Once authorised for onward movement, a road transport partner collects the container from the inland port and drives it to the destination warehouse.',
+ q:{where:'PIP yard to gate.',who:'Terminal operator, then road haulier.',what:'Lift onto truck, gate-out procedure.',docs:'Release order, gate-out record.',next:'Arrival at the destination warehouse.'},
+ terms:[],risk:'Haulier booking and gate appointments must line up with customs release.',
+ setup:()=>{const w=pipWorld();const c=mkContainer(w,{mount:'ground',p:new V(2,CT.H/2,9.5),sealed:true,restraints:stdRestraints()});mkCages(w,c.id);w.trucks.push({id:'T1',x:-40,z:4.6,label:'ROAD HAULIER'});return w},
+ play:async(w,X)=>{const t=w.trucks[0];X.say('Truck arrives at the handling position');await tw('A',3600,e=>t.x=lerp(-40,2,e),easeOut);await liftContainer('A',w,w.containers[0],'truck:T1',X.say);X.say('Driver verifies container reference; gate-out completed');await wait('A',800);await tw('A',4000,e=>t.x=lerp(2,48,e),easeIn)}});
+addA({part:'Destination',title:'Arrival at the Malaysian destination hub',country:'Malaysia',place:'RealWay partner warehouse · Klang Valley',mode:'Warehouse',status:'Arrived at destination hub',map:'KLV',
+ cam:camP(1.1,1.0,22,5,1.6,0),narr:'At the destination warehouse, the team verifies the container identity and seal and confirms the receiving instructions before opening. Any discrepancy is recorded first.',
+ q:{where:'Destination warehouse dock.',who:'RealWay partner warehouse.',what:'Container and seal verification before opening.',docs:'Receiving instructions, seal check record.',next:'Unloading the cages.'},
+ terms:['Seal'],risk:'A seal mismatch must be reported before the doors are opened.',
+ setup:()=>{const {w}=dockWorld({loaded:true,sealed:true,restraints:stdRestraints(),building:'REALWAY PARTNER WAREHOUSE · KLANG VALLEY'});return w},
+ play:async(w,X)=>{const rows=[['Container','RW-CONT-001 · matches'],['Seal','RWS-0451207 · intact, matches record'],['Exterior condition','No visible damage'],['Receiving instructions','Unload 13 cages, scan each']];for(let i=1;i<=rows.length;i++){X.ov(`<h4>Pre-opening checks <span class="sim">Simulated</span></h4><dl class="kv">${rows.slice(0,i).map(r=>`<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}</dl>`);await wait('A',800)}X.say('Seal verified. Cleared to open.','ok');await wait('A',2000)}});
+addA({part:'Destination',title:'Unloading the cargo cages',country:'Malaysia',place:'Destination warehouse',mode:'Warehouse',status:'Unloading',map:'KLV',
+ cam:camP(.7,1.0,34,4,1.5,3.5),narr:'The shared cargo is now separated. Instead of searching an unorganised container, workers use the recorded cage IDs. Cages nearest the doors come out first; the forklift cannot reach the front until the rear is cleared. Each cage is scanned against the records.',
+ q:{where:'Destination dock.',who:'Destination warehouse team.',what:'Seal removed, doors opened, cages unloaded rear-to-front and scanned.',docs:'Unloading tally, cage scans vs manifest.',next:'Sorting and final delivery.'},
+ terms:['Cargo cage'],risk:'Damaged cages or cartons must be recorded at unloading, before sorting.',
+ setup:()=>{const {w,c}=dockWorld({loaded:true,sealed:true,restraints:stdRestraints()});return w},
+ play:async(w,X)=>{const c=w.containers[0];X.say('Seal removed and recorded; doors opened');c.sealed=false;await doorsTo('A',c,1);c.cut=1;c.restraints=c.restraints.filter(r=>r.type!=='block'||r.x<0);
+   const ks=w.cages.filter(k=>k.in).sort((a,b)=>b.plan.n-a.plan.n);for(let i=0;i<ks.length;i++){if(i===3){X.say('Unloading continues rear to front (shown faster)');CLK.boost=4}await unloadCage('A',w,c,ks[i],i<3?X.say:null)}CLK.boost=1;X.say('All 13 cages unloaded and scanned','ok');await wait('A',1500)}});
+addA({part:'Destination',title:'Shipment sorting and final delivery',country:'Malaysia',place:'Destination warehouse → customers',mode:'Warehouse → road',status:'Delivered',map:'KLV',
+ cam:camP(.5,.95,28,0,1.4,1),narr:'Each customer’s goods are prepared for delivery. The warehouse checks quantities, records any damage or shortage, assigns delivery vehicles, and marks the delivery complete when the customer signs.',
+ q:{where:'Sorting area, then customer warehouses.',who:'Destination warehouse and last-mile partners.',what:'Opening cages, scanning cartons, grouping by customer, dispatch.',docs:'Delivery orders, electronic proof of delivery.',next:'Empty cages go to inspection and reuse.'},
+ terms:['Proof of delivery'],risk:'Shortages found here must be traced back through the scan history.',
+ setup:()=>{const w=cagePackWorld();w.cages.forEach(k=>k.cartons=k.plan.own.length?12:0);return w},
+ play:async(w,X)=>{X.say('Cages opened; cartons scanned and grouped by customer');const ks=w.cages.filter(k=>k.plan.own.length);for(const k of ks){k.gate=1;await tw('A',240,e=>k.cartons=Math.round(12*(1-e)))}
+   ['A','B','C','D'].forEach((s,i)=>{for(let j=0;j<6;j++)w.props.push({type:'carton',p:new V(-8.6+i*4.2+(j%3)*.62,.3+Math.floor(j/3)*.58,5.4),s:[.56,.56,.46],col:SME[s].col})});
+   X.ov(`<h4>Proof of delivery <span class="sim">Simulated</span></h4><dl class="kv"><dt>SME A · RW-BKG-024</dt><dd>Delivered · e-POD signed</dd><dt>SME B</dt><dd>Delivered · e-POD signed</dd><dt>SME C</dt><dd>Delivered · e-POD signed</dd><dt>SME D</dt><dd>Delivered · e-POD signed</dd></dl>`);X.say('Deliveries complete','ok');await wait('A',4000)}});
+addA({part:'Destination',title:'Final overview',country:'China → Malaysia',place:'Whole corridor',mode:'Overview',status:'Delivered',map:'KLV',
+ cam:camP(.5,1.05,30,0,1.6,0),narr:'One international container can carry goods for several businesses. By coordinating existing transport providers, warehouse operators and railway infrastructure, RealWay Express aims to make shared freight capacity accessible to SMEs. Every shipment stays individually traceable from booking to delivery.',
+ q:{where:'Delivered to each SME.',who:'—',what:'Summary of the journey.',docs:'Full tracking history per booking.',next:'Cages return for reuse (see Demo B, scene 12).'},
+ terms:['LCL','Consolidation'],risk:'Commercial availability of each leg still needs carrier confirmation.',
+ setup:()=>{const {w,c}=planWorld(13);return w},
+ play:async(w,X)=>{X.ov(`<h4 style="font-size:22px">REALWAY EXPRESS</h4><p style="font-size:16px;font-weight:600">One container. Multiple businesses. Shared freight capacity.</p><p class="small">China → Laos → Thailand → Malaysia · 4 SMEs · 13 cages · 1 container</p>`);await wait('A',6000)}});
+
+
+/* ================= DEMO B: INSIDE THE SHARED CONTAINER ================= */
+const B_SCENES=[];function addB(o){o.n=B_SCENES.length+1;B_SCENES.push(o)}
+function padWorld(o){o=o||{};const w=newWorld();w.pads=[{x:0,z:0,w:26,d:12,col:COL.concrete}];const c=mkContainer(w,Object.assign({mount:'ground',p:new V(0,CT.H/2,0)},o));mkCages(w,o.loaded?c.id:null);return {w,c}}
+addB({title:'Exterior: a standard 40 ft high-cube container',mode:'exterior',status:'Empty container',narr:'This is a standard 40-foot high-cube shipping container, built to move through international transport networks. The same container can move between trucks and railway wagons without unloading the cargo each time the mode changes.',
+ cam:camP(.65,1.05,22,0,1.4,0),setup:()=>{const {w}=padWorld({});w.labels.push({x:0,y:CT.H+.5,z:CT.W/2,t:'≈ 12.19 m external length'},{x:CT.L/2+.7,y:CT.H/2,z:0,t:'≈ 2.90 m high'},{x:CT.L/2+.4,y:.15,z:CT.W/2+.8,t:'≈ 2.44 m wide'});return w},
+ play:async(w,X)=>{X.say('Rotate and zoom with your mouse or finger. Dimensions are approximate and vary by manufacturer.');const t0=X.view.goal.theta;await tw('B',9000,e=>X.view.goal.theta=t0+e*1.1,x=>x)}});
+addB({title:'Open the container',mode:'exterior',status:'Empty container',narr:'Inside is one large cargo space. RealWay proposes organising it into individually traceable handling units using removable cargo cages. The outer container stays unchanged.',
+ cam:camP(.75,1.0,20,1,1.4,0),setup:()=>padWorld({}).w,
+ play:async(w,X)=>{const c=w.containers[0];X.say('Roof removed (animated cutaway)');await tw('B',1600,e=>c.roofOff=e);X.say('Side wall made transparent');await tw('B',1200,e=>c.sideClear=.92*e);X.say('Rear doors open: opening ≈ 2.34 m wide × 2.58 m high');await doorsTo('B',c,1);
+   w.labels.push({x:0,y:.4,z:CT.W/2+.4,t:'Internal ≈ 12.03 m × 2.35 m × 2.70 m'});X.say('One empty cargo space, ready to be planned','ok');await wait('B',2500)}});
+addB({title:'Inspect a cargo cage',mode:'cage',status:'Cage RW-CAGE-003',narr:'A cargo cage is a smaller reusable handling unit. It can hold one SME’s goods or a compatible group of shipments. Its job is to make cargo easier to identify, organise and move in warehouses. It is not an ISO shipping container and has no wheels.',
+ cam:camP(.7,1.05,5.6,0,1.0,0),setup:()=>padWorld({}).w,
+ play:async(w,X)=>{const k=X.cage();k.gate=0;k.cartons=12;await wait('B',2500);X.say('Opening the front gate to show the cartons inside');await tw('B',1500,e=>k.gate=e);await wait('B',2500);await tw('B',1200,e=>k.gate=1-e)}});
+addB({title:'SME allocation',mode:'top',status:'Planning allocation',narr:'Customers do not need to buy a whole cage. RealWay can place smaller orders into shared cages while keeping every shipment separately recorded, so the warehouse knows exactly which goods belong to whom.',
+ cam:camP(.3,.6,20,0,1,0),setup:()=>{const {w}=padWorld({cut:1});return w},
+ play:async(w,X)=>{const c=w.containers[0];for(const pl of BOOKED){const k=w.cages.find(x=>x.plan.id===pl.id);k.in=c.id;await wait('B',380)}X.say('13 of 16 slots allocated to 4 SMEs. RW-CAGE-004 is shared by SME C and SME D.','ok');await wait('B',3000)}});
+addB({title:'Loading the cages',mode:'cutaway',status:'Loading',narr:'The warehouse loads cages in a planned sequence, starting at the front wall and working towards the doors. The team considers total weight, cage position and safe handling access. The goal is stable, secure cargo, not filling every gap.',
+ cam:camP(.7,1.0,34,4,1.5,3.5),setup:()=>{const {w,c,geo}=dockWorld({doors:1});c.cut=1;w.cages.filter(k=>k.plan.own.length).forEach((k,i)=>k.queue=i);queuePositions(w,geo);return w},
+ play:async(w,X)=>{const c=w.containers[0];const ks=w.cages.filter(k=>k.plan.own.length);for(const k of ks)await loadCage('B',w,c,k,X.say);X.say('All 13 cages loaded front to rear','ok');await wait('B',1500)}});
+addB({title:'Cargo restraint',mode:'cutaway',status:'Securing',narr:'Cargo must not move dangerously during braking, acceleration, vibration or handling. The warehouse applies blocking, bracing and lashing following the IMO/ILO/UNECE CTU Code. Cages cannot simply be placed inside without an approved restraint arrangement.',
+ cam:camP(.6,.85,22,1,1.5,0),setup:()=>{const {w,c}=dockWorld({loaded:true,doors:1});c.cut=1;return w},
+ play:async(w,X)=>{const c=w.containers[0];X.say('Lashing each row to the container’s securing points');for(const r of stdRestraints().filter(r=>r.type==='lash')){c.restraints.push(r);await wait('B',350)}
+   X.say('Blocking at the front wall and behind the last row, filling the 1.23 m gap');for(const r of stdRestraints().filter(r=>r.type==='block')){c.restraints.push(r);await wait('B',600)}X.say('Weight distribution checked (see dashboard)','ok');await wait('B',3000)}});
+addB({title:'Sealing',mode:'exterior',status:'Sealed',narr:'After loading and final checks, the doors are closed and a numbered seal is applied. The cages stay inside until the container reaches an authorised unloading location.',
+ cam:camP(1.2,1.0,18,4,1.5,0),setup:()=>{const {w,c}=dockWorld({loaded:true,doors:1,restraints:stdRestraints()});return w},
+ play:async(w,X)=>{const c=w.containers[0];X.say('Doors closing');await doorsTo('B',c,0);c.sealed=true;X.say('Seal RWS-0451207 applied (illustrative)','ok');await wait('B',3000)}});
+addB({title:'Railway movement',mode:'cutaway',status:'In transit by rail',narr:'During rail transport the whole container moves as one unit. The railway operator handles only the outer container; it never needs to remove or handle the cages inside. The cages stay put.',
+ cam:camP(.5,1.0,26,-1,2,0),setup:()=>{const r=railWorld('SG',null);r.c.cut=1;return r.w},
+ play:async(w,X)=>{await tw('B',2000,e=>w.speed=e*1.2,x=>x);X.say('Transparent view: cages remain stationary and restrained inside');await wait('B',8000)}});
+addB({title:'Gauge transfer',mode:'cutaway',status:'Gauge transfer',narr:'Even when the container changes wagons at the break of gauge, the cages remain inside. This is the advantage of standard containers: cargo is not unpacked just because the track gauge changes.',
+ cam:camP(.55,1.05,32,0,4,3),setup:()=>{const r=gaugeWorld({});r.c.cut=1;return r.w},
+ play:async(w,X)=>{await liftContainer('B',w,w.containers[0],'wagon:M1',X.say);X.say('Same container, same cages, now on a metre-gauge wagon','ok');await wait('B',2000)}});
+addB({title:'Destination unloading',mode:'cutaway',status:'Unloading',narr:'At the Malaysian destination warehouse, after customs release, the team checks the container and seal, opens the doors, and removes cages in a safe sequence from the rear towards the front. Each cage is scanned.',
+ cam:camP(.7,1.0,34,4,1.5,3.5),setup:()=>{const {w}=dockWorld({loaded:true,sealed:true,restraints:stdRestraints(),building:'REALWAY PARTNER WAREHOUSE · KLANG VALLEY'});return w},
+ play:async(w,X)=>{const c=w.containers[0];X.say('Seal RWS-0451207 checked against the record, then removed');await wait('B',1500);c.sealed=false;await doorsTo('B',c,1);c.cut=1;c.restraints=c.restraints.filter(r=>r.type!=='block'||r.x<0);
+   const ks=w.cages.filter(k=>k.in).sort((a,b)=>b.plan.n-a.plan.n);for(const k of ks)await unloadCage('B',w,c,k,X.say);X.say('13 cages unloaded and scanned, rear to front','ok');await wait('B',1500)}});
+addB({title:'Cargo separation',mode:'warehouse',status:'Sorting',narr:'Although the goods travelled together, each shipment stays identifiable. Workers open the cages, scan the cartons and separate them into staging areas for SME A, B, C and D.',
+ cam:camP(.5,.95,28,0,1.4,1),setup:()=>{const w=cagePackWorld();w.cages.forEach(k=>k.cartons=k.plan.own.length?12:0);return w},
+ play:async(w,X)=>{const ks=w.cages.filter(k=>k.plan.own.length);for(const k of ks){k.gate=1;await tw('B',260,e=>k.cartons=Math.round(12*(1-e)))}
+   ['A','B','C','D'].forEach((s,i)=>{for(let j=0;j<6;j++)w.props.push({type:'carton',p:new V(-8.6+i*4.2+(j%3)*.62,.3+Math.floor(j/3)*.58,5.4),s:[.56,.56,.46],col:SME[s].col})});X.say('Cartons staged by customer for delivery','ok');await wait('B',3000)}});
+addB({title:'Equipment reuse',mode:'warehouse',status:'Cage reuse',narr:'Reusable cages may reduce repeated handling and improve organisation. But RealWay must manage the cost of buying, maintaining, storing and returning them. The system only makes sense if the benefits exceed those costs. This reference cage is not shown folding, because a non-collapsible design does not fold.',
+ cam:camP(.5,.95,26,0,1.4,0),setup:()=>{const w=cagePackWorld();w.zones=[{x:-6,z:5.2,w:6,d:2,label:'INSPECTION',col:'#F5C02A'},{x:2,z:5.2,w:5,d:2,label:'MAINTENANCE',col:'#E07A2F'},{x:9,z:5.2,w:5,d:2,label:'AWAITING RETURN',col:'#8a95a3'}];w.cages.forEach(k=>{k.cartons=0;k.gate=1;k.status=k.plan.own.length?'Awaiting return':'Available'});return w},
+ play:async(w,X)=>{const ks=w.cages;const st=['Under inspection','Available','Under maintenance','Awaiting return','In use'];for(let i=0;i<ks.length;i++){ks[i].status=st[i%5];ks[i].gate=0;X.refresh();await wait('B',300)}X.say('Cage statuses updated in the platform','ok');await wait('B',3000)}});
+
+
+/* ================= UI / CONTROLLERS ================= */
+const CUSTOMS=n=>n<=8?'Not yet lodged':n===9?'Export declaration lodged':n<=12?'Export released (simulated)':n===13?'Border processing':n<=24?'Transit under Lao customs control':n===25?'Border handover':n<=27?'Thai transit (simulated)':n===28?'Malaysian border processing':n<=30?'Awaiting import clearance':n===31?'Released (simulated)':'Released';
+const mob=v=>v.W&&v.W<640?1.4:1;
+let VA,VB;const A={i:0,w:null,playing:false,tok:0,cam:'scene',cut:false,path:'truck'};const B={i:0,w:null,playing:false,tok:0,mode:'exterior',sel:'RW-CAGE-003',fromA:null};
+let current='A';
+
+/* ---------- Demo A ---------- */
+function ctxA(){let mt;return {view:VA,say:(m,k)=>{const e=$('#msgA');e.textContent=m;e.className='msg '+(k||'');e.hidden=false;clearTimeout(mt);mt=setTimeout(()=>e.hidden=true,k==='ok'?3200:4500)},
+  ov:h=>{const o=$('#ovA');o.innerHTML=h;o.hidden=false},ovHide:()=>{$('#ovA').hidden=true},path:()=>$('#aPath').value}}
+function setCamA(){const s=A_SCENES[A.i];const c=s.cam;const m=mob(VA);let g={theta:c.theta,phi:c.phi,R:c.R*m,target:c.target.clone()};
+  if(A.cam==='top')g={theta:.001,phi:.24,R:c.R*1.15*m,target:c.target.clone()};if(A.cam==='close')g.R=c.R*.55*m;VA.goal=g}
+function renderPanelsA(){const s=A_SCENES[A.i];
+  $('#aPill').textContent=`Scene ${s.n} / ${A_SCENES.length} · ${s.place}`;$('#aPart').textContent=s.part;$('#aSt').textContent=`Scene ${s.n} · ${s.country} · ${s.mode}`;$('#aTitle').textContent=s.title;$('#aNarr').textContent=s.narr;
+  $('#aQ').innerHTML=[['Where is the cargo?',s.q.where],['Who is responsible?',s.q.who],['What physical operation?',s.q.what],['Documents or approvals?',s.q.docs],['What happens next?',s.q.next]].map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('');
+  $('#aTerms').innerHTML=(s.terms.length?s.terms:['Consolidation']).map(t=>`<button data-term="${t}">${t}</button>`).join('');$('#aDef').textContent='Tap a term for a plain-English explanation.';
+  $('#aRisk').textContent=s.risk;$('#aSel').value=String(A.i);$('#pathBox').hidden=s.n!==23;
+  $$('#aSegs button').forEach((b,i)=>b.className=i<A.i?'done':i===A.i?'now':'');
+  updTrack();renderMap()}
+function updTrack(){const s=A_SCENES[A.i];$('#tCountry').textContent=s.country;$('#tPlace').textContent=s.place;$('#tMode').textContent=s.mode;$('#tCustoms').textContent=CUSTOMS(s.n);$('#tStatus').textContent=s.status;$('#tNext').textContent=s.q.next}
+async function loadA(i,auto){i=clamp(i,0,A_SCENES.length-1);cancelGrp('A');const my=++A.tok;A.i=i;const s=A_SCENES[i];CLK.boost=1;
+  A.w=s.setup();setCamA();renderPanelsA();$('#ovA').hidden=true;$('#msgA').hidden=true;
+  try{await s.play(A.w,ctxA())}catch(e){if(e.message!=='cancel')console.error(e);return}
+  if(my!==A.tok)return;
+  if(A.playing&&auto!==false){await new Promise(r=>setTimeout(r,1400));if(my===A.tok&&A.playing&&!CLK.paused&&A.i<A_SCENES.length-1)loadA(A.i+1,true);else if(A.i>=A_SCENES.length-1){A.playing=false}}}
+function renderMap(){const s=A_SCENES[A.i];const at=MAPORDER.indexOf(s.map);const W=330;
+  const seg=(a,b,kind)=>{const y1=MAPN[a].y,y2=MAPN[b].y;const col=kind==='SG'?'#d9644f':kind==='MG'?'#3b7dd8':'#8a95a3';return `<line x1="22" y1="${y1}" x2="22" y2="${y2}" stroke="${col}" stroke-width="4" ${kind==='road'?'stroke-dasharray="4 4"':''} opacity="${MAPORDER.indexOf(b)<=at?1:.35}"/>`};
+  let h=`<svg viewBox="0 0 ${W} 340" role="img" aria-label="Route map">`;
+  [['SUP','HUB','road'],['HUB','KMT','road'],['KMT','CNR','SG'],['CNR','BDR1','SG'],['BDR1','LAR','SG'],['LAR','VTE','SG'],['VTE','NKH','MG'],['NKH','THR','MG'],['THR','PBS','MG'],['PBS','PIP','MG'],['PIP','KLV','road']].forEach(x=>h+=seg(...x));
+  MAPORDER.forEach((k,i)=>{const n=MAPN[k];const on=i===at;h+=`<g class="${on?'on':''}" data-map="${k}" style="cursor:pointer"><circle cx="22" cy="${n.y}" r="${on?8:5}" fill="${on?'#F5C02A':i<at?'#1F5BD8':'var(--surface)'}" stroke="${i<=at?'#1F5BD8':'#8a95a3'}" stroke-width="2"/><text x="38" y="${n.y+4}">${n.l}</text></g>`});
+  h+=`<text x="38" y="${MAPN.VTE.y+15}" style="fill:#d97706;font-size:9.5px">break of gauge: 1,435 → 1,000 mm</text></svg>`;$('#aMap').innerHTML=h}
+$('#aMap').addEventListener('click',e=>{const g=e.target.closest('[data-map]');if(!g)return;const i=A_SCENES.findIndex(s=>s.map===g.dataset.map);if(i>=0){A.playing=false;loadA(i,false)}});
+$('#aTerms').addEventListener('click',e=>{const b=e.target.closest('[data-term]');if(b)$('#aDef').innerHTML=`<b>${b.dataset.term}:</b> ${GLOSS[b.dataset.term]||''}`});
+$('#ovA').addEventListener('click',e=>{const b=e.target.closest('[data-out]');if(!b)return;$('#outTxt').innerHTML=b.dataset.out==='rel'?'<b>Released:</b> the container may proceed to the railway terminal.':'<b>Selected for inspection:</b> customs may open the container. The seal is replaced and the new seal number recorded. Cargo moves only after inspection is completed.'});
+$('#aPlay').onclick=()=>{CLK.paused=false;$('#aPause').textContent='Pause';if(!A.playing){A.playing=true;loadA(A.i,true)}};
+$('#aPause').onclick=()=>{CLK.paused=!CLK.paused;$('#aPause').textContent=CLK.paused?'Resume':'Pause'};
+$('#aPrev').onclick=()=>{loadA(A.i-1,A.playing)};$('#aNext').onclick=()=>{loadA(A.i+1,A.playing)};$('#aReplay').onclick=()=>loadA(A.i,false);
+$('#aReset').onclick=()=>{A.playing=false;CLK.paused=false;$('#aPause').textContent='Pause';loadA(0,false)};
+$('#aSpeed').onchange=e=>{CLK.speed=+e.target.value;$('#bSpeed').value=e.target.value};
+$('#aSel').onchange=e=>{loadA(+e.target.value,A.playing)};
+$('#aPath').onchange=()=>loadA(A.i,false);
+$$('[data-ca]').forEach(b=>b.onclick=()=>{const k=b.dataset.ca;if(k==='cut'){A.cut=!A.cut;b.setAttribute('aria-pressed',A.cut);return}A.cam=k;$$('[data-ca]').forEach(x=>{if(x.dataset.ca!=='cut')x.setAttribute('aria-pressed',x.dataset.ca===k)});setCamA()});
+$('#aZin').onclick=()=>VA.zoom=clamp(VA.zoom*1.2,.6,2.4);$('#aZout').onclick=()=>VA.zoom=clamp(VA.zoom/1.2,.6,2.4);
+
+/* ---------- Demo B ---------- */
+function ctxB(){let mt;return {view:VB,say:(m,k)=>{const e=$('#msgB');e.textContent=m;e.className='msg '+(k||'');e.hidden=false;clearTimeout(mt);mt=setTimeout(()=>e.hidden=true,k==='ok'?3200:4500)},
+  cage:()=>B.w.cages.find(k=>k.plan.id===B.sel),refresh:()=>refreshB(true)}}
+const VB_CAMS={warehouse:camP(1.25,1.02,17,5,1.4,0),cage:camP(.7,1.05,5.8,0,1.0,0)};
+function setCamB(){const s=B_SCENES[B.i];const m=mob(VB);const c=(B.mode==='warehouse'&&s.mode!=='warehouse')?VB_CAMS.warehouse:B.mode==='cage'?VB_CAMS.cage:s.cam;VB.goal={theta:c.theta,phi:c.phi,R:c.R*m,target:c.target.clone()}}
+function setModeB(m){B.mode=m;$$('[data-vb]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.vb===m));setCamB()}
+function renderPanelsB(){const s=B_SCENES[B.i];$('#bPill').textContent=`Scene ${s.n} / ${B_SCENES.length} · ${s.title}`;$('#bSt').textContent=`Demo B · scene ${s.n}`;$('#bTitle').textContent=s.title;$('#bNarr').textContent=s.narr;$('#bSel').value=String(B.i);
+  $$('#bSegs button').forEach((b,i)=>b.className=i<B.i?'done':i===B.i?'now':'');refreshB(true)}
+async function loadB(i,auto){i=clamp(i,0,B_SCENES.length-1);cancelGrp('B');const my=++B.tok;B.i=i;const s=B_SCENES[i];
+  B.w=s.setup();B.w.cages.forEach(k=>k.hi=k.plan.id===B.sel);setModeB(s.mode);renderPanelsB();$('#msgB').hidden=true;
+  try{await s.play(B.w,ctxB())}catch(e){if(e.message!=='cancel')console.error(e);return}
+  if(my!==B.tok)return;refreshB(true);
+  if(B.playing&&auto!==false){await new Promise(r=>setTimeout(r,1400));if(my===B.tok&&B.playing&&!CLK.paused&&B.i<B_SCENES.length-1)loadB(B.i+1,true);else B.playing=false}}
+let bSig='';
+function refreshB(force){if(!B.w)return;const c=B.w.containers[0];const loaded=B.w.cages.filter(k=>k.in);const sig=loaded.length+'|'+(c&&c.sealed)+'|'+B.sel+'|'+B.w.cages.map(k=>k.status).join('');if(!force&&sig===bSig)return;bSig=sig;
+  $('#dLoaded').textContent=loaded.length;$('#dStatus').textContent=B_SCENES[B.i].status;$('#dSeal').textContent=c&&c.sealed?'RWS-0451207 (illustrative)':'not applied';
+  $('#dKg').textContent=fmtKg(loaded.reduce((a,k)=>a+k.plan.kg,0))+' + cage tare (unconfirmed)';
+  const rows=[];for(let r=1;r<=8;r++)rows.push(loaded.filter(k=>k.plan.row===r).reduce((a,k)=>a+k.plan.kg,0));const mx=1200;
+  $('#dWd').innerHTML=rows.map(v=>`<i style="height:${clamp(v/mx*100,2,100)}%" title="${v} kg"></i>`).join('');
+  const k=B.w.cages.find(x=>x.plan.id===B.sel)||B.w.cages[2];const pl=k.plan;
+  $('#cageCard').innerHTML=`<h3>${pl.id}</h3><dl class="kv" style="font-size:13px"><dt>Customer(s)</dt><dd>${pl.own.length?pl.own.map(o=>SME[o].full).join(' + '):'Available slot'}</dd><dt>Position</dt><dd>Row ${pl.row}, ${pl.side}</dd><dt>Destination</dt><dd>Klang Valley hub, Malaysia</dd><dt>Gross cargo</dt><dd>${pl.kg?fmtKg(pl.kg):'—'}</dd><dt>Cartons</dt><dd>${pl.id==='RW-CAGE-003'?'24 (SME A · RW-BKG-024)':pl.own.length?'Per manifest':'—'}</dd><dt>Status</dt><dd>${k.status||'—'}${k.in?' · loaded':''}</dd></dl>
+    ${pl.id==='RW-CAGE-003'?'<p class="small" style="margin-top:6px">All cartons in this cage belong to SME A’s booking RW-BKG-024. The cage ID links to, but does not replace, the shipment record.</p>':''}`;
+  $('#cageList').innerHTML=B.w.cages.map(x=>`<tr class="${x.plan.id===B.sel?'sel':''}" data-cage="${x.plan.id}" style="cursor:pointer"><td>${x.plan.id.slice(3)}</td><td>${x.plan.own.length?x.plan.own.map(o=>`<i style="background:${SME[o].col}"></i>${SME[o].name}`).join(' '):'—'}</td><td>R${x.plan.row} ${x.plan.side[0].toUpperCase()}</td><td>${x.in?'Loaded':x.status}</td></tr>`).join('')}
+$('#cageList').addEventListener('click',e=>{const r=e.target.closest('[data-cage]');if(r)selectCage(r.dataset.cage)});
+function selectCage(id){B.sel=id;B.w.cages.forEach(k=>k.hi=k.plan.id===id);refreshB(true)}
+$('#bPlay').onclick=()=>{CLK.paused=false;$('#bPause').textContent='Pause';if(!B.playing){B.playing=true;loadB(B.i,true)}};
+$('#bPause').onclick=()=>{CLK.paused=!CLK.paused;$('#bPause').textContent=CLK.paused?'Resume':'Pause'};
+$('#bPrev').onclick=()=>loadB(B.i-1,B.playing);$('#bNext').onclick=()=>loadB(B.i+1,B.playing);$('#bReplay').onclick=()=>loadB(B.i,false);
+$('#bReset').onclick=()=>{B.playing=false;CLK.paused=false;loadB(0,false)};$('#bSpeed').onchange=e=>{CLK.speed=+e.target.value;$('#aSpeed').value=e.target.value};$('#bSel').onchange=e=>loadB(+e.target.value,B.playing);
+$$('[data-vb]').forEach(b=>b.onclick=()=>setModeB(b.dataset.vb));
+$('#bZin').onclick=()=>VB.zoom=clamp(VB.zoom*1.2,.6,2.4);$('#bZout').onclick=()=>VB.zoom=clamp(VB.zoom/1.2,.6,2.4);
+const toggleC=(k,on,off)=>{const c=B.w&&B.w.containers[0];if(!c)return;const v0=c[k],v1=v0>.5?off:on;tw('X',900,t=>c[k]=lerp(v0,v1,t)).catch(()=>{})};
+$('#tRoof').onclick=()=>toggleC('roofOff',1,0);$('#tSide').onclick=()=>toggleC('sideClear',.92,0);$('#tDoors').onclick=()=>toggleC('doors',1,0);
+
+/* ---------- linking ---------- */
+function show(k){current=k;$('#demoA').hidden=k!=='A';$('#demoB').hidden=k!=='B';$('#tabA').setAttribute('aria-selected',k==='A');$('#tabB').setAttribute('aria-selected',k==='B');(k==='A'?VA:VB).resize();if(k==='A')setCamA();else setCamB()}
+$('#tabA').onclick=()=>show('A');$('#tabB').onclick=()=>{show('B');if(!B.w)loadB(0,false)};
+$('#toB').onclick=()=>{const n=A_SCENES[A.i].n;B.fromA=A.i;A.playing=false;CLK.paused=false;
+  const map=n<=6?3:n===7?4:n<=8?6:n<=14?7:n<=24?8:n<=32?7:n<=34?9:10;B.sel='RW-CAGE-003';show('B');$('#toA').hidden=false;loadB(map,false).then(()=>{});
+  setTimeout(()=>{ctxB().say('Highlighted: RW-CAGE-003, Row 2 left, holding SME A’s 24 cartons for RW-BKG-024')},300)};
+$('#toA').onclick=()=>{show('A');if(B.fromA!=null)loadA(B.fromA,false);$('#toA').hidden=true};
+
+/* ---------- taps ---------- */
+function tapA(x,y){const h=VA.hitTest(x,y);if(!h)return;if(h.type==='container'||h.type==='cage')ctxA().say('RW-CONT-001 holds 13 cages for 4 SMEs. Use “View inside container” to open Demo B.');else if(h.type==='crane')ctxA().say('Terminal crane: lifts the whole container by its four top corner fittings.');else if(h.type==='pin')ctxA().say('Wagon securing fitting: green when the container is secured.');else if(h.type==='forklift')ctxA().say('Forklift: moves cages through the rear doors using fork pockets in the cage base.')}
+function tapB(x,y){const h=VB.hitTest(x,y);if(!h)return;if(h.type==='cage'){selectCage(h.id);ctxB().say(`${h.id} selected`)}}
+
+/* ---------- boot ---------- */
+function boot(){
+  $('#aSel').innerHTML=[...new Set(A_SCENES.map(s=>s.part))].map(p=>`<optgroup label="${p}">${A_SCENES.filter(s=>s.part===p).map(s=>`<option value="${s.n-1}">${s.n}. ${s.title}</option>`).join('')}</optgroup>`).join('');
+  $('#bSel').innerHTML=B_SCENES.map(s=>`<option value="${s.n-1}">${s.n}. ${s.title}</option>`).join('');
+  $('#aSegs').innerHTML=A_SCENES.map((s,i)=>`<button aria-label="Scene ${s.n}: ${s.title}" title="${s.n}. ${s.title}" data-i="${i}"></button>`).join('');
+  $('#bSegs').innerHTML=B_SCENES.map((s,i)=>`<button aria-label="Scene ${s.n}: ${s.title}" title="${s.n}. ${s.title}" data-i="${i}"></button>`).join('');
+  $('#aSegs').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b)loadA(+b.dataset.i,A.playing)});$('#bSegs').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b)loadB(+b.dataset.i,B.playing)});
+  VA=makeView($('#vA'),{ignore:'button,.ov',theta:.55,phi:1.05,R:26,target:new V(0,1.4,0),onTap:tapA,limits:{t:[-1.35,1.35],p:[.18,1.5]},onResize:v=>{if(v.goal)setCamA()}});
+  VB=makeView($('#vB'),{ignore:'button',theta:.65,phi:1.05,R:22,target:new V(0,1.4,0),onTap:tapB,limits:{t:[-3.1,3.1],p:[.18,1.52]},onResize:v=>{if(v.goal)setCamB()}});
+  CLK.speed=1.5;loadA(0,false);B.w=null;
+  if(location.hash==='#demoB'){show('B');loadB(0,false)}
+  requestAnimationFrame(frame)}
+function frame(now){const dt=Math.min(64,now-CLK.last);CLK.last=now;if(!CLK.paused)CLK.t+=dt*CLK.speed*(CLK.boost||1);
+  try{stepTweens();
+    if(current==='A'&&A.w){if(!CLK.paused)A.w.scroll+=A.w.speed*dt*CLK.speed*.012;VA.smooth();renderWorld(VA,A.w,{cutaway:A.cut?1:0})}
+    if(current==='B'&&B.w){if(!CLK.paused)B.w.scroll+=B.w.speed*dt*CLK.speed*.012;VB.smooth();
+      if(B.mode==='top')renderPlan(VB,B.w);else if(B.mode==='cage'){const k=B.w.cages.find(x=>x.plan.id===B.sel)||B.w.cages[2];renderCageInspect(VB,k,{callouts:true})}
+      else renderWorld(VB,B.w,{ext:B.mode==='exterior',cutaway:B.mode==='cutaway'?1:0});refreshB(false)}
+  }catch(e){console.error(e)}
+  requestAnimationFrame(frame)}
+boot();
+
+
+})();
+</script>
+
+</body>
+</html>
